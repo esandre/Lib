@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Lib.Random
 {
-    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class RandomExtensions
     {
         public static object Next(this System.Random generator, Type desired)
@@ -46,7 +44,7 @@ namespace Lib.Random
 
         public static TOutput Next<TOutput>(this System.Random generator) => (TOutput) generator.Next(typeof(TOutput));
 
-        public static bool NextBool(this System.Random generator) => generator.Next() % 2 == 0;
+        public static bool NextBool(this System.Random generator) => generator.Next() % 2 != 0;
 
         public static byte NextByte(this System.Random generator) => generator.NextBytes(1)[0];
 
@@ -81,7 +79,7 @@ namespace Lib.Random
 
         public static DateTime NextDateTime(this System.Random generator)
         {
-            var year = generator.Next(1900, 9999);
+            var year = generator.Next(1, 9999);
             var month = generator.Next(1, 12);
             var day = generator.Next(1, DateTime.DaysInMonth(year, month));
             var hour = generator.Next(0, 23);
