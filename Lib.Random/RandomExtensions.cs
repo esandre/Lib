@@ -1,10 +1,11 @@
 ﻿using System;
-// ReSharper disable MemberCanBePrivate.Global
+using JetBrains.Annotations;
 
 namespace Lib.Random
 {
     public static class RandomExtensions
     {
+        [PublicAPI]
         public static object Next(this System.Random generator, Type desired)
         {
             switch (Type.GetTypeCode(desired))
@@ -42,16 +43,22 @@ namespace Lib.Random
             }
         }
 
+        [PublicAPI]
         public static TOutput Next<TOutput>(this System.Random generator) => (TOutput) generator.Next(typeof(TOutput));
 
+        [PublicAPI]
         public static bool NextBool(this System.Random generator) => generator.Next() % 2 != 0;
 
+        [PublicAPI]
         public static byte NextByte(this System.Random generator) => generator.NextBytes(1)[0];
 
+        [PublicAPI]
         public static sbyte NextSByte(this System.Random generator) => (sbyte) generator.NextByte();
 
+        [PublicAPI]
         public static char NextChar(this System.Random generator) => BitConverter.ToChar(generator.NextBytes(2), 0);
 
+        [PublicAPI]
         public static decimal NextDecimal(this System.Random generator) 
             => new decimal(
                 generator.NextInt(),
@@ -61,22 +68,31 @@ namespace Lib.Random
                 generator.NextByte()
             );
 
+        [PublicAPI]
         public static double NextDouble(this System.Random generator) => BitConverter.ToDouble(generator.NextBytes(8), 0);
 
+        [PublicAPI]
         public static float NextFloat(this System.Random generator) => BitConverter.ToSingle(generator.NextBytes(4), 0);
 
+        [PublicAPI]
         public static int NextInt(this System.Random generator) => generator.Next();
 
+        [PublicAPI]
         public static uint NextUInt(this System.Random generator) => BitConverter.ToUInt32(generator.NextBytes(4), 0);
 
+        [PublicAPI]
         public static long NextLong(this System.Random generator) => BitConverter.ToInt64(generator.NextBytes(8), 0);
 
+        [PublicAPI]
         public static ulong NextULong(this System.Random generator) => BitConverter.ToUInt64(generator.NextBytes(8), 0);
 
+        [PublicAPI]
         public static short NextShort(this System.Random generator) => BitConverter.ToInt16(generator.NextBytes(2), 0);
 
+        [PublicAPI]
         public static ushort NextUShort(this System.Random generator) => BitConverter.ToUInt16(generator.NextBytes(2), 0);
 
+        [PublicAPI]
         public static DateTime NextDateTime(this System.Random generator)
         {
             var year = generator.Next(1, 9999);
@@ -88,6 +104,7 @@ namespace Lib.Random
             return new DateTime(year, month, day, hour, minute, second);
         }
 
+        [PublicAPI]
         public static byte[] NextBytes(this System.Random generator, int nb)
         {
             var buffer = new byte[nb];
