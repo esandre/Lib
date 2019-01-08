@@ -7,8 +7,14 @@ using JetBrains.Annotations;
 
 namespace Lib.Reflection
 {
+    /// <summary>
+    /// <see cref="Type"/> extensions
+    /// </summary>
     public static class TypeExtensions
     {
+        /// <summary>
+        /// A core type is either a primitive type, an Enum, an object, a string, a DateTime or a Guid
+        /// </summary>
         [PublicAPI]
         public static bool IsCore(this Type type)
         {
@@ -28,18 +34,27 @@ namespace Lib.Reflection
             return false;
         }
 
+        /// <summary>
+        /// Is an <see cref="IEnumerable{T}"/>, but not a plain <see cref="IEnumerable"/>
+        /// </summary>
         [PublicAPI]
         public static bool IsGenericEnumerable(this Type type)
         {
             return type.IsEnumerable() && type.GenericTypeArguments.Any();
         }
 
+        /// <summary>
+        /// Is a plain <see cref="IEnumerable"/>, but not a generic <see cref="IEnumerable{T}"/>
+        /// </summary>
         [PublicAPI]
         public static bool IsNonGenericEnumerable(this Type type)
         {
             return type.IsEnumerable() && !type.GenericTypeArguments.Any();
         }
 
+        /// <summary>
+        /// Is <see cref="IEnumerable{T}"/> with T matching predicate
+        /// </summary>
         [PublicAPI]
         public static bool IsGenericEnumerableOf(this Type type, Predicate<Type> predicate)
         {
@@ -47,18 +62,29 @@ namespace Lib.Reflection
                    && predicate(type.GetGenericArguments().Single());
         }
 
+        /// <summary>
+        /// Returns the only constructor of a type, if exactly one
+        /// </summary>
         [PublicAPI]
         public static ConstructorInfo GetSingleConstructor(this Type type)
         {
             return type.GetConstructors().Single();
         }
 
+        /// <summary>
+        /// Returns the parameterless constructor of a type, if any
+        /// </summary>
         [PublicAPI]
         public static ConstructorInfo GetParameterlessContructor(this Type type)
         {
             return type.GetConstructor(new Type[0]);
         }
 
+        /// <summary>
+        /// Returns all properties of a type bearing a specific attribute
+        /// </summary>
+        /// <typeparam name="TAttribute">Searched attribute type</typeparam>
+        /// <returns>Lookup mapping each found property with all attributes it bears</returns>
         [PublicAPI]
         public static ILookup<PropertyInfo, TAttribute> GetPropertiesWithAttribute<TAttribute>(this Type type) 
             where TAttribute : Attribute
@@ -69,6 +95,9 @@ namespace Lib.Reflection
                 .ToLookup(tuple => tuple.propertyInfo, tuple => tuple.attribute);
         }
 
+        /// <summary>
+        /// Returns a single generic method with specific name and bindingFlags
+        /// </summary>
         [PublicAPI]
         public static MethodInfo GetGenericMethod(this Type type, string name, BindingFlags bindingFlags)
         {
@@ -80,6 +109,10 @@ namespace Lib.Reflection
             return type.GetMethods(bindingFlags).Where(info => info.ContainsGenericParameters && info.Name == name);
         }
 
+        /// <summary>
+        /// Checks if a type is the reification of a specific generic type
+        /// </summary>
+        /// <example>IEnumerable{string} is IEnumerable{}</example>
         [PublicAPI]
         public static bool IsOfGenericType(this Type typeToCheck, Type genericType)
         {

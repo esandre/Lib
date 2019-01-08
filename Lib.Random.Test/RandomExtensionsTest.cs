@@ -9,7 +9,7 @@ namespace Lib.Random.Test
     [TestClass]
     public class RandomExtensionsTest
     {
-        private static System.Random FakeGenerator = new FakeRandom();
+        private static readonly System.Random FakeGenerator = new FakeRandom();
 
         [TestMethod]
         public void Next_Throws_ForNonCoreTypes()
