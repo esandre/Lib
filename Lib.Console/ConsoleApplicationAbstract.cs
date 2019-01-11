@@ -32,6 +32,12 @@ namespace Lib.Console
             this._application.Command(command.CommandlineName, command.Execute);
         }
 
+        /// <summary>
+        /// Adds a command to this application
+        /// </summary>
+        protected void AddCommand(IAsyncCommand command)
+            => this.AddCommand(new AsyncCommandSyncAdapter(command));
+
         /// <inheritdoc />
         public int Execute(string[] args) => this._application.Invoke();
 
