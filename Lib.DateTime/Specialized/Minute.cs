@@ -12,5 +12,11 @@
             : base(new System.DateTime(year, month, day, hour, minute, 0))
         {
         }
+
+        /// <summary>
+        /// Extracts a Minute from a DateTime, ignoring more precise parts
+        /// </summary>
+        public static implicit operator Minute(System.DateTime dateTime)
+            => new Minute(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute);
     }
 }

@@ -47,7 +47,7 @@ namespace Lib.DateTime.Specialized
         /// </summary>
         public static implicit operator System.DateTime(SpecializedDateTimeAbstract instance)
             => instance._dateTime;
-
+        
         /// <summary>
         /// Opérateur GreaterThan
         /// </summary>
