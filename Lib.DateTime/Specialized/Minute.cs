@@ -1,4 +1,4 @@
-﻿namespace Lib.DateTime.Components
+﻿namespace Lib.DateTime.Specialized
 {
     /// <summary>
     /// A Minute

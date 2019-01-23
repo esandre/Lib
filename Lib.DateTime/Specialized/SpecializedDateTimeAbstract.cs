@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.Serialization;
 
-namespace Lib.DateTime.Components
+namespace Lib.DateTime.Specialized
 {
     /// <summary>
     /// Abstract DateTimeComponent, comparable to others, with operators from and to <see cref="_dateTime"/>
@@ -24,7 +23,7 @@ namespace Lib.DateTime.Components
         /// </summary>
         protected SpecializedDateTimeAbstract(System.DateTime dateTime)
         {
-            this._dateTime = dateTime;
+            _dateTime = dateTime;
         }
 
         /// <inheritdoc />

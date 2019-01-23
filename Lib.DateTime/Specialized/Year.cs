@@ -1,16 +1,16 @@
-﻿namespace Lib.DateTime.Components
+﻿namespace Lib.DateTime.Specialized
 {
     /// <inheritdoc />
     /// <summary>
-    /// A month
+    /// A year
     /// </summary>
-    public class Month : SpecializedDateTimeAbstract
+    public class Year : SpecializedDateTimeAbstract
     {
         /// <inheritdoc />
         /// <summary>
         /// Constructor
         /// </summary>
-        public Month(int year, int month) : base(new System.DateTime(year, month, 1))
+        public Year(int year) : base(new System.DateTime(year, 1, 1))
         {
         }
     }
