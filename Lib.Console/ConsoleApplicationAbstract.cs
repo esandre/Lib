@@ -15,13 +15,13 @@ namespace Lib.Console
         /// </summary>
         protected ConsoleApplicationAbstract(string name, string description)
         {
-            this._application = new CommandLineApplication
+            _application = new CommandLineApplication
             {
                 Name = name,
                 Description = description
             };
 
-            this._application.HelpOption("-?|-h|--help");
+            _application.HelpOption("-?|-h|--help");
         }
 
         /// <summary>
@@ -29,17 +29,17 @@ namespace Lib.Console
         /// </summary>
         protected void AddCommand(ICommand command)
         {
-            this._application.Command(command.CommandlineName, command.Execute);
+            _application.Command(command.CommandlineName, command.Execute);
         }
 
         /// <summary>
         /// Adds a command to this application
         /// </summary>
         protected void AddCommand(IAsyncCommand command)
-            => this.AddCommand(new AsyncCommandSyncAdapter(command));
+            => AddCommand(new AsyncCommandSyncAdapter(command));
 
         /// <inheritdoc />
-        public int Execute(string[] args) => this._application.Invoke();
+        public int Execute(string[] args) => _application.Invoke();
 
         /// <inheritdoc />
         public abstract IConsoleApplication Fork();

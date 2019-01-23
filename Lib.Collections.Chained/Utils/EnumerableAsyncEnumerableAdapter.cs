@@ -23,7 +23,7 @@ namespace Lib.Collections.Chained.Utils
 
         async Task<IAsyncEnumerator> IAsyncEnumerable.GetAsyncEnumeratorAsync(CancellationToken cancellationToken)
         {
-            return await this.GetAsyncEnumeratorAsync(cancellationToken);
+            return await GetAsyncEnumeratorAsync(cancellationToken);
         }
     }
 }

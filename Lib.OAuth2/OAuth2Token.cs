@@ -32,26 +32,26 @@ namespace Lib.OAuth2
         /// </summary>
         public OAuth2Token(Uri provider, IAccount account)
         {
-            this._provider = provider;
-            this._client.DefaultRequestHeaders.Clear();
+            _provider = provider;
+            _client.DefaultRequestHeaders.Clear();
 
-            this._requestContent = new FormUrlEncodedContent(new Dictionary<string, string> 
+            _requestContent = new FormUrlEncodedContent(new Dictionary<string, string> 
             {
                 {"client_id", account.ClientId}, 
                 {"client_secret", account.ClientSecret},
                 {"grant_type", "client_credentials"}
             });
 
-            this._expirationDate = DateTime.MinValue;
+            _expirationDate = DateTime.MinValue;
         }
 
         private async Task RefreshToken()
         {
-            var response = await this._client.PostAsync(this._provider, this._requestContent);
+            var response = await _client.PostAsync(_provider, _requestContent);
             var responseContract = (PostTokenResponseContract) Serializer.ReadObject(await response.Content.ReadAsStreamAsync());
 
-            this._latestToken = responseContract.AccessToken;
-            this._expirationDate = DateTime.Now.AddSeconds(responseContract.ExpiresIn * PreventiveRenewalFactor);
+            _latestToken = responseContract.AccessToken;
+            _expirationDate = DateTime.Now.AddSeconds(responseContract.ExpiresIn * PreventiveRenewalFactor);
         }
         
         /// <inheritdoc />
@@ -61,8 +61,8 @@ namespace Lib.OAuth2
         /// <returns></returns>
         public async Task<string> GetValueAsync()
         {
-            if (DateTime.Now >= this._expirationDate) await this.RefreshToken();
-            return this._latestToken;
+            if (DateTime.Now >= _expirationDate) await RefreshToken();
+            return _latestToken;
         }
     }
 }

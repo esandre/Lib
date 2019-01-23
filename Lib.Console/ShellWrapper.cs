@@ -16,7 +16,7 @@ namespace Lib.Console
         /// </summary>
         public ShellWrapper(IConsoleApplication application)
         {
-            this._application = application;
+            _application = application;
         }
 
         /// <summary>
@@ -27,12 +27,12 @@ namespace Lib.Console
         {
             if (!args.Any())
             {
-                System.Console.Write($"> {this.CommandlineName} ");
+                System.Console.Write($"> {CommandlineName} ");
                 var inputArgs = System.Console.ReadLine()?.Split(' ');
 
                 try
                 {
-                    var returnCode = this._application.Execute(inputArgs);
+                    var returnCode = _application.Execute(inputArgs);
                     System.Console.WriteLine("Application returned code " + returnCode);
                 }
                 catch (Exception e)
@@ -41,21 +41,21 @@ namespace Lib.Console
                 }
 
 #if DEBUG
-                return this.Fork().Execute(new string[0]);
+                return Fork().Execute(new string[0]);
 #else
                 return 0;
 #endif
             }
             else
             {
-                return this._application.Execute(args);
+                return _application.Execute(args);
             }
         }
 
         /// <inheritdoc />
-        public IConsoleApplication Fork() => new ShellWrapper(this._application.Fork());
+        public IConsoleApplication Fork() => new ShellWrapper(_application.Fork());
 
         /// <inheritdoc />
-        public string CommandlineName => this._application.CommandlineName;
+        public string CommandlineName => _application.CommandlineName;
     }
 }

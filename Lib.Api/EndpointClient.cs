@@ -24,20 +24,20 @@ namespace Lib.Api
 
         protected EndpointClient(Uri endPointUri, IToken credentials)
         {
-            this._endPointUri = endPointUri;
-            this._credentials = credentials;
+            _endPointUri = endPointUri;
+            _credentials = credentials;
         }
 
         public async Task<HttpResponseMessage> GetAsync(string relativeUri, object payload)
         {
-            return await this.GetAsync(relativeUri, DataContractToDictionary(payload));
+            return await GetAsync(relativeUri, DataContractToDictionary(payload));
         }
 
         private async Task<HttpResponseMessage> GetAsync(string relativeUri, IEnumerable<KeyValuePair<string, string>> query = null)
         {
-            var client = await this.BuildHttpClient();
+            var client = await BuildHttpClient();
 
-            var uri = this._endPointUri.Append(relativeUri);
+            var uri = _endPointUri.Append(relativeUri);
             var uriWithQuery = new Uri(uri.ToString().TrimEnd('/') + InlineQuery(query));
 
             var response = await client.GetAsync(uriWithQuery);
@@ -67,9 +67,9 @@ namespace Lib.Api
 
         protected async Task DeleteAsync(string relativeUri)
         {
-            var client = await this.BuildHttpClient();
+            var client = await BuildHttpClient();
 
-            var uri = this._endPointUri.Append(relativeUri);
+            var uri = _endPointUri.Append(relativeUri);
             var response = await client.DeleteAsync(uri);
 
             ThrowIfStatusCodeNotOk(uri, response);
@@ -83,7 +83,7 @@ namespace Lib.Api
         
         protected async Task<IEnumerable<TContract>> GetManyAsync<TContract>(string relativeUri)
         {
-            var response = await this.GetAsync(relativeUri);
+            var response = await GetAsync(relativeUri);
             var deserializer = new DataContractJsonSerializer(typeof(TContract));
             
             return (TContract[])deserializer.ReadObject(await response.Content.ReadAsStreamAsync());
@@ -91,7 +91,7 @@ namespace Lib.Api
 
         protected async Task<TContract> GetAsync<TContract>(string relativeUri)
         {
-            var response = await this.GetAsync(relativeUri);
+            var response = await GetAsync(relativeUri);
             var deserializer = new DataContractJsonSerializer(typeof(TContract));
             var responseStream = await response.Content.ReadAsStreamAsync();
 
@@ -107,7 +107,7 @@ namespace Lib.Api
 
         protected async Task<TContract> GetAsync<TContract>(string relativeUri, object payload)
         {
-            var response = await this.GetAsync(relativeUri, payload);
+            var response = await GetAsync(relativeUri, payload);
             var deserializer = new DataContractJsonSerializer(typeof(TContract));
 
             return (TContract)deserializer.ReadObject(await response.Content.ReadAsStreamAsync());
@@ -115,8 +115,8 @@ namespace Lib.Api
 
         protected async Task<TResponseContract> PostAsync<TRequestContract, TResponseContract>(string relativeUri, IEnumerable<TRequestContract> payload)
         {
-            var client = await this.BuildHttpClient();
-            var uri = this._endPointUri.Append(relativeUri);
+            var client = await BuildHttpClient();
+            var uri = _endPointUri.Append(relativeUri);
 
             var serializer = new DataContractJsonSerializer(payload.GetType());
 
@@ -137,8 +137,8 @@ namespace Lib.Api
 
         protected async Task<TContract> PostAsync<TContract>(string relativeUri, object payload)
         {
-            var client = await this.BuildHttpClient();
-            var uri = this._endPointUri.Append(relativeUri);
+            var client = await BuildHttpClient();
+            var uri = _endPointUri.Append(relativeUri);
 
             var serializer = new DataContractJsonSerializer(payload.GetType());
 
@@ -159,8 +159,8 @@ namespace Lib.Api
 
         protected async Task<HttpResponseMessage> PutAsync(string relativeUri, object payload)
         {
-            var client = await this.BuildHttpClient();
-            var uri = this._endPointUri.Append(relativeUri);
+            var client = await BuildHttpClient();
+            var uri = _endPointUri.Append(relativeUri);
 
             var serializer = new DataContractJsonSerializer(payload.GetType());
 
@@ -222,7 +222,7 @@ namespace Lib.Api
             var client = new HttpClient();
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", await this._credentials.GetValueAsync());
+                new AuthenticationHeaderValue("Bearer", await _credentials.GetValueAsync());
 
             return client;
         }

@@ -17,7 +17,7 @@ namespace Lib.Api
         {
             using (var reader = new StreamReader(rawResponse))
             {
-                this.RawResponse = reader.ReadToEnd();
+                RawResponse = reader.ReadToEnd();
             }
         }
 
@@ -27,7 +27,7 @@ namespace Lib.Api
                    + Environment.NewLine 
                    + "Raw response dump :" 
                    + Environment.NewLine 
-                   + this.RawResponse;
+                   + RawResponse;
         }
     }
 }
