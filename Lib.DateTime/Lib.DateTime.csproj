@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
     <Description>System.DateTime wrappers for years, months, days, etc...</Description>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>Enzo Sandré</Authors>
     <Company> </Company>
     <Product>Toolbox</Product>
