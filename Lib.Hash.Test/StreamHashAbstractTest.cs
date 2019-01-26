@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using Lib.Hash.Stream;
 using Lib.Random;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -36,7 +35,7 @@ namespace Lib.Hash.Test
                 .Select(tuple =>
                 {
                     var (expectedByteArray, inputStreamForHash) = tuple;
-                    var hashMock = new Mock<StreamHash<THashAlgorithm>>(
+                    var hashMock = new Mock<StreamHash>(
                             inputStreamForHash,
                             Instance)
                         { CallBase = true }.Object;
@@ -60,7 +59,7 @@ namespace Lib.Hash.Test
 
             var expectedByteArray = Instance.ComputeHash(inputStreamForExpected);
 
-            var hashMock = new Mock<StreamHash<THashAlgorithm>>(
+            var hashMock = new Mock<StreamHash>(
                     inputStreamForHash,
                     Instance)
                 { CallBase = true }.Object;
@@ -71,16 +70,16 @@ namespace Lib.Hash.Test
         [TestMethod]
         public void AHash_EqualityOperator_RelaysEqualsResult()
         {
-            var hashMock = new Mock<IHash<THashAlgorithm>>();
-            hashMock.SetupSequence(m => m.Equals(It.IsAny<IHash<THashAlgorithm>>()))
+            var hashMock = new Mock<IHash>();
+            hashMock.SetupSequence(m => m.Equals(It.IsAny<IHash>()))
                 .Returns(true)
                 .Returns(false);
             var hash = hashMock.Object;
 
-            Check.That(hash.Equals(It.IsAny<IHash<THashAlgorithm>>())).Equals(true);
-            Check.That(hash.Equals(It.IsAny<IHash<THashAlgorithm>>())).Equals(false);
+            Check.That(hash.Equals(It.IsAny<IHash>())).Equals(true);
+            Check.That(hash.Equals(It.IsAny<IHash>())).Equals(false);
 
-            hashMock.Verify(m => m.Equals(It.IsAny<IHash<THashAlgorithm>>()), Times.Exactly(2));
+            hashMock.Verify(m => m.Equals(It.IsAny<IHash>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -88,7 +87,7 @@ namespace Lib.Hash.Test
         {
             var inputStream = new MemoryStream(new byte[] { 0, 1, 2, 3, 4 });
 
-            var hash = new Mock<StreamHash<THashAlgorithm>>(
+            var hash = new Mock<StreamHash>(
                 inputStream, 
                 Mock.Of<THashAlgorithm>()) { CallBase = true }.Object;
 

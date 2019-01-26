@@ -17,8 +17,8 @@ namespace Lib.Hash.Hashable.Test
             var elementBytes = new[] {(byte) 0x01};
 
             var elementExtractorMock = new Mock<IByteExtractor>();
-            elementExtractorMock.Setup(m => m.Extract(It.IsAny<object>(), It.IsAny<System.IO.Stream>()))
-                .Callback<object, System.IO.Stream>((obj, stream) => stream.Write(elementBytes));
+            elementExtractorMock.Setup(m => m.Extract(It.IsAny<object>(), It.IsAny<Stream>()))
+                .Callback<object, Stream>((obj, stream) => stream.Write(elementBytes));
             var elementExtractor = elementExtractorMock.Object;
 
             var arrayExtractor = new EnumerableByteExtractor(elementExtractor);
@@ -49,8 +49,8 @@ namespace Lib.Hash.Hashable.Test
             var elementBytes = new[] { (byte)0x01 };
 
             var elementExtractorMock = new Mock<IByteExtractor>();
-            elementExtractorMock.Setup(m => m.Extract(It.IsAny<object>(), It.IsAny<System.IO.Stream>()))
-                .Callback<object, System.IO.Stream>((obj, stream) => stream.Write(elementBytes));
+            elementExtractorMock.Setup(m => m.Extract(It.IsAny<object>(), It.IsAny<Stream>()))
+                .Callback<object, Stream>((obj, stream) => stream.Write(elementBytes));
             var elementExtractor = elementExtractorMock.Object;
 
             var arrayExtractor = new EnumerableByteExtractor(elementExtractor);

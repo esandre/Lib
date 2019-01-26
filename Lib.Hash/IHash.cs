@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Security.Cryptography;
 
 namespace Lib.Hash
 {
@@ -14,12 +13,5 @@ namespace Lib.Hash
         /// Bytes of the hash
         /// </summary>
         byte[] Bytes { get; }
-    }
-
-    /// <summary>
-    /// An algorithm-specific type of Hash
-    /// </summary>
-    public interface IHash<THashAlgorithm> : IHash, IEquatable<IHash<THashAlgorithm>> where THashAlgorithm : HashAlgorithm
-    {
     }
 }

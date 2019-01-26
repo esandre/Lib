@@ -1,15 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Security.Cryptography;
-using Lib.Hash.Stream;
-using Lib.Patterns;
 
 namespace Lib.Hash.Hashable
 {
     /// <summary>
     /// Automatic hash factory
     /// </summary>
-    public class HashFactory<THashAlgorithm> : IFactory<object, IHash<THashAlgorithm>> 
+    public class HashFactory<THashAlgorithm> : IHashFactory
         where THashAlgorithm : HashAlgorithm
     {
         /// <summary>
@@ -29,7 +27,7 @@ namespace Lib.Hash.Hashable
         }
 
         /// <inheritdoc />
-        public IHash<THashAlgorithm> Factory(object input)
+        public IHash Factory(object input)
         {
             if(!_byteExtractor.CanExtract(input.GetType()))
                 throw new ArgumentException(CannotHashMessage(input));
@@ -38,7 +36,7 @@ namespace Lib.Hash.Hashable
             {
                 _byteExtractor.Extract(input, stream);
                 stream.Position = 0;
-                return new StreamHash<THashAlgorithm>(stream, _algorithm);
+                return new StreamHash(stream, _algorithm);
             }
         }
     }
