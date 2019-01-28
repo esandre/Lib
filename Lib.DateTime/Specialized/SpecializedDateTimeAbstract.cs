@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Lib.Reflection;
 
 namespace Lib.DateTime.Specialized
 {
@@ -24,6 +25,15 @@ namespace Lib.DateTime.Specialized
         protected SpecializedDateTimeAbstract(System.DateTime dateTime)
         {
             _dateTime = dateTime;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="SpecializedDateTimeAbstract"/> child built from a DateTime, by implicit conversion
+        /// </summary>
+        public static TChild FromDateTime<TChild>(System.DateTime dateTime) where TChild : SpecializedDateTimeAbstract
+        {
+            var implicitOperator = typeof(TChild).GetImplicitOperator<System.DateTime>();
+            return (TChild) implicitOperator.Invoke(null, new object[] {dateTime});
         }
 
         /// <inheritdoc />

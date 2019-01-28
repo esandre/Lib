@@ -6,7 +6,7 @@ using NFluent;
 namespace Lib.DateTime.Test.Specialized
 {
     [TestClass]
-    public class HourTest : SpecializedDateTimeAbstractTest
+    public class HourTest : SpecializedDateTimeAbstractTest<Hour>
     {
         [TestMethod]
         public void AnHour_IsADateTime_At00_00()

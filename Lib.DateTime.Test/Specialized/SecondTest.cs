@@ -6,7 +6,7 @@ using NFluent;
 namespace Lib.DateTime.Test.Specialized
 {
     [TestClass]
-    public class SecondTest : SpecializedDateTimeAbstractTest
+    public class SecondTest : SpecializedDateTimeAbstractTest<Second>
     {
         [TestMethod]
         public void ASecond_IsADateTime_WithNoMilliseconds()

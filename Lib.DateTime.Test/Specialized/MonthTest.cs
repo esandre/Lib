@@ -6,7 +6,7 @@ using NFluent;
 namespace Lib.DateTime.Test.Specialized
 {
     [TestClass]
-    public class MonthTest : SpecializedDateTimeAbstractTest
+    public class MonthTest : SpecializedDateTimeAbstractTest<Month>
     {
         [TestMethod]
         public void AMonth_IsADateTime_AtFirstDay_WithNoTime()
