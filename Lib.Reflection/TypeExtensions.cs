@@ -44,6 +44,15 @@ namespace Lib.Reflection
         }
 
         /// <summary>
+        /// Returns an implicit operator from {TImplicit} type
+        /// </summary>
+        [PublicAPI]
+        public static MethodInfo GetImplicitOperator<TImplicit>(this Type type)
+        {
+            return type.GetMethod("op_Implicit", new[] {typeof(TImplicit)});
+        }
+
+        /// <summary>
         /// Is a plain <see cref="IEnumerable"/>, but not a generic <see cref="IEnumerable{T}"/>
         /// </summary>
         [PublicAPI]
