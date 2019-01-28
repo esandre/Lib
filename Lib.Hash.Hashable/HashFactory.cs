@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Security.Cryptography;
+using Lib.Hash.Hashable.ByteExtractors;
 
 namespace Lib.Hash.Hashable
 {
@@ -24,6 +25,15 @@ namespace Lib.Hash.Hashable
         {
             _algorithm = algorithm;
             _byteExtractor = byteExtractor;
+        }
+
+        /// <inheritdoc />
+        public HashFactory(THashAlgorithm algorithm, params IByteExtractor[] byteExtractor)
+        {
+            _algorithm = algorithm;
+            var extractors = new ByteExtractorsCollection();
+            foreach (var extractor in byteExtractor) extractors.Add(extractor);
+            _byteExtractor = extractors;
         }
 
         /// <inheritdoc />
