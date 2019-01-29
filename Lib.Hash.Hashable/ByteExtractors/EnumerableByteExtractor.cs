@@ -12,9 +12,16 @@ namespace Lib.Hash.Hashable.ByteExtractors
         {
             _elementExtractor = elementExtractor;
         }
-        
-        public bool CanExtract(Type t) => typeof(IEnumerable).IsAssignableFrom(t) &&
-                                          _elementExtractor.CanExtract(t.GenericTypeArguments.Single());
+
+        private bool CanExtractEnumerable(Type t) => 
+            typeof(IEnumerable).IsAssignableFrom(t) 
+            && _elementExtractor.CanExtract(t.GenericTypeArguments.Single());
+
+        private bool CanExtractArray(Type t) =>
+            t.IsArray
+            && _elementExtractor.CanExtract(t.GetElementType());
+
+        public bool CanExtract(Type t) => CanExtractArray(t) || CanExtractEnumerable(t);
 
         public void Extract(object instance, System.IO.Stream stream)
         {
