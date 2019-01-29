@@ -16,9 +16,11 @@ namespace Lib.Hash.Hashable.ByteExtractors
         {
             _collection = new ByteExtractorsCollection();
 
-            _collection.Add(new PrimitiveByteExtractor());
+            var primitiveByteExtractor = new PrimitiveByteExtractor();
+            _collection.Add(primitiveByteExtractor);
             _collection.Add(new StringByteExtractor());
             _collection.Add(new DateTimeByteExtractor());
+            _collection.Add(new EnumByteExtractor(primitiveByteExtractor));
             _collection.Add(new EnumerableByteExtractor(_collection));
         }
 
