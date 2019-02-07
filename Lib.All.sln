@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28407.52
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Random", "Lib.Random\Lib.Random.csproj", "{BD3AE611-AB53-4751-B2BA-9370C9129FB8}"
 EndProject
@@ -23,15 +23,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.DateTime", "Lib.DateTim
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.DateTime.Test", "Lib.DateTime.Test\Lib.DateTime.Test.csproj", "{4D549EB8-D899-4E41-9653-2B75EDBCBAC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Hash.Hashable", "Lib.Hash.Hashable\Lib.Hash.Hashable.csproj", "{8802D775-65F1-4DBF-90D6-90368DB197EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Hash.Hashable", "Lib.Hash.Hashable\Lib.Hash.Hashable.csproj", "{8802D775-65F1-4DBF-90D6-90368DB197EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Hash.Hashable.Test", "Lib.Hash.Hashable.Test\Lib.Hash.Hashable.Test.csproj", "{1967A363-96F6-453F-87D1-19599EEF1070}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Hash.Hashable.Test", "Lib.Hash.Hashable.Test\Lib.Hash.Hashable.Test.csproj", "{1967A363-96F6-453F-87D1-19599EEF1070}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Hash.Test", "Lib.Hash.Test\Lib.Hash.Test.csproj", "{B4BF9C95-D1B2-42C8-9CC9-548105E130E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Hash.Test", "Lib.Hash.Test\Lib.Hash.Test.csproj", "{B4BF9C95-D1B2-42C8-9CC9-548105E130E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Hash", "Lib.Hash\Lib.Hash.csproj", "{93B12B5F-793B-42CC-9186-AA3CDA90044F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Hash", "Lib.Hash\Lib.Hash.csproj", "{93B12B5F-793B-42CC-9186-AA3CDA90044F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Patterns", "Lib.Patterns\Lib.Patterns.csproj", "{068E8BF8-9C63-4898-9664-989C547D20BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Patterns", "Lib.Patterns\Lib.Patterns.csproj", "{068E8BF8-9C63-4898-9664-989C547D20BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Geography", "Lib.Geography\Lib.Geography.csproj", "{05953091-FC43-455B-9BA2-87858BC0B984}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Geography.Test", "Lib.Geography.Test\Lib.Geography.Test.csproj", "{70A119E6-549D-44A9-BA1E-17802FD8CB1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +99,14 @@ Global
 		{068E8BF8-9C63-4898-9664-989C547D20BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{068E8BF8-9C63-4898-9664-989C547D20BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{068E8BF8-9C63-4898-9664-989C547D20BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05953091-FC43-455B-9BA2-87858BC0B984}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05953091-FC43-455B-9BA2-87858BC0B984}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05953091-FC43-455B-9BA2-87858BC0B984}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05953091-FC43-455B-9BA2-87858BC0B984}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70A119E6-549D-44A9-BA1E-17802FD8CB1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70A119E6-549D-44A9-BA1E-17802FD8CB1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70A119E6-549D-44A9-BA1E-17802FD8CB1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70A119E6-549D-44A9-BA1E-17802FD8CB1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
