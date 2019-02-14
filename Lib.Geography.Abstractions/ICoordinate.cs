@@ -1,9 +1,11 @@
-﻿namespace Lib.Geography
+﻿using System;
+
+namespace Lib.Geography.Abstractions
 {
     /// <summary>
     /// A 2D coordinate
     /// </summary>
-    public interface ICoordinate
+    public interface ICoordinate : IEquatable<ICoordinate>
     {
         /// <summary>
         /// Latitude
