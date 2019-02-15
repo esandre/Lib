@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Lib.Geography\Lib.Geography.csproj" />
+    <ProjectReference Include="..\Lib.Geometry\Lib.Geometry.csproj" />
+    <ProjectReference Include="..\Lib.Geometry.Abstractions\Lib.Geometry.Abstractions.csproj" />
+    <ProjectReference Include="..\Lib.Geometry\Lib.Geometry.csproj" />
   </ItemGroup>
 
 </Project>

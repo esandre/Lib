@@ -2,7 +2,7 @@
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 
-namespace Lib.Geography
+namespace Lib.Geometry
 {
     /// <summary>
     /// A generic Geometry
@@ -19,17 +19,17 @@ namespace Lib.Geography
         /// <summary>
         /// True if point is inside the geometry, including borders
         /// </summary>
-        public bool Contains(ICoordinate point)
+        public bool Contains(IPoint point)
         {
-            return NTSGeometry.Contains(new Point(new Coordinate(point.Latitude, point.Longitude)));
+            return NTSGeometry.Contains(new Point(new Coordinate(point.X, point.Y)));
         }
 
         /// <summary>
         /// True if point is inside the geometry, excluding borders
         /// </summary>
-        public bool Covers(ICoordinate point)
+        public bool Covers(IPoint point)
         {
-            return NTSGeometry.Covers(new Point(new Coordinate(point.Latitude, point.Longitude)));
+            return NTSGeometry.Covers(new Point(new Coordinate(point.X, point.Y)));
         }
 
         /// <inheritdoc />

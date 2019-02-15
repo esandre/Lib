@@ -1,6 +1,6 @@
 ﻿using NetTopologySuite.IO;
 
-namespace Lib.Geography
+namespace Lib.Geometry
 {
     /// <summary>
     /// Tools to represent a <see cref="Geometry"/> as WKT
