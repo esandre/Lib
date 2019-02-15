@@ -1,24 +1,23 @@
 ﻿using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Buffer;
 
-namespace Lib.Geography
+namespace Lib.Geometry
 {
     /// <summary>
     /// Approximates a circle
     /// </summary>
     public class PseudoCircle : Geometry
     {
-        private static IGeometry DrawCircle(ICoordinate center, double radius, int verticesPerQuarter)
+        private static IGeometry DrawCircle(IPoint center, double radius, int verticesPerQuarter)
         {
-            var point = new Point(center.Latitude, center.Longitude);
+            var point = new Point(center.X, center.Y);
             return point.Buffer(radius, verticesPerQuarter);
         }
 
         /// <summary>
         /// Builds a pseudocircle
         /// </summary>
-        public PseudoCircle(ICoordinate center, double radius, int vertices) 
+        public PseudoCircle(IPoint center, double radius, int vertices) 
             : base(DrawCircle(center, radius, vertices))
         {
         }

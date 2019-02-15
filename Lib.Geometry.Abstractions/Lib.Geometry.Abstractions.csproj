@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
-    <Description>Lib.Geography abstractions</Description>
+    <Description>Lib.Geometry abstractions</Description>
     <Version>1.0.0</Version>
     <Authors>Enzo Sandré</Authors>
     <Company> </Company>

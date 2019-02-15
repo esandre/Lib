@@ -33,11 +33,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Hash", "Lib.Hash\Lib.Ha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Patterns", "Lib.Patterns\Lib.Patterns.csproj", "{068E8BF8-9C63-4898-9664-989C547D20BE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Geography", "Lib.Geography\Lib.Geography.csproj", "{05953091-FC43-455B-9BA2-87858BC0B984}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Geometry", "Lib.Geometry\Lib.Geometry.csproj", "{05953091-FC43-455B-9BA2-87858BC0B984}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Geography.Test", "Lib.Geography.Test\Lib.Geography.Test.csproj", "{70A119E6-549D-44A9-BA1E-17802FD8CB1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Geometry.Test", "Lib.Geometry.Test\Lib.Geometry.Test.csproj", "{70A119E6-549D-44A9-BA1E-17802FD8CB1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Geography.Abstractions", "Lib.Geography.Abstractions\Lib.Geography.Abstractions.csproj", "{C703FCAC-D62F-4A55-AEAC-B50A158BBA87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Geometry.Abstractions", "Lib.Geometry.Abstractions\Lib.Geometry.Abstractions.csproj", "{C703FCAC-D62F-4A55-AEAC-B50A158BBA87}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

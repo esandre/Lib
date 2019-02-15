@@ -1,23 +1,24 @@
+using GeoAPI.Geometries;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NFluent;
 
-namespace Lib.Geography.Test
+namespace Lib.Geometry.Test
 {
     public abstract class GeometryTestAbstract
     {
-        protected static ICoordinate Coordinates(double latitude, double longitude)
+        protected static IPoint Point(double x, double y)
         {
             // ReSharper disable CompareOfFloatsByEqualityOperator
-            return Mock.Of<ICoordinate>(m => m.Latitude == latitude && m.Longitude == longitude);
+            return Mock.Of<IPoint>(m => m.X == x && m.Y == y);
         }
 
         protected abstract Geometry TestingGeometry { get; }
         protected abstract string TestingWKT { get; }
 
-        protected abstract ICoordinate OutsidePoint { get; }
-        protected abstract ICoordinate InsidePoint { get; }
-        protected abstract ICoordinate BorderPoint { get; }
+        protected abstract IPoint OutsidePoint { get; }
+        protected abstract IPoint InsidePoint { get; }
+        protected abstract IPoint BorderPoint { get; }
 
         [TestMethod]
         public void ToWKT_ReturnsExpectedWKT()
