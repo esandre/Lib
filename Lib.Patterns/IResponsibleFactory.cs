@@ -1,8 +1,11 @@
-﻿namespace Lib.Patterns
+﻿using JetBrains.Annotations;
+
+namespace Lib.Patterns
 {
     /// <summary>
     /// A Responsible Factory, with a CanFactory method
     /// </summary>
+    [PublicAPI]
     public interface IResponsibleFactory<in TInput, out TOutput> : IFactory<TInput, TOutput>
     {
         /// <summary>

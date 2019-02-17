@@ -1,9 +1,11 @@
-﻿namespace Lib.Geometry.Abstractions
+﻿using System;
+
+namespace Lib.Geometry.Abstractions
 {
     /// <summary>
     /// A 2D point
     /// </summary>
-    public interface IPoint : IGeometry
+    public interface IPoint : IPolygon, IEquatable<IPoint>
     {
         /// <summary>
         /// X coordinate

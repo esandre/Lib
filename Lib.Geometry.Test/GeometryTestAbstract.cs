@@ -1,19 +1,12 @@
-using GeoAPI.Geometries;
+using Lib.Geometry.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using NFluent;
 
 namespace Lib.Geometry.Test
 {
     public abstract class GeometryTestAbstract
     {
-        protected static IPoint Point(double x, double y)
-        {
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            return Mock.Of<IPoint>(m => m.X == x && m.Y == y);
-        }
-
-        protected abstract Geometry TestingGeometry { get; }
+        protected abstract IGeometry TestingGeometry { get; }
         protected abstract string TestingWKT { get; }
 
         protected abstract IPoint OutsidePoint { get; }
@@ -30,8 +23,8 @@ namespace Lib.Geometry.Test
         [TestMethod]
         public void FromWKT_ReturnsExpectedGeometry()
         {
-            var wkt = TestingWKT;
-            Check.That(WktRepresentation.ReadWkt(wkt)).Equals(TestingGeometry);
+            var geometry = WktRepresentation.ReadWkt(TestingWKT);
+            Check.That(geometry).Equals(TestingGeometry);
         }
 
         [TestMethod]

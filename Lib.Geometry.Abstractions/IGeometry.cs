@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Lib.Geometry.Abstractions
 {
@@ -7,6 +8,11 @@ namespace Lib.Geometry.Abstractions
     /// </summary>
     public interface IGeometry : IEquatable<IGeometry>
     {
+        /// <summary>
+        /// Polygons constituting the Geometry
+        /// </summary>
+        IEnumerable<IPolygon> Polygons { get; }
+
         /// <summary>
         /// True if the input geometry is inside the geometry, including borders
         /// </summary>

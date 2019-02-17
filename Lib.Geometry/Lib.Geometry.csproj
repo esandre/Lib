@@ -5,15 +5,19 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
-    <Description>Geography related classes</Description>
-    <Version>1.0.0</Version>
+    <Description>Geometry related classes</Description>
+    <Version>1.0.2</Version>
     <Authors>Enzo Sandré</Authors>
     <Company> </Company>
     <Product>Toolbox</Product>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="1.15.1" />
+    <PackageReference Include="NetTopologySuite" Version="1.15.1" PrivateAssets="compile, build, analyzers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lib.Geometry.Abstractions\Lib.Geometry.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

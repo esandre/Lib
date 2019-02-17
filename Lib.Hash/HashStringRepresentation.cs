@@ -4,11 +4,10 @@ using System.Linq;
 
 namespace Lib.Hash
 {
-
     /// <summary>
     /// StringRepresentation of a <see cref="IHash"/>
     /// </summary>
-    public class HashStringRepresentation
+    public static class HashStringRepresentation
     {
         /// <summary>
         /// Retrieves a Hash from a String representation
