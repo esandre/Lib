@@ -1,4 +1,5 @@
 using Lib.Geometry.Abstractions;
+using Lib.Geometry.WKT;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NFluent;
 
@@ -6,6 +7,9 @@ namespace Lib.Geometry.Test
 {
     public abstract class GeometryTestAbstract
     {
+        private readonly GeometryFromWktFactory _geometryFromWktFactory = new GeometryFromWktFactory();
+        protected readonly WktFromGeometryFactory WktFromGeometryFactory = new WktFromGeometryFactory();
+
         protected abstract IGeometry TestingGeometry { get; }
         protected abstract string TestingWKT { get; }
 
@@ -17,13 +21,13 @@ namespace Lib.Geometry.Test
         public void ToWKT_ReturnsExpectedWKT()
         {
             var geometry = TestingGeometry;
-            Check.That(geometry.ToWkt()).Equals(TestingWKT);
+            Check.That(WktFromGeometryFactory.Factory(geometry)).Equals(TestingWKT);
         }
 
         [TestMethod]
         public void FromWKT_ReturnsExpectedGeometry()
         {
-            var geometry = WktRepresentation.ReadWkt(TestingWKT);
+            var geometry = _geometryFromWktFactory.Factory(TestingWKT);
             Check.That(geometry).Equals(TestingGeometry);
         }
 
