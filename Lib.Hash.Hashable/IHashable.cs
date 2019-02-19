@@ -10,11 +10,6 @@ namespace Lib.Hash.Hashable
         /// <summary>
         /// Describes how to hash self
         /// </summary>
-        HashableVisitDelegate Hash { get; }
+        void Hash(IHashableVisitor visitor);
     }
-
-    /// <summary>
-    /// Hashable visitor pattern, should return the way to hash instance
-    /// </summary>
-    public delegate void HashableVisitDelegate(IHashableVisitor visitor);
 }
