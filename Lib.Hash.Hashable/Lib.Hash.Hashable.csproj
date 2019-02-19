@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
     <Description>Automatic instance hashing</Description>
-    <Version>1.0.2-beta04</Version>
+    <Version>1.0.3</Version>
     <Authors>Enzo Sandré</Authors>
     <Company> </Company>
     <Product>Toolbox</Product>
