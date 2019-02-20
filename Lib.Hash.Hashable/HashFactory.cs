@@ -16,21 +16,21 @@ namespace Lib.Hash.Hashable
         /// </summary>
         // ReSharper disable once StaticMemberInGenericType
         public static readonly Func<object, string> CannotHashMessage = obj => $"Cannot hash object {obj} of type {obj.GetType()}";
-
-        private readonly THashAlgorithm _algorithm;
+        
+        private readonly Func<THashAlgorithm> _algorithmGenerator;
         private readonly IByteExtractor _byteExtractor;
 
         /// <inheritdoc />
-        public HashFactory(THashAlgorithm algorithm, IByteExtractor byteExtractor)
+        public HashFactory(Func<THashAlgorithm> algorithmGenerator, IByteExtractor byteExtractor)
         {
-            _algorithm = algorithm;
+            _algorithmGenerator = algorithmGenerator;
             _byteExtractor = byteExtractor;
         }
 
         /// <inheritdoc />
-        public HashFactory(THashAlgorithm algorithm, params IByteExtractor[] byteExtractor)
+        public HashFactory(Func<THashAlgorithm> algorithmGenerator, params IByteExtractor[] byteExtractor)
         {
-            _algorithm = algorithm;
+            _algorithmGenerator = algorithmGenerator;
             var extractors = new ByteExtractorsCollection();
             foreach (var extractor in byteExtractor) extractors.Add(extractor);
             _byteExtractor = extractors;
@@ -43,10 +43,11 @@ namespace Lib.Hash.Hashable
                 throw new ArgumentException(CannotHashMessage(input));
 
             using (var stream = new MemoryStream())
+            using (var safeStream = Stream.Synchronized(stream))
             {
-                _byteExtractor.Extract(input, stream);
-                stream.Position = 0;
-                return new StreamHash(stream, _algorithm);
+                _byteExtractor.Extract(input, safeStream);
+                safeStream.Position = 0;
+                return new StreamHash(safeStream, _algorithmGenerator.Invoke());
             }
         }
     }

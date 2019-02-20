@@ -27,7 +27,7 @@ namespace Lib.Hash.Hashable.Test
                 .Callback((object obj, System.IO.Stream stream) => stream.Write(bytes));
             var byteExtractor = byteExtractorMock.Object;
 
-            var hashFactory = new HashFactory<THashAlgorithm>(Algorithm, byteExtractor);
+            var hashFactory = new HashFactory<THashAlgorithm>(() => Algorithm, byteExtractor);
 
             var expected = Algorithm.ComputeHash(bytes);
             var actual = hashFactory.Factory(new object()).Bytes;
@@ -38,7 +38,7 @@ namespace Lib.Hash.Hashable.Test
         public void Factory_Anything_Throws_ArgumentException_IfCannotExtract()
         {
             var byteExtractor = Mock.Of<IByteExtractor>(m => m.CanExtract(It.IsAny<Type>()) == false);
-            var hashFactory = new HashFactory<THashAlgorithm>(Algorithm, byteExtractor);
+            var hashFactory = new HashFactory<THashAlgorithm>(() => Algorithm, byteExtractor);
             
             var obj = new object();
 

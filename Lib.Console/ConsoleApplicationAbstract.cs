@@ -8,6 +8,7 @@ namespace Lib.Console
     /// </summary>
     public abstract class ConsoleApplicationAbstract : IConsoleApplication
     {
+        private const string Help = "-?|-h|--help";
         private readonly CommandLineApplication _application;
 
         /// <summary>
@@ -21,7 +22,7 @@ namespace Lib.Console
                 Description = description
             };
 
-            _application.HelpOption("-?|-h|--help");
+            _application.HelpOption(Help);
         }
 
         /// <summary>
@@ -29,7 +30,9 @@ namespace Lib.Console
         /// </summary>
         protected void AddCommand(ICommand command)
         {
-            _application.Command(command.CommandlineName, command.Execute);
+            _application
+                .Command(command.CommandlineName, command.Execute)
+                .HelpOption(Help);
         }
 
         /// <summary>
@@ -39,7 +42,7 @@ namespace Lib.Console
             => AddCommand(new AsyncCommandSyncAdapter(command));
 
         /// <inheritdoc />
-        public int Execute(string[] args) => _application.Invoke();
+        public int Execute(string[] args) => _application.Execute(args);
 
         /// <inheritdoc />
         public abstract IConsoleApplication Fork();
