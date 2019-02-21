@@ -49,7 +49,7 @@ namespace Lib.Encapsulation
         }
 
         /// <inheritdoc />
-        public override int GetHashCode() => EqualityComparer<TValue>.Default.GetHashCode(Value);
+        public override int GetHashCode() => HashCode.Combine(GetType(), Value);
 
         /// <summary>
         /// Equality operator
