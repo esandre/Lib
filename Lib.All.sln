@@ -39,7 +39,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Geometry.Test", "Lib.Ge
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Geometry.Abstractions", "Lib.Geometry.Abstractions\Lib.Geometry.Abstractions.csproj", "{C703FCAC-D62F-4A55-AEAC-B50A158BBA87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.Encapsulation", "Lib.Encapsulation\Lib.Encapsulation.csproj", "{662742E7-4897-46C1-9BFE-7936983E08E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Encapsulation", "Lib.Encapsulation\Lib.Encapsulation.csproj", "{662742E7-4897-46C1-9BFE-7936983E08E2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Encapsulation.Test", "Lib.Encapsulation.Test\Lib.Encapsulation.Test.csproj", "{BCF1F503-EA42-4F34-BF51-D19703DDF184}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +121,10 @@ Global
 		{662742E7-4897-46C1-9BFE-7936983E08E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{662742E7-4897-46C1-9BFE-7936983E08E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{662742E7-4897-46C1-9BFE-7936983E08E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCF1F503-EA42-4F34-BF51-D19703DDF184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCF1F503-EA42-4F34-BF51-D19703DDF184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCF1F503-EA42-4F34-BF51-D19703DDF184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCF1F503-EA42-4F34-BF51-D19703DDF184}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
