@@ -41,7 +41,7 @@ namespace Lib.Encapsulation
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             if (other.GetType() != GetType()) return false;
-            return EqualityComparer<TValue>.Default.Equals(Value, other.Value);
+            return ValueComparer.Equals(Value, other.Value);
         }
 
         /// <inheritdoc />
@@ -50,7 +50,7 @@ namespace Lib.Encapsulation
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((EncapsulatedValueAbstract<TValue>) obj);
+            return ValueComparer.Equals(Value, ((EncapsulatedValueAbstract<TValue>) obj).Value);
         }
 
         /// <inheritdoc />

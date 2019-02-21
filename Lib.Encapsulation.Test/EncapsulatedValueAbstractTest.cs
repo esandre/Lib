@@ -35,5 +35,28 @@ namespace Lib.Encapsulation.Test
 
             Check.That(instance.ToString()).Equals(value.ToString());
         }
+
+        [TestMethod]
+        public void TwoChildren_OfSameType_WithSameContent_AreEquals()
+        {
+            var x = new ChildClass("x");
+            var y = new ChildClass("x");
+
+            Check.That(Equals(x, y)).IsTrue();
+            Check.That(x == y).IsTrue();
+            Check.That(x.Equals(y)).IsTrue();
+            Check.That(y.Equals(x)).IsTrue();
+        }
+
+        private class ChildClass : EncapsulatedValueAbstract<object>
+        {
+            public ChildClass(IEncapsulatedValue<object> other) : base(other)
+            {
+            }
+
+            public ChildClass(object input) : base(input)
+            {
+            }
+        }
     }
 }
