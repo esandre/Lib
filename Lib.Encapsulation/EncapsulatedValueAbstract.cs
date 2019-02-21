@@ -27,6 +27,11 @@ namespace Lib.Encapsulation
             Value = input;
         }
 
+        /// <summary>
+        /// Comparer used for values
+        /// </summary>
+        protected virtual EqualityComparer<TValue> ValueComparer => EqualityComparer<TValue>.Default;
+
         /// <inheritdoc />
         public override string ToString() => Value.ToString();
 
@@ -49,7 +54,7 @@ namespace Lib.Encapsulation
         }
 
         /// <inheritdoc />
-        public override int GetHashCode() => HashCode.Combine(GetType(), Value);
+        public override int GetHashCode() => HashCode.Combine(GetType(), ValueComparer.GetHashCode(Value));
 
         /// <summary>
         /// Equality operator
