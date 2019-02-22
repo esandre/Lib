@@ -50,10 +50,6 @@ namespace Lib.Encapsulation.Test
 
         private class ChildClass : EncapsulatedValueAbstract<object>
         {
-            public ChildClass(IEncapsulatedValue<object> other) : base(other)
-            {
-            }
-
             public ChildClass(object input) : base(input)
             {
             }
