@@ -20,14 +20,7 @@ namespace Lib.Mocked.ConstructorSelector
 
         public bool CanFactory(Type input)
         {
-            try
-            {
-                return _elements.SingleOrDefault(element => element.CanFactory(input)) != null;
-            }
-            catch (InvalidOperationException)
-            {
-                throw new AmbiguousMatchException($"Multiple constructors for type {input} and no default one to pick");
-            }
+            return _elements.Any(element => element.CanFactory(input));
         }
     }
 }
