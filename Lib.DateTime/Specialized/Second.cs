@@ -18,5 +18,11 @@
         /// </summary>
         public static implicit operator Second(System.DateTime dateTime)
             => new Second(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
+
+        /// <summary>
+        /// Extracts a Second from a nullable DateTime, ignoring more precise parts
+        /// </summary>
+        public static implicit operator Second(System.DateTime? dateTime)
+            => dateTime.HasValue ? (Second) dateTime.Value : null;
     }
 }

@@ -15,5 +15,14 @@ namespace Lib.DateTime.Test.Specialized
             Check.That(SpecializedDateTimeAbstract.FromDateTime<TChild>(System.DateTime.MinValue))
                 .IsInstanceOf<TChild>();
         }
+
+        [TestMethod]
+        public void IsImplicitly_ConvertibleToNullDateTime()
+        {
+            var child = (TChild) null;
+
+            // ReSharper disable once ExpressionIsAlwaysNull
+            Check.That((System.DateTime?) child).IsNull();
+        }
     }
 }

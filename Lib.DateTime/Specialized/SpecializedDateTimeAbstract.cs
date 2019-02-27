@@ -9,15 +9,17 @@ namespace Lib.DateTime.Specialized
     /// </summary>
     public abstract class SpecializedDateTimeAbstract :
         IComparable,
-        IComparable<System.DateTime>, 
+        IComparable<System.DateTime>,
+        IComparable<System.DateTime?>,
         IConvertible, 
         IEquatable<System.DateTime>, 
+        IEquatable<System.DateTime?>,
         IFormattable, 
         ISerializable, 
         IEquatable<SpecializedDateTimeAbstract>,
         IComparable<SpecializedDateTimeAbstract>
     {
-        private readonly System.DateTime _dateTime;
+        private readonly System.DateTime? _dateTime;
 
         /// <summary>
         /// Constructor that checks the validity af the component
@@ -53,11 +55,17 @@ namespace Lib.DateTime.Specialized
         }
 
         /// <summary>
-        /// Opérateur vers DateTime
+        /// Opérateur vers DateTime nullable
         /// </summary>
-        public static implicit operator System.DateTime(SpecializedDateTimeAbstract instance)
-            => instance._dateTime;
-        
+        public static implicit operator System.DateTime?(SpecializedDateTimeAbstract instance)
+            => instance?._dateTime;
+
+        /// <summary>
+        /// Opérateur vers DateTime nullable
+        /// </summary>
+        public static implicit operator System.DateTime (SpecializedDateTimeAbstract instance)
+            => instance?._dateTime ?? throw new NullReferenceException("Trying to create a DateTime from a null " + nameof(SpecializedDateTimeAbstract));
+
         /// <summary>
         /// Opérateur GreaterThan
         /// </summary>
@@ -99,14 +107,36 @@ namespace Lib.DateTime.Specialized
         // ReSharper disable once SpecifyACultureInStringConversionExplicitly
         public override string ToString() => _dateTime.ToString();
 
-        int IComparable<System.DateTime>.CompareTo(System.DateTime other) => _dateTime.CompareTo(other);
-        bool IEquatable<System.DateTime>.Equals(System.DateTime other) => _dateTime.Equals(other);
+        string IFormattable.ToString(string format, IFormatProvider formatProvider)
+            => _dateTime.HasValue ? _dateTime.Value.ToString(format, formatProvider) : _dateTime.ToString();
+
+        bool IEquatable<System.DateTime>.Equals(System.DateTime other) => _dateTime.HasValue && _dateTime.Value.Equals(other);
+        bool IEquatable<System.DateTime?>.Equals(System.DateTime? other) => _dateTime.Equals(other);
+
+        int IComparable.CompareTo(object obj)
+        {
+            if (!_dateTime.HasValue) return obj is null ? 0 : -1;
+            return _dateTime.Value.CompareTo(obj);
+        }
+
+        int IComparable<System.DateTime>.CompareTo(System.DateTime other) => _dateTime?.CompareTo(other) ?? -1;
+
+        int IComparable<System.DateTime?>.CompareTo(System.DateTime? other)
+        {
+            if (!_dateTime.HasValue) return other.HasValue ? -1 : 0;
+            return -other?.CompareTo(_dateTime.Value) ?? 0;
+        }
+
+        int IComparable<SpecializedDateTimeAbstract>.CompareTo(SpecializedDateTimeAbstract other)
+        {
+            if (!_dateTime.HasValue) return other._dateTime.HasValue ? -1 : 0;
+            return -other._dateTime?.CompareTo(_dateTime.Value) ?? 0;
+        }
+
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) =>
-            ((ISerializable) _dateTime).GetObjectData(info, context);
-        int IComparable.CompareTo(object obj) => _dateTime.CompareTo(obj);
-        string IFormattable.ToString(string format, IFormatProvider formatProvider) 
-            => _dateTime.ToString(format, formatProvider);
-        TypeCode IConvertible.GetTypeCode() => _dateTime.GetTypeCode();
+            ((ISerializable)_dateTime)?.GetObjectData(info, context);
+
+        TypeCode IConvertible.GetTypeCode() => TypeCode.DateTime;
         bool IConvertible.ToBoolean(IFormatProvider provider) => Convertible.ToBoolean(provider);
         byte IConvertible.ToByte(IFormatProvider provider) => Convertible.ToByte(provider);
         char IConvertible.ToChar(IFormatProvider provider) => Convertible.ToChar(provider);
@@ -124,7 +154,5 @@ namespace Lib.DateTime.Specialized
         uint IConvertible.ToUInt32(IFormatProvider provider) => Convertible.ToUInt32(provider);
         ulong IConvertible.ToUInt64(IFormatProvider provider) => Convertible.ToUInt64(provider);
         private IConvertible Convertible => _dateTime;
-        int IComparable<SpecializedDateTimeAbstract>.CompareTo(SpecializedDateTimeAbstract other) =>
-            other._dateTime.CompareTo(_dateTime);
     }
 }
