@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
     <Description>Mocked instances and stubs automatic generator</Description>
-    <Version>0.0.2</Version>
+    <Version>0.1.0</Version>
     <Authors>Enzo Sandré</Authors>
     <Company> </Company>
     <Product>Toolbox</Product>

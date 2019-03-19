@@ -29,6 +29,7 @@ namespace Lib.Mocked
             stubFactoryCollection.Append(new EmptyStringFactory());
             stubFactoryCollection.Append(new DefaultDateFactory());
             stubFactoryCollection.Append(new DefaultPrimitiveTypeFactory());
+            stubFactoryCollection.Append(new NullableFactory());
             stubFactoryCollection.Append(new InterfaceStubFactory(moqBuilderFactory));
             stubFactoryCollection.Append(new TypeWithSingleParameterlessConstructorFactory(moqBuilderFactory));
             stubFactoryCollection.Append(new TypeWithSingleConstructorFactory(moqBuilderFactory, stubFactoryCollection));
