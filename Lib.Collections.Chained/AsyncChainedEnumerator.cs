@@ -1,5 +1,4 @@
-﻿using System.Collections.Async;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,49 +8,54 @@ namespace Lib.Collections.Chained
 {
     internal class AsyncChainedEnumerator<TElement> : IAsyncEnumerator<TElement>
     {
+        private readonly CancellationToken _cancellationToken;
         private IAsyncEnumerator<TElement> _currentChunk;
         private readonly IAsyncEnumerator<IAsyncEnumerable<TElement>> _chunkEnumerator;
 
-        public AsyncChainedEnumerator(IEnumerator<IAsyncEnumerable<TElement>> chunkEnumerator)
+        public AsyncChainedEnumerator(IEnumerator<IAsyncEnumerable<TElement>> chunkEnumerator, CancellationToken cancellationToken)
         {
             _chunkEnumerator = new EnumeratorAsyncEnumeratorAdapter<IAsyncEnumerable<TElement>>(chunkEnumerator);
+            _cancellationToken = cancellationToken;
         }
 
-        public AsyncChainedEnumerator(IAsyncEnumerator<IEnumerable<TElement>> chunkEnumerator)
+        public AsyncChainedEnumerator(IAsyncEnumerator<IEnumerable<TElement>> chunkEnumerator, CancellationToken cancellationToken)
         {
+            _cancellationToken = cancellationToken;
             _chunkEnumerator = new AsyncEnumeratorCastAdapter<IEnumerable<TElement>, IAsyncEnumerable<TElement>>(
                 chunkEnumerator, 
                 enumerable => new EnumerableAsyncEnumerableAdapter<TElement>(enumerable));
         }
 
-        public AsyncChainedEnumerator(IAsyncEnumerator<IAsyncEnumerable<TElement>> chunkEnumerator)
+        public AsyncChainedEnumerator(IAsyncEnumerator<IAsyncEnumerable<TElement>> chunkEnumerator, CancellationToken cancellationToken)
         {
             _chunkEnumerator = chunkEnumerator;
+            _cancellationToken = cancellationToken;
         }
 
-        public void Dispose()
+        public async ValueTask<bool> MoveNextAsync()
         {
-            _currentChunk.Dispose();
-            _chunkEnumerator.Dispose();
-        }
+            // ReSharper disable once ImpureMethodCallOnReadonlyValueField
+            _cancellationToken.ThrowIfCancellationRequested();
 
-        public async Task<bool> MoveNextAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
             //No more chunks
-            if (!await _chunkEnumerator.MoveNextAsync(cancellationToken)) return false;
+            if (!await _chunkEnumerator.MoveNextAsync()) return false;
 
             Debug.Assert(_chunkEnumerator.Current != null, "_chunkEnumerator.Current != null");
-            var nextChunk = await _chunkEnumerator.Current.GetAsyncEnumeratorAsync(cancellationToken);
+            var nextChunk = _chunkEnumerator.Current.GetAsyncEnumerator();
 
             var previousChunk = _currentChunk;
             _currentChunk = nextChunk;
-            previousChunk.Dispose();
+            await previousChunk.DisposeAsync();
 
-            return await _currentChunk.MoveNextAsync(cancellationToken);
+            return await _currentChunk.MoveNextAsync();
         }
 
         public TElement Current => _currentChunk.Current;
 
-        object IAsyncEnumerator.Current => Current;
+        public async ValueTask DisposeAsync()
+        {
+            await _currentChunk.DisposeAsync();
+            await _chunkEnumerator.DisposeAsync();
+        }
     }
 }

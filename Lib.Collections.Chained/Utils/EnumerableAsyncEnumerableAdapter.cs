@@ -1,7 +1,5 @@
-﻿using System.Collections.Async;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lib.Collections.Chained.Utils
 {
@@ -14,16 +12,10 @@ namespace Lib.Collections.Chained.Utils
             _enumerable = enumerable;
         }
 
-        public async Task<IAsyncEnumerator<TElement>> GetAsyncEnumeratorAsync(CancellationToken cancellationToken)
+        public IAsyncEnumerator<TElement> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken())
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var enumerator = new EnumeratorAsyncEnumeratorAdapter<TElement>(_enumerable.GetEnumerator());
-            return await Task.FromResult((IAsyncEnumerator<TElement>) enumerator);
-        }
-
-        async Task<IAsyncEnumerator> IAsyncEnumerable.GetAsyncEnumeratorAsync(CancellationToken cancellationToken)
-        {
-            return await GetAsyncEnumeratorAsync(cancellationToken);
+            return new EnumeratorAsyncEnumeratorAdapter<TElement>(_enumerable.GetEnumerator());
         }
     }
 }

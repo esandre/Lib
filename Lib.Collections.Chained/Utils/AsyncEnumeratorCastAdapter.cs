@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Async;
-using System.Threading;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Lib.Collections.Chained.Utils
@@ -17,20 +16,18 @@ namespace Lib.Collections.Chained.Utils
             _castFunc = castFunc;
         }
 
-        public void Dispose()
+        public async ValueTask<bool> MoveNextAsync()
         {
-            _source.Dispose();
-        }
-
-        public async Task<bool> MoveNextAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            var sourceMoveNext = await _source.MoveNextAsync(cancellationToken);
+            var sourceMoveNext = await _source.MoveNextAsync();
             _current = new Lazy<TDestination>(() => _castFunc(_source.Current));
             return sourceMoveNext;
         }
 
         public TDestination Current => _current.Value;
 
-        object IAsyncEnumerator.Current => Current;
+        public async ValueTask DisposeAsync()
+        {
+            await _source.DisposeAsync();
+        }
     }
 }

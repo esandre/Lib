@@ -100,7 +100,7 @@ namespace Lib.Reflection
         {
             return type.GetProperties()
                 .SelectMany(propertyInfo => propertyInfo.GetCustomAttributes<TAttribute>()
-                    .Select(attribute => (attribute: attribute, propertyInfo: propertyInfo)))
+                    .Select(attribute => (attribute, propertyInfo)))
                 .ToLookup(tuple => tuple.propertyInfo, tuple => tuple.attribute);
         }
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Async;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Lib.Collections.Chained.Utils
@@ -14,16 +12,14 @@ namespace Lib.Collections.Chained.Utils
             _wrapped = wrapped;
         }
 
-        public void Dispose() => _wrapped.Dispose();
-
-        public Task<bool> MoveNextAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return Task.FromResult(_wrapped.MoveNext());
-        }
+        public ValueTask<bool> MoveNextAsync() => new ValueTask<bool>(Task.FromResult(_wrapped.MoveNext()));
 
         public TElement Current => _wrapped.Current;
 
-        object IAsyncEnumerator.Current => Current;
+        public ValueTask DisposeAsync()
+        {
+            _wrapped.Dispose();
+            return new ValueTask();
+        }
     }
 }

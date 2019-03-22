@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lib.Collections.Chained
 {
@@ -12,15 +10,14 @@ namespace Lib.Collections.Chained
     /// </summary>
     public class AsyncChainedEnumerable<TElement> : IAsyncEnumerable<TElement>
     {
-        private readonly Func<CancellationToken, Task<IAsyncEnumerator<TElement>>> _asyncEnumeratorGenerator;
+        private readonly Func<CancellationToken, IAsyncEnumerator<TElement>> _asyncEnumeratorGenerator;
 
         /// <summary>
         /// Builds from an async enumerable of sync chunks
         /// </summary>
         public AsyncChainedEnumerable(IAsyncEnumerable<IEnumerable<TElement>> chunkGenerator)
         {
-            _asyncEnumeratorGenerator = async cancellationToken
-                => new AsyncChainedEnumerator<TElement>(await chunkGenerator.GetAsyncEnumeratorAsync(cancellationToken));
+            _asyncEnumeratorGenerator = cancellationToken => new AsyncChainedEnumerator<TElement>(chunkGenerator.GetAsyncEnumerator(), cancellationToken);
         }
 
         /// <summary>
@@ -28,8 +25,7 @@ namespace Lib.Collections.Chained
         /// </summary>
         public AsyncChainedEnumerable(IEnumerable<IAsyncEnumerable<TElement>> chunkGenerator)
         {
-            _asyncEnumeratorGenerator = async _ 
-                => await Task.FromResult(new AsyncChainedEnumerator<TElement>(chunkGenerator.GetEnumerator()));
+            _asyncEnumeratorGenerator = cancellationToken => new AsyncChainedEnumerator<TElement>(chunkGenerator.GetEnumerator(), cancellationToken);
         }
 
         /// <summary>
@@ -37,15 +33,10 @@ namespace Lib.Collections.Chained
         /// </summary>
         public AsyncChainedEnumerable(IAsyncEnumerable<IAsyncEnumerable<TElement>> chunkGenerator)
         {
-            _asyncEnumeratorGenerator = async cancellationToken
-                => new AsyncChainedEnumerator<TElement>(await chunkGenerator.GetAsyncEnumeratorAsync(cancellationToken));
+            _asyncEnumeratorGenerator = cancellationToken => new AsyncChainedEnumerator<TElement>(chunkGenerator.GetAsyncEnumerator(), cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<IAsyncEnumerator<TElement>> GetAsyncEnumeratorAsync(CancellationToken cancellationToken)
-            => await _asyncEnumeratorGenerator(cancellationToken);
-
-        async Task<IAsyncEnumerator> IAsyncEnumerable.GetAsyncEnumeratorAsync(CancellationToken cancellationToken) 
-            => await GetAsyncEnumeratorAsync(cancellationToken);
+        public IAsyncEnumerator<TElement> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken()) => _asyncEnumeratorGenerator(cancellationToken);
     }
 }
