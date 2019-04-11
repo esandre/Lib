@@ -1,5 +1,4 @@
-﻿using System;
-using Lib.Chaining.Chain;
+﻿using Lib.Chaining.Chain;
 
 namespace Lib.Chaining.Enumeration
 {
@@ -34,7 +33,14 @@ namespace Lib.Chaining.Enumeration
                 Previous = primer;
                 Next = primer;
             }
-            else throw new ArgumentException("Link is neither successor nor predecesor");
+            else
+            {
+                var startLink = new StartLink<TPayload>(new LazyPredecessorProxy<TPayload>(() => Previous));
+                var endLink = new EndLink<TPayload>(new LazySuccessorProxy<TPayload>(() => Next));
+
+                Previous = LinkPredecessorDecorator<TPayload>.Decorate(firstValue, endLink);
+                Next = LinkSuccessorDecorator<TPayload>.Decorate(firstValue, startLink);
+            }
         }
 
         public TPayload Payload => default;
