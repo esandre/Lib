@@ -14,7 +14,7 @@ namespace Lib.Chaining.Test
         [TestInitialize]
         public void Initialize()
         {
-            _enumeratorImplicitBehavior = new ReversibleEnumeratorImplicitBehaviorFixtures<byte>(
+            _enumeratorImplicitBehavior = new ReversibleEnumeratorImplicitBehaviorFixture<byte>(
                 () => NumericalLineGenerator.GenerateFrom(128).ToReversibleEnumerable().GetEnumerator(), 
                 byte.MaxValue - 127,
                 129);

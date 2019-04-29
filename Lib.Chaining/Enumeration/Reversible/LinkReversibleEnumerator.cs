@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using Lib.Chaining.Chain;
 
-namespace Lib.Chaining.Enumeration
+namespace Lib.Chaining.Enumeration.Reversible
 {
     /// <summary>
     /// Reversible link enumerable

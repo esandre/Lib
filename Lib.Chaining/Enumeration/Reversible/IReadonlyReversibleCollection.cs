@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Lib.Chaining.Enumeration
+namespace Lib.Chaining.Enumeration.Reversible
 {
     /// <summary>
     /// Couples a <see cref="IReadOnlyCollection{T}"/> and a <see cref="IReversibleEnumerable{TElement}"/>

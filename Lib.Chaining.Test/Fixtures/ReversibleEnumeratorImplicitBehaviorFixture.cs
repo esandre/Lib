@@ -1,5 +1,5 @@
 ﻿using System;
-using Lib.Chaining.Enumeration;
+using Lib.Chaining.Enumeration.Reversible;
 using NFluent;
 
 namespace Lib.Chaining.Test.Fixtures
@@ -12,12 +12,12 @@ namespace Lib.Chaining.Test.Fixtures
         void NextAndPrevious_Commutative();
     }
 
-    public class ReversibleEnumeratorImplicitBehaviorFixtures<TEnumerator> : EnumeratorImplicitBehaviorFixture<TEnumerator>, IReversibleEnumeratorImplicitBehaviorFixture
+    public class ReversibleEnumeratorImplicitBehaviorFixture<TEnumerator> : EnumeratorImplicitBehaviorFixture<TEnumerator>, IReversibleEnumeratorImplicitBehaviorFixture
     {
         private readonly Func<IReversibleEnumerator<TEnumerator>> _enumeratorFactory;
         private readonly byte _elementsNumberBackwards;
 
-        public ReversibleEnumeratorImplicitBehaviorFixtures(
+        public ReversibleEnumeratorImplicitBehaviorFixture(
             Func<IReversibleEnumerator<TEnumerator>> enumeratorFactory, 
             byte elementsNumberForward, 
             byte elementsNumberBackwards) 

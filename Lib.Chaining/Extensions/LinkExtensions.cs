@@ -1,5 +1,5 @@
 ﻿using Lib.Chaining.Chain;
-using Lib.Chaining.Enumeration;
+using Lib.Chaining.Enumeration.Reversible;
 
 namespace Lib.Chaining.Extensions
 {
@@ -9,7 +9,7 @@ namespace Lib.Chaining.Extensions
     public static class LinkExtensions
     {
         /// <summary>
-        /// Creates à cursor
+        /// Creates a cursor
         /// </summary>
         /// <typeparam name="TPayload"></typeparam>
         /// <param name="origin"></param>

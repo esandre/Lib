@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Lib.Chaining.Chain;
 
-namespace Lib.Chaining.Enumeration
+namespace Lib.Chaining.Enumeration.Reversible
 {
     internal class LinkReversibleEnumerable<TPayload> : IReversibleEnumerable<TPayload>
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace Lib.Chaining.Enumeration
+namespace Lib.Chaining.Enumeration.Reversible
 {
     /// <summary>
     /// Enumerator with reversing capability

@@ -1,4 +1,4 @@
-﻿using Lib.Chaining.Enumeration;
+﻿using Lib.Chaining.Enumeration.Reversible;
 using Lib.Chaining.Structures;
 
 namespace Lib.Chaining.Extensions
@@ -12,6 +12,6 @@ namespace Lib.Chaining.Extensions
         /// Returns a collection enumerating the segment
         /// </summary>
         public static IReadonlyReversibleCollection<TPayload> ToReadonlyReversibleCollection<TPayload>(this ISegment<TPayload> segment)
-            => new SegmentReadonlyCollectionAdapter<TPayload>(segment);
+            => new SegmentReadonlyReversibleCollection<TPayload>(segment);
     }
 }

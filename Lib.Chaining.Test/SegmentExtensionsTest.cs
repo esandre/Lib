@@ -1,7 +1,10 @@
-﻿using Lib.Chaining.Extensions;
+﻿using Lib.Chaining.Chain;
+using Lib.Chaining.Extensions;
+using Lib.Chaining.Structures;
 using Lib.Chaining.Test.Fixtures;
 using Lib.Chaining.Test.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using NFluent;
 
 namespace Lib.Chaining.Test
@@ -15,7 +18,7 @@ namespace Lib.Chaining.Test
         public void Initialize()
         {
             var segment = NumericalSegmentGenerator.GenerateSegment(0, 10).ToReadonlyReversibleCollection();
-            _enumeratorImplicitBehavior = new ReversibleEnumeratorImplicitBehaviorFixtures<byte>(
+            _enumeratorImplicitBehavior = new ReversibleEnumeratorImplicitBehaviorFixture<byte>(
                 () => segment.GetEnumerator(), 
                 (byte) segment.Count,
                 (byte) segment.Count);
@@ -79,6 +82,78 @@ namespace Lib.Chaining.Test
             {
                 Check.That(enumerator.MoveNext()).IsTrue();
                 Check.That(enumerator.MovePrevious()).IsFalse();
+                Check.That(enumerator.Current).IsDefaultValue();
+            }
+        }
+
+        [TestMethod]
+        public void BoundariesEnforced_EvenIfStartIsSuccessor()
+        {
+            var line = NumericalLineGenerator.GenerateFrom(128);
+            var start = (IPredecessor<byte>) line;
+            var end = start.Next;
+
+            var segment = Mock.Of<ISegment<byte>>(m => m.Start == start && m.End == end);
+            var collection = segment.ToReadonlyReversibleCollection();
+
+            Check.That(collection.Count).Equals(2);
+
+            using (var enumerator = collection.GetEnumerator())
+            {
+                Check.That(enumerator.Current).IsDefaultValue();
+
+                Check.That(enumerator.MoveNext()).IsTrue();
+                Check.That(enumerator.Current).Equals(128);
+
+                Check.That(enumerator.MoveNext()).IsTrue();
+                Check.That(enumerator.Current).Equals(129);
+
+                Check.That(enumerator.MoveNext()).IsFalse();
+                Check.That(enumerator.Current).IsDefaultValue();
+
+                Check.That(enumerator.MovePrevious()).IsTrue();
+                Check.That(enumerator.Current).Equals(129);
+
+                Check.That(enumerator.MovePrevious()).IsTrue();
+                Check.That(enumerator.Current).Equals(128);
+
+                Check.That(enumerator.MovePrevious()).IsFalse();
+                Check.That(enumerator.Current).IsDefaultValue();
+            }
+        }
+
+        [TestMethod]
+        public void BoundariesEnforced_EvenIfEndIsPredecessor()
+        {
+            var line = NumericalLineGenerator.GenerateFrom(128);
+            var end = (ISuccessor<byte>)line;
+            var start = end.Previous;
+
+            var segment = Mock.Of<ISegment<byte>>(m => m.Start == start && m.End == end);
+            var collection = segment.ToReadonlyReversibleCollection();
+
+            Check.That(collection.Count).Equals(2);
+
+            using (var enumerator = collection.GetEnumerator())
+            {
+                Check.That(enumerator.Current).IsDefaultValue();
+
+                Check.That(enumerator.MovePrevious()).IsTrue();
+                Check.That(enumerator.Current).Equals(128);
+
+                Check.That(enumerator.MovePrevious()).IsTrue();
+                Check.That(enumerator.Current).Equals(127);
+
+                Check.That(enumerator.MovePrevious()).IsFalse();
+                Check.That(enumerator.Current).IsDefaultValue();
+
+                Check.That(enumerator.MoveNext()).IsTrue();
+                Check.That(enumerator.Current).Equals(127);
+
+                Check.That(enumerator.MoveNext()).IsTrue();
+                Check.That(enumerator.Current).Equals(128);
+
+                Check.That(enumerator.MoveNext()).IsFalse();
                 Check.That(enumerator.Current).IsDefaultValue();
             }
         }

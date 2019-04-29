@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using Lib.Chaining.Structures;
 
-namespace Lib.Chaining.Enumeration
+namespace Lib.Chaining.Enumeration.Reversible
 {
     /// <summary>
     /// Enumerates a Segment backwards or forward
     /// </summary>
     /// <typeparam name="TPayload"></typeparam>
-    internal class SegmentReadonlyCollectionAdapter<TPayload> : IReadonlyReversibleCollection<TPayload>
+    internal class SegmentReadonlyReversibleCollection<TPayload> : IReadonlyReversibleCollection<TPayload>
     {
         private readonly ISegment<TPayload> _segment;
 
@@ -16,7 +16,7 @@ namespace Lib.Chaining.Enumeration
         /// Constructor
         /// </summary>
         /// <param name="segment"></param>
-        public SegmentReadonlyCollectionAdapter(ISegment<TPayload> segment)
+        public SegmentReadonlyReversibleCollection(ISegment<TPayload> segment)
         {
             _segment = segment;
         }
@@ -27,8 +27,13 @@ namespace Lib.Chaining.Enumeration
             get
             {
                 var num = 0;
+                var end = _segment.End.Payload;
                 using (var enumerator = ((IEnumerable<TPayload>)this).GetEnumerator())
-                    while (enumerator.MoveNext()) checked { ++num; }
+                    while (enumerator.MoveNext())
+                    {
+                        checked { ++ num; }
+                        if (end.Equals(enumerator.Current)) break;
+                    }
                 return num;
             }
         }

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using Lib.Chaining.Structures;
 
-namespace Lib.Chaining.Enumeration
+namespace Lib.Chaining.Enumeration.Reversible
 {
     /// <summary>
     /// Enumerates a Segment from either the Start or the End depending of the direction chosen initially
@@ -19,17 +19,28 @@ namespace Lib.Chaining.Enumeration
             _segment = segment;
         }
 
+        private bool IsLowerBoundary(TPayload payload) => _segment.Start.Payload.Equals(payload);
+        private bool IsUpperBoundary(TPayload payload) => _segment.End.Payload.Equals(payload);
+
         /// <inheritdoc />
         public bool MoveNext()
         {
-            if (_inner is null) _inner = new LinkReversibleEnumerator<TPayload>(_segment.Start);
+            if (_inner is null) _inner = new ReversibleEnumeratorBoundariesDecorator<TPayload>(
+                new LinkReversibleEnumerator<TPayload>(_segment.Start),
+                IsLowerBoundary, 
+                IsUpperBoundary);
+
             return _inner.MoveNext();
         }
 
         /// <inheritdoc />
         public bool MovePrevious()
         {
-            if (_inner is null) _inner = new LinkReversibleEnumerator<TPayload>(_segment.End);
+            if (_inner is null) _inner = new ReversibleEnumeratorBoundariesDecorator<TPayload>(
+                new LinkReversibleEnumerator<TPayload>(_segment.End),
+                IsLowerBoundary,
+                IsUpperBoundary);
+
             return _inner.MovePrevious();
         }
 
