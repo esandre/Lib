@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NFluent;
@@ -45,6 +46,7 @@ namespace Lib.Random.Test
                 Check.That(generator(FakeGenerator)).IsInstanceOfType(type).And.Equals(expected);
 
                 var assertGenericMethod = typeof(RandomExtensionsTest).GetMethod(nameof(AssertGenericNextMethod), BindingFlags.NonPublic | BindingFlags.Static);
+                Debug.Assert(assertGenericMethod != null, nameof(assertGenericMethod) + " != null");
                 assertGenericMethod.MakeGenericMethod(type).Invoke(null, new[] {expected});
             }
         }

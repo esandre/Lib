@@ -19,7 +19,7 @@ namespace Lib.Hash.Hashable.Visitor
             if(!_byteExtractor.CanExtract(data.GetType()))
                 throw new InvalidOperationException("Cannot hash " + data.GetType());
 
-             _byteExtractor.Extract(data, _stream);
+            _byteExtractor.Extract(data, _stream);
         }
 
         public void HashOther(IHashable other)
