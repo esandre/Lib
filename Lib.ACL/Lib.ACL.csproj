@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company />
+    <Authors>Enzo Sandré</Authors>
+    <Product>Toolbox</Product>
+    <Description>Access Control Lists</Description>
   </PropertyGroup>
 
 </Project>

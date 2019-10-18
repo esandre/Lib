@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Enzo Sandré</Authors>
+    <Product>Toolbox</Product>
+    <Description>SQL querying tools</Description>
   </PropertyGroup>
 
   <ItemGroup>
