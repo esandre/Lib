@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Enzo Sandré</Authors>
+    <Product>Toolbox</Product>
+    <Description>MySQL adapter</Description>
   </PropertyGroup>
 
   <ItemGroup>

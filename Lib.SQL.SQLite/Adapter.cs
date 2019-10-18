@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SQLite;
 using System.IO;
 using Lib.SQL.Adapter;
 using Lib.SQL.Adapter.Session;
