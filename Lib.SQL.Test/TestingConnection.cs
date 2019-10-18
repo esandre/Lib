@@ -17,8 +17,6 @@ namespace Lib.SQL.Test
     internal class TestingConnection : IConnection
     {
         public static readonly TestingConnection Instance = new TestingConnection();
-        public ISession Parent { get; private set; }
-        public IConnection Connection { get; private set; }
 
         public ITransaction BeginTransaction()
         {
