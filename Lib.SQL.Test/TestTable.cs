@@ -3,6 +3,7 @@ using Lib.SQL.Adapter;
 using Lib.SQL.Executor;
 using Lib.SQL.Executor.Collections;
 using Lib.SQL.QueryBuilder;
+using Lib.SQL.QueryBuilder.Operator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.Test

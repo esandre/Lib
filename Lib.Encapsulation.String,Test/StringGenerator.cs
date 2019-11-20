@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Lib.Encapsulation.String_Test
+namespace Lib.Encapsulation.String.Test
 {
     internal static class StringGenerator
     {

@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NFluent;
 
-namespace Lib.Encapsulation.String_Test
+namespace Lib.Encapsulation.String.Test
 {
     [TestClass]
     public class AlphanumericStringDecoratorTest

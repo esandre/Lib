@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RootNamespace>Lib.Encapsulation.String_Test</RootNamespace>
+    <RootNamespace>Lib.Encapsulation.String.Test</RootNamespace>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

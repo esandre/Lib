@@ -45,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Encapsulation.Test", "L
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Encapsulation.String", "Lib.Encapsulation.String\Lib.Encapsulation.String.csproj", "{654DE78E-2D06-40DA-902C-F72D1CB0CF8D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Encapsulation.String,Test", "Lib.Encapsulation.String,Test\Lib.Encapsulation.String,Test.csproj", "{BF2A718D-5979-48F9-99CE-1638EC9A4D3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Encapsulation.String.Test", "Lib.Encapsulation.String,Test\Lib.Encapsulation.String.Test.csproj", "{BF2A718D-5979-48F9-99CE-1638EC9A4D3F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.Mocked", "Lib.Mocked\Lib.Mocked.csproj", "{0A7F3593-EAE9-4F66-B5E9-DC8B0A04D098}"
 EndProject
@@ -65,13 +65,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL", "Lib.SQL\Lib.SQL.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL.Test", "Lib.SQL.Test\Lib.SQL.Test.csproj", "{988C7B3A-AAE6-44FC-9585-303BA99228FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.SQL.SQLite", "Lib.SQL.SQLite\Lib.SQL.SQLite.csproj", "{29F66F62-2CDD-41F4-A337-0FB81779433B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL.SQLite", "Lib.SQL.SQLite\Lib.SQL.SQLite.csproj", "{29F66F62-2CDD-41F4-A337-0FB81779433B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.SQL.MySQL", "Lib.SQL.MySQL\Lib.SQL.MySQL.csproj", "{F5671658-B87C-4546-A512-C12EAC2C2FF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL.MySQL", "Lib.SQL.MySQL\Lib.SQL.MySQL.csproj", "{F5671658-B87C-4546-A512-C12EAC2C2FF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.SQL.SQLite.Test", "Lib.SQL.SQLite.Test\Lib.SQL.SQLite.Test.csproj", "{EB33DCA7-71AC-4FBD-A340-BC0A92B83D44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL.SQLite.Test", "Lib.SQL.SQLite.Test\Lib.SQL.SQLite.Test.csproj", "{EB33DCA7-71AC-4FBD-A340-BC0A92B83D44}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.SQL.MySQL.Test", "Lib.SQL.MySQL.Test\Lib.SQL.MySQL.Test.csproj", "{B31C7776-9D9F-4362-A9A3-3102F086CB9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL.MySQL.Test", "Lib.SQL.MySQL.Test\Lib.SQL.MySQL.Test.csproj", "{B31C7776-9D9F-4362-A9A3-3102F086CB9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,7 +8,6 @@ namespace Lib.SQL.QueryBuilder
             get
             {
                 var whereSql = WhereSql;
-                if (whereSql == string.Empty) throw new System.Exception("You cannot call delete without Where. At least call Where(1, IsEqualWith, 1)");
                 return "DELETE FROM " + TableName + whereSql;
             }
         }
