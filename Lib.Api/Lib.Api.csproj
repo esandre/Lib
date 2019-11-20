@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
     <Description>Api Client toolbox to handle easily HTTP operations</Description>
-    <Version>0.0.5</Version>
+    <Version>0.0.6</Version>
     <Authors>Enzo Sandré</Authors>
-    <Company> </Company>
     <Product>Toolbox</Product>
   </PropertyGroup>
 

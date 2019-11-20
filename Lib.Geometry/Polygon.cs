@@ -4,7 +4,7 @@ using System.Linq;
 using Lib.Geometry.NTS;
 using IGeometry = Lib.Geometry.Abstractions.IGeometry;
 using IPolygon = Lib.Geometry.Abstractions.IPolygon;
-using INTSPolygon = GeoAPI.Geometries.IPolygon;
+using NTSPolygon = NetTopologySuite.Geometries.Polygon;
 using IPoint = Lib.Geometry.Abstractions.IPoint;
 
 namespace Lib.Geometry
@@ -12,14 +12,14 @@ namespace Lib.Geometry
     /// <inheritdoc />
     public class Polygon : IPolygon
     {
-        private readonly Lazy<INTSPolygon> _ntsPolygon;
+        private readonly Lazy<NTSPolygon> _ntsPolygon;
 
-        internal Polygon(INTSPolygon polygon)
+        internal Polygon(NTSPolygon polygon)
         {
             Shell = NTSConverter.FromLinearRing(polygon.Shell);
             Holes = polygon.Holes.Select(NTSConverter.FromLinearRing).ToArray();
 
-            _ntsPolygon = new Lazy<INTSPolygon>(() => polygon);
+            _ntsPolygon = new Lazy<NTSPolygon>(() => polygon);
         }
 
         /// <inheritdoc />
@@ -28,7 +28,7 @@ namespace Lib.Geometry
             Shell = shell;
             Holes = new IEnumerable<IPoint>[0];
             
-            _ntsPolygon = new Lazy<INTSPolygon>(() => NTSConverter.FromEnvelope(Shell));
+            _ntsPolygon = new Lazy<NTSPolygon>(() => NTSConverter.FromEnvelope(Shell));
         }
 
         /// <inheritdoc />

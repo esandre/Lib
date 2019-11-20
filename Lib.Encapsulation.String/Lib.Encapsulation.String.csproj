@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
     <Description>String encapsulation and validation helpers</Description>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Enzo Sandré</Authors>
     <Company> </Company>
     <Product>Toolbox</Product>

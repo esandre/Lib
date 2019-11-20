@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Lib.Geometry.Abstractions;
-using INTSPoint = GeoAPI.Geometries.IPoint;
-using NTSCoordinate = GeoAPI.Geometries.Coordinate;
+using NTSPoint = NetTopologySuite.Geometries.Point;
+using NTSCoordinate = NetTopologySuite.Geometries.Coordinate;
 
 namespace Lib.Geometry
 {
@@ -20,7 +20,7 @@ namespace Lib.Geometry
             Y = y;
         }
 
-        internal Point(INTSPoint point)
+        internal Point(NTSPoint point)
         {
             X = point.X;
             Y = point.Y;

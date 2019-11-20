@@ -4,33 +4,30 @@ using NetTopologySuite.Geometries;
 using IGeometry = Lib.Geometry.Abstractions.IGeometry;
 using IPolygon = Lib.Geometry.Abstractions.IPolygon;
 using IPoint = Lib.Geometry.Abstractions.IPoint;
-using INTSGeometry = GeoAPI.Geometries.IGeometry;
-using INTSPoint = GeoAPI.Geometries.IPoint;
-using INTSPolygon = GeoAPI.Geometries.IPolygon;
+using NTSGeometry = NetTopologySuite.Geometries.Geometry;
 using NTSPolygon = NetTopologySuite.Geometries.Polygon;
-using INTSLinearRing = GeoAPI.Geometries.ILinearRing;
 using NTSLinearRing = NetTopologySuite.Geometries.LinearRing;
-using NTSCoordinate = GeoAPI.Geometries.Coordinate;
+using NTSCoordinate = NetTopologySuite.Geometries.Coordinate;
 
 namespace Lib.Geometry.NTS
 {
     internal static class NTSConverter
     {
-        private static INTSLinearRing FromPoints(IEnumerable<IPoint> coordinates)
+        private static NTSLinearRing FromPoints(IEnumerable<IPoint> coordinates)
             => new NTSLinearRing(coordinates.Select(point => new NTSCoordinate(point.X, point.Y)).ToArray());
 
-        public static IEnumerable<IPoint> FromLinearRing(INTSLinearRing linearRing) =>
+        public static IEnumerable<IPoint> FromLinearRing(NTSLinearRing linearRing) =>
             linearRing.Coordinates.Select(point => new Point(point));
 
-        public static INTSPolygon FromEnvelope(IEnumerable<IPoint> envelope, params IEnumerable<IPoint>[] holes)
+        public static NTSPolygon FromEnvelope(IEnumerable<IPoint> envelope, params IEnumerable<IPoint>[] holes)
             => new NTSPolygon(FromPoints(envelope), holes.Select(FromPoints).ToArray());
 
-        private static INTSPolygon ToNTS(this IPolygon polygon)
+        private static NTSPolygon ToNTS(this IPolygon polygon)
             => new NTSPolygon(
                 FromPoints(polygon.Shell), 
                 polygon.Holes.Select(FromPoints).ToArray());
         
-        public static INTSGeometry ToNTS(this IGeometry geometry)
+        public static NTSGeometry ToNTS(this IGeometry geometry)
         {
             var polygons = geometry.Polygons.ToArray();
             if(polygons.Length > 1) return new MultiPolygon(polygons.Select(ToNTS).ToArray());

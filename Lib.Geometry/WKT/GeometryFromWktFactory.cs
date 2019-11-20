@@ -20,8 +20,8 @@ namespace Lib.Geometry.WKT
         {
             var ntsGeometry = _reader.Read(wkt);
 
-            if (ntsGeometry is GeoAPI.Geometries.IPolygon polygon) return new Polygon(polygon);
-            if (ntsGeometry is GeoAPI.Geometries.IPoint point) return new Point(point);
+            if (ntsGeometry is NetTopologySuite.Geometries.Polygon polygon) return new Polygon(polygon);
+            if (ntsGeometry is NetTopologySuite.Geometries.Point point) return new Point(point);
 
             throw new NotImplementedException("Only POLYGON and POINT WKT objects are currently supported");
         }

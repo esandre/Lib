@@ -1,6 +1,6 @@
 ﻿using Lib.Geometry.Abstractions;
 using NetTopologySuite.Geometries;
-using INTSPolygon = GeoAPI.Geometries.IPolygon;
+using NTSPolygon = NetTopologySuite.Geometries.Polygon;
 using NTSPoint = NetTopologySuite.Geometries.Point;
 
 namespace Lib.Geometry
@@ -10,7 +10,7 @@ namespace Lib.Geometry
     /// </summary>
     public class PseudoCircle : Polygon
     {
-        private static INTSPolygon DrawCircle(IPoint center, double radius, int verticesPerQuarter)
+        private static NTSPolygon DrawCircle(IPoint center, double radius, int verticesPerQuarter)
         {
             var point = new NTSPoint(center.X, center.Y);
             var geometry = point.Buffer(radius, verticesPerQuarter);
