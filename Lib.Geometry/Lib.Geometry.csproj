@@ -6,14 +6,14 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>false</IsTestProject>
     <Description>Geometry related classes</Description>
-    <Version>1.0.4</Version>
+    <Version>2.0.4</Version>
     <Authors>Enzo Sandré</Authors>
     <Company> </Company>
     <Product>Toolbox</Product>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="1.15.2" PrivateAssets="compile, build, analyzers" />
+    <PackageReference Include="NetTopologySuite" Version="2.0.0" PrivateAssets="compile, build, analyzers" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,6 +6,9 @@
     <Authors>Enzo Sandré</Authors>
     <Product>Toolbox</Product>
     <Description>SQL querying tools</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsTestProject>false</IsTestProject>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
