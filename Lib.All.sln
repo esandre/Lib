@@ -73,6 +73,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL.SQLite.Test", "Lib.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib.SQL.MySQL.Test", "Lib.SQL.MySQL.Test\Lib.SQL.MySQL.Test.csproj", "{B31C7776-9D9F-4362-A9A3-3102F086CB9D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{D798676F-930B-40E2-A357-B296B4E23528}"
+	ProjectSection(SolutionItems) = preProject
+		pack-publish.ps1 = pack-publish.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

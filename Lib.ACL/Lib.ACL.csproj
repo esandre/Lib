@@ -9,4 +9,11 @@
     <Description>Access Control Lists</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NuGet.CommandLine" Version="5.4.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
