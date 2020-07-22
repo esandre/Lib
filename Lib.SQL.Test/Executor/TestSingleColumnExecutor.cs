@@ -11,8 +11,7 @@ namespace Lib.SQL.Test.Executor
         {
             var result = new SingleColumnExecutor
             {
-                Adapter = new TestExecutorAbstractAbstract<SingleColumnExecutor, object[]>.TestAdapter(),
-                Column = "a"
+                Adapter = new TestExecutorAbstractAbstract<SingleColumnExecutor, object[]>.TestAdapter()
             }.Execute("");
 
             Assert.AreEqual("b", result[0]);

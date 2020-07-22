@@ -1,4 +1,6 @@
-﻿namespace Lib.Patterns
+﻿using System.Threading.Tasks;
+
+namespace Lib.Patterns
 {
     /// <summary>
     /// A Factory with one input
@@ -9,6 +11,17 @@
         /// Factories Output from Input
         /// </summary>
         TOutput Factory(TInput input);
+    }
+
+    /// <summary>
+    /// An async Factory with one input
+    /// </summary>
+    public interface IAsyncFactory<in TInput, TOutput>
+    {
+        /// <summary>
+        /// Factories Output from Input
+        /// </summary>
+        Task<TOutput> FactoryAsync(TInput input);
     }
 
     /// <summary>

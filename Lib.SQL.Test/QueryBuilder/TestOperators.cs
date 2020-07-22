@@ -1,4 +1,4 @@
-﻿using Lib.SQL.QueryBuilder.Operator;
+﻿using Lib.SQL.Operation.QueryBuilder.Operator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.Test.QueryBuilder
@@ -9,6 +9,7 @@ namespace Lib.SQL.Test.QueryBuilder
         [TestMethod]
         public void TestPreset()
         {
+            Assert.AreEqual("a IN (b,c)", Is.In.ToString("a", "b,c"));
             Assert.AreEqual("a = b", Is.EqualWith.ToString("a", "b"));
             Assert.AreEqual("a != b", Is.DifferentWith.ToString("a", "b"));
             Assert.AreEqual("a >= b", Is.GreaterOrEqualThan.ToString("a", "b"));

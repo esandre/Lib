@@ -1,9 +1,9 @@
 ﻿using System;
 using Lib.SQL.Executor;
-using Lib.SQL.QueryBuilder;
-using Lib.SQL.QueryBuilder.Operator;
-using Lib.SQL.QueryBuilder.Sequences;
-using Lib.SQL.QueryBuilder.Sequences.Where;
+using Lib.SQL.Operation.QueryBuilder;
+using Lib.SQL.Operation.QueryBuilder.Operator;
+using Lib.SQL.Operation.QueryBuilder.Sequences;
+using Lib.SQL.Operation.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Operation
 {

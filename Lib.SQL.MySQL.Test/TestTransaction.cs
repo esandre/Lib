@@ -13,7 +13,7 @@ namespace Lib.SQL.MySQL.Test
         {
             InsertValueInNewDb(true);
 
-            var adapter = new Adapter(Credentials, "tmp");
+            var adapter = Adapter.Open(Credentials);
             Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
         }
 
@@ -22,104 +22,103 @@ namespace Lib.SQL.MySQL.Test
         {
             InsertValueInNewDb(false);
 
-            var adapter = new Adapter(Credentials, "tmp");
+            var adapter = Adapter.Open(Credentials);
             Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
         private static void InsertValueInNewDb(bool commit)
         {
-            var adapter = Adapter.CreateFromPlainScript(Credentials, "tmp", Resources.TestCommitRollback, true);
+            var adapter = Adapter.CreateFromPlainScript(Credentials, Resources.TestCommitRollback, true);
 
-            adapter.ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
-                adapter.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, object>{{"@value", "committed" } });
+                scope.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, object>{{"@value", "committed" } });
                 return commit ? TransactionResult.Commit : TransactionResult.Rollback;
             });
         }
 
-        private static int GetCount(Table table)
+        private static int GetCount(Table table, ICommandChannel adapter)
         {
-            return Convert.ToInt32(table.Select("COUNT(*)").Execute());
+            return Convert.ToInt32(table.Select("COUNT(*)").ExecuteOn(adapter));
         }
 
-        private static void InsertDoSomethingAndCommit(Table table, string what, Action something)
+        private static void InsertDoSomethingAndCommit(TransactionalDbAdapter adapter, Table table, string what, Action something)
         {
             var beforeCommit = 0;
-            ((TransactionalDbAdapter)table.Adapter()).ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
-                var initial = GetCount(table);
-                table.Insert().Values(what).Execute();
-                Assert.AreEqual(initial + 1, GetCount(table));
+                var initial = GetCount(table, scope);
+                table.Insert().Values(what).ExecuteOn(scope);
+                Assert.AreEqual(initial + 1, GetCount(table, scope));
 
                 something.Invoke();
 
-                beforeCommit = GetCount(table);
+                beforeCommit = GetCount(table, scope);
                 return TransactionResult.Commit;
             });
-            Assert.AreEqual(beforeCommit, GetCount(table));
+            Assert.AreEqual(beforeCommit, GetCount(table, adapter));
         }
 
-        private static void InsertDoSomethingAndRollback(Table table, string what, Action something)
+        private static void InsertDoSomethingAndRollback(TransactionalDbAdapter adapter, Table table, string what, Action something)
         {
-            var initial = GetCount(table);
-            ((TransactionalDbAdapter)table.Adapter()).ExecuteInTransaction(() =>
+            var initial = GetCount(table, adapter);
+            adapter.ExecuteInTransaction(scope =>
             {
-                table.Insert().Values(what).Execute();
-                Assert.AreEqual(initial + 1, GetCount(table));
+                table.Insert().Values(what).ExecuteOn(scope);
+                Assert.AreEqual(initial + 1, GetCount(table, scope));
                 something.Invoke();
                 return TransactionResult.Rollback;
             });
-            Assert.AreEqual(initial, GetCount(table));
+            Assert.AreEqual(initial, GetCount(table, adapter));
         }
 
-        private static void DoSomethingInsertAndCommit(Table table, string what, Action something)
+        private static void DoSomethingInsertAndCommit(TransactionalDbAdapter adapter, Table table, string what, Action something)
         {
-            var initial = GetCount(table);
+            var initial = GetCount(table, adapter);
 
-            ((TransactionalDbAdapter)table.Adapter()).ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
                 something.Invoke();
-                table.Insert().Values(what).Execute();
+                table.Insert().Values(what).ExecuteOn(scope);
                 return  TransactionResult.Commit;
             });
 
-            Assert.AreEqual(initial + 1, GetCount(table));
+            Assert.AreEqual(initial + 1, GetCount(table, adapter));
         }
 
-        private static void DoSomethingInsertAndRollback(Table table, string what, Action something)
+        private static void DoSomethingInsertAndRollback(TransactionalDbAdapter adapter, Table table, string what, Action something)
         {
-            var initial = GetCount(table);
+            var initial = GetCount(table, adapter);
 
-            ((TransactionalDbAdapter)table.Adapter()).ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
-                
                 something.Invoke();
 
-                var afterInvoke = GetCount(table);
-                table.Insert().Values(what).Execute();
-                Assert.AreEqual(afterInvoke + 1, GetCount(table));
+                var afterInvoke = GetCount(table, scope);
+                table.Insert().Values(what).ExecuteOn(scope);
+                Assert.AreEqual(afterInvoke + 1, GetCount(table, scope));
 
                 return TransactionResult.Rollback;
             });
 
-            Assert.AreEqual(initial, GetCount(table));
+            Assert.AreEqual(initial, GetCount(table, adapter));
         }
 
         [TestMethod]
         public void TestNestedTransactions()
         {
-            var adapter = Adapter.CreateFromPlainScript(Credentials, "tmp", Resources.TestCommitRollback, true);
-            var table = new Table(() => adapter, "test", "reference");
+            var adapter = Adapter.CreateFromPlainScript(Credentials, Resources.TestCommitRollback, true);
+            var table = new Table("test", "reference");
 
-            DoSomethingInsertAndCommit(table, "B",
-                () => DoSomethingInsertAndRollback(table, "C",
-                    () => InsertDoSomethingAndCommit(table, "D",
-                        () => InsertDoSomethingAndRollback(table, "E", () => { })
+            DoSomethingInsertAndCommit(adapter, table, "B",
+                () => DoSomethingInsertAndRollback(adapter, table, "C",
+                    () => InsertDoSomethingAndCommit(adapter, table, "D",
+                        () => InsertDoSomethingAndRollback(adapter, table, "E", () => { })
                     )
                 )
             );
 
-            Assert.AreEqual(1, GetCount(table));
+            Assert.AreEqual(1, GetCount(table, adapter));
         }
     }
 }

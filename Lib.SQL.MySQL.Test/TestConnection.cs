@@ -15,7 +15,7 @@ namespace Lib.SQL.MySQL.Test
             var script = Path.GetTempFileName();
 
             CreateSqlFileFromScriptDoSomethingAndDelete(Resources.TestCreationSuccess, script,
-                () => Adapter.CreateFromScriptFile(Credentials, "tmp", script, true));
+                () => Adapter.CreateFromScriptFile(Credentials, script, true));
         }
 
         [TestMethod]
@@ -25,7 +25,7 @@ namespace Lib.SQL.MySQL.Test
             var script = Path.Combine(Path.GetTempPath(), "TestCreationFailFromScriptFile.sql");
 
             CreateSqlFileFromScriptDoSomethingAndDelete(Resources.TestCreationFail, script,
-                () => Adapter.CreateFromScriptFile(Credentials, "tmp", script, true));
+                () => Adapter.CreateFromScriptFile(Credentials, script, true));
 
         }
 
@@ -45,26 +45,26 @@ namespace Lib.SQL.MySQL.Test
         [TestMethod]
         public void TestCreationSuccessFromPlainSql()
         {
-            Adapter.CreateFromPlainScript(Credentials, "tmp", Resources.TestCreationSuccess, true);
+            Adapter.CreateFromPlainScript(Credentials, Resources.TestCreationSuccess, true);
         }
 
         [TestMethod]
         [ExpectedException(typeof(Exception), AllowDerivedTypes = true)]
         public void TestCreationFailFromFromPlainSql()
         {
-            Adapter.CreateFromPlainScript(Credentials, "tmp", Resources.TestCreationFail, true);
+            Adapter.CreateFromPlainScript(Credentials, Resources.TestCreationFail, true);
         }
 
         [TestMethod]
         public void TestOpeningSuccess()
         {
-            Adapter.CreateFromPlainScript(Credentials, "tmp", "", true);
+            Adapter.CreateFromPlainScript(Credentials, "", true);
         }
 
         [TestMethod]
         public void TestDispose()
         {
-            Adapter.CreateFromPlainScript(Credentials, "tmp", "", true).Dispose();
+            Adapter.CreateFromPlainScript(Credentials, "", true).Dispose();
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
@@ -72,32 +72,32 @@ namespace Lib.SQL.MySQL.Test
         [TestMethod]
         public void TestSuccessiveConnections()
         {
-            var adapter = Adapter.CreateFromPlainScript(Credentials, "tmp", "CREATE TABLE a (b TEXT)", true);
+            var adapter = Adapter.CreateFromPlainScript(Credentials, "CREATE TABLE a (b TEXT)", true);
             adapter.Execute("INSERT INTO a VALUES ('c')");
-            adapter = Adapter.CreateFromPlainScript(Credentials, "tmp", "CREATE TABLE a (b TEXT)", true);
+            adapter = Adapter.CreateFromPlainScript(Credentials, "CREATE TABLE a (b TEXT)", true);
             Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count());
         }
 
         [TestMethod]
         public void TestMultithreading()
         {
-            var mainAdapter = Adapter.CreateFromPlainScript(Credentials, "tmp", "CREATE TABLE a (b TEXT)", true);
+            var mainAdapter = Adapter.CreateFromPlainScript(Credentials, "CREATE TABLE a (b TEXT)", true);
 
             var t1 = new Thread(() =>
             {
-                var adapter = new Adapter(Credentials, "tmp");
+                var adapter = Adapter.Open(Credentials);
                 foreach (var n in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             var t2 = new Thread(() =>
             {
-                var adapter = new Adapter(Credentials, "tmp");
+                var adapter = Adapter.Open(Credentials);
                 foreach (var n in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             var t3 = new Thread(() =>
             {
-                var adapter = new Adapter(Credentials, "tmp");
+                var adapter = Adapter.Open(Credentials);
                 foreach (var n in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 

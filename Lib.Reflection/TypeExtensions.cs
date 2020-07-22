@@ -140,5 +140,57 @@ namespace Lib.Reflection
 
             return typeToCheck.BaseType.IsOfGenericType(genericType);
         }
+
+        /// <summary>
+        /// Checks if a type is the reification of a specific generic type
+        /// </summary>
+        /// <example>IEnumerable{string} is IEnumerable{} but not ICollection{}</example>
+        [PublicAPI]
+        public static bool IsStrictlyOfGenericType(this Type typeToCheck, Type genericType)
+        {
+            if (!genericType.IsGenericTypeDefinition)
+                throw new ArgumentException("The definition needs to be a GenericTypeDefinition", nameof(genericType));
+
+            if (typeToCheck == null) return false;
+            if (typeToCheck == typeof(object)) return false;
+            if (typeToCheck == genericType) return true;
+
+            if (typeToCheck.IsGenericType && typeToCheck.GetGenericTypeDefinition() == genericType)
+                return true;
+
+            return typeToCheck.IsGenericType && typeToCheck.GetGenericTypeDefinition() == genericType;
+        }
+
+        /// <summary>
+        /// Find interfaces matching an unbound type in the haystack type.
+        /// </summary>
+        /// <example>With List{T} as haystack and IEnumerable{} as needle, will return IEnumerable{T}</example>
+        [PublicAPI]
+        public static IEnumerable<Type> FindInterfacesMatchingUnbound(this Type haystack, Type unboundNeedle)
+        {
+            return haystack.GetInterfaces().Where(t => t.IsStrictlyOfGenericType(unboundNeedle));
+        }
+
+        private static IEnumerable<Type> FlattenHierarchy(this Type type)
+        {
+            while (type != null && type != typeof(object))
+            {
+                yield return type;
+                type = type.BaseType;
+            }
+        }
+
+        [PublicAPI]
+        public static Type As(this Type limitType, Type unboundNeedle)
+        {
+            if (limitType == unboundNeedle) return limitType;
+
+            var correspondingParent = limitType.FlattenHierarchy()
+                .FirstOrDefault(t => t.IsStrictlyOfGenericType(unboundNeedle));
+
+            return correspondingParent != null 
+                ? correspondingParent 
+                : limitType.FindInterfacesMatchingUnbound(unboundNeedle).Single();
+        }
     }
 }

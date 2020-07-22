@@ -15,6 +15,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from other encapsulated value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public MaximalLengthStringDecorator(int limit, IEncapsulatedValue<string> decorated) : base(decorated)
         {
             if (decorated.Value.Length > limit) throw new FormatException(LengthExceededMessage(limit));
@@ -23,6 +24,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from raw value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public MaximalLengthStringDecorator(int limit, string input) : base(input)
         {
             if (input.Length > limit)

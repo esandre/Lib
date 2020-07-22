@@ -6,29 +6,11 @@ namespace Lib.DateTime.Descriptors
 {
     public class TimeSlotBuilder
     {
-        private class AliasesNotSupported : IAliasProvider
-        {
-            public ITimeSlot Fetch(string name)
-            {
-                throw new System.NotSupportedException("You must provide an IAliasProvider as dependency of TimeSlotBuilder");
-            }
-        }
-
         private readonly CultureInfo _culture;
         private readonly IAliasProvider _aliasesProvider;
 
-        public TimeSlotBuilder() :
-            this(new AliasesNotSupported())
-        {
-        }
-
         public TimeSlotBuilder(IAliasProvider aliases) :
             this(aliases, CultureInfo.InvariantCulture)
-        {
-        }
-
-        public TimeSlotBuilder(CultureInfo culture) :
-            this(new AliasesNotSupported(), culture)
         {
         }
 

@@ -1,5 +1,7 @@
-﻿using Lib.SQL.Executor;
-using Lib.SQL.QueryBuilder;
+﻿using System.Threading.Tasks;
+using Lib.SQL.Adapter;
+using Lib.SQL.Executor;
+using Lib.SQL.Operation.QueryBuilder;
 
 namespace Lib.SQL
 {
@@ -7,27 +9,23 @@ namespace Lib.SQL
         where TStatement : StatementAbstract
         where TExecutor : ExecutorAbstract<TResultType>, new()
     {
-        internal readonly TExecutor Executor;
         protected readonly TStatement Statement;
         private readonly string _description;
 
         protected TableOperation(Table table, TStatement statement)
         {
             Statement = statement;
-            Executor = new TExecutor {Adapter = table.Adapter.Invoke()};
             _description = table.Name; 
         }
 
-        public TResultType Execute()
-        {
-            return Executor.Execute(Statement.Sql, Statement.Parameters);
-        }
+        public virtual TResultType ExecuteOn(ICommandChannel on) 
+            => new TExecutor { Adapter = on }.Execute(Statement.Sql, Statement.Parameters);
+
+        public virtual async Task<TResultType> ExecuteOnAsync(ICommandChannel on) 
+            => await new TExecutor { Adapter = on }.ExecuteAsync(Statement.Sql, Statement.Parameters);
 
         public string Sql => Statement.Sql;
 
-        public override string ToString()
-        {
-            return _description;
-        }
+        public override string ToString() => _description;
     }
 }

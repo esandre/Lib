@@ -1,18 +1,18 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Lib.SQL.Adapter;
 using Lib.SQL.Executor;
-using Lib.SQL.QueryBuilder;
-using Lib.SQL.QueryBuilder.Sequences;
+using Lib.SQL.Operation.QueryBuilder;
+using Lib.SQL.Operation.QueryBuilder.Sequences;
 
 namespace Lib.SQL.Operation
 {
     public class TableInsert : TableOperation<Insert, AffectedLinesExecutor, int>
     {
-        private readonly Table _table;
         private int _values;
 
         public TableInsert(Table table) : base(table, Insert.Into(table.Name, table.Columns))
         {
-            _table = table;
         }
 
         public TableInsert Values(params IConvertible[] values)
@@ -22,18 +22,32 @@ namespace Lib.SQL.Operation
             return this;
         }
 
-        public new int Execute()
+        public override int ExecuteOn(ICommandChannel on)
         {
-            var affectedLines = base.Execute();
+            var affectedLines = base.ExecuteOn(on);
             if (affectedLines != _values)
-                throw new Exception(string.Format("Tentative d'insertion de {0} lignes, seulement {1} insérée(s)", _values, affectedLines));
+                throw new Exception($"Tentative d'insertion de {_values} lignes, seulement {affectedLines} insérée(s)");
             return affectedLines;
         }
 
-        public long ExecuteAndReturnRowId()
+        public override async Task<int> ExecuteOnAsync(ICommandChannel on)
         {
-             Execute();
-            return _table.LastInsertedId;
+            var affectedLines = await base.ExecuteOnAsync(on);
+            if (affectedLines != _values)
+                throw new Exception($"Tentative d'insertion de {_values} lignes, seulement {affectedLines} insérée(s)");
+            return affectedLines;
+        }
+
+        public IConvertible ExecuteOnAndReturnRowId(ICommandChannel on)
+        {
+            ExecuteOn(on);
+            return on.LastInsertedId;
+        }
+
+        public async Task<IConvertible> ExecuteOnAndReturnRowIdAsync(ICommandChannel on)
+        {
+            await ExecuteOnAsync(on);
+            return on.LastInsertedId;
         }
 
         public TableInsert OnError(OrType handler)

@@ -1,8 +1,10 @@
-﻿namespace Lib.SQL.MySQL.Test
+﻿using MySql.Data.MySqlClient;
+
+namespace Lib.SQL.MySQL.Test
 {
     public class TestAbstract
     {
-        protected static MySQLCredentials Credentials
-            => new MySQLCredentials {Password = "2zRpZ4fnGcVynUh2", Username = "cali_badges", Server = "192.168.1.7", Port = "3306"};
+        protected static MySqlConnectionStringBuilder Credentials
+            => new MySqlConnectionStringBuilder { Password = "2zRpZ4fnGcVynUh2", UserID = "cali_badges", Server = "192.168.1.7", Port = 3306, Database = "tmp"};
     }
 }

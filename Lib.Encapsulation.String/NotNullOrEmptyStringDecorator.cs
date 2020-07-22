@@ -15,6 +15,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from other encapsulated value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public NotNullOrEmptyStringDecorator(IEncapsulatedValue<string> decorated) : base(decorated)
         {
             if (string.IsNullOrEmpty(decorated.Value)) throw new FormatException(NullOrEmptyInputMessage);
@@ -23,6 +24,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from raw value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public NotNullOrEmptyStringDecorator(string input) : base(input)
         {
             if (string.IsNullOrEmpty(input)) throw new FormatException(NullOrEmptyInputMessage);

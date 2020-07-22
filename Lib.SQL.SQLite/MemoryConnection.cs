@@ -1,13 +1,21 @@
-﻿namespace Lib.SQL.SQLite
+﻿using System.Data.SQLite;
+
+namespace Lib.SQL.SQLite
 {
-    class MemoryConnection : Connection
+    internal class MemoryConnection : Connection
     {
-        public MemoryConnection() : base(":memory:")
+        public MemoryConnection(SQLiteConnectionStringBuilder connectionStringBuilder) 
+            : base(connectionStringBuilder)
         {
         }
 
         public override void Close()
         {
+        }
+
+        public override void Dispose()
+        {
+            base.Close();
         }
     }
 }

@@ -78,6 +78,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{D798
 		pack-publish.ps1 = pack-publish.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.SerialPort", "Lib.SerialPort\Lib.SerialPort.csproj", "{AE7FEBC2-A75C-42C6-A647-69300EAE018D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.TCP", "Lib.TCP\Lib.TCP.csproj", "{3D70C80D-2CC9-4B98-A719-09FD6E38AFB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib.SerialPort.Test", "Lib.SerialPort.Test\Lib.SerialPort.Test.csproj", "{50E3152F-89A7-4EA3-810B-10062C123992}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -216,6 +222,18 @@ Global
 		{B31C7776-9D9F-4362-A9A3-3102F086CB9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B31C7776-9D9F-4362-A9A3-3102F086CB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B31C7776-9D9F-4362-A9A3-3102F086CB9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE7FEBC2-A75C-42C6-A647-69300EAE018D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE7FEBC2-A75C-42C6-A647-69300EAE018D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE7FEBC2-A75C-42C6-A647-69300EAE018D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE7FEBC2-A75C-42C6-A647-69300EAE018D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D70C80D-2CC9-4B98-A719-09FD6E38AFB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D70C80D-2CC9-4B98-A719-09FD6E38AFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D70C80D-2CC9-4B98-A719-09FD6E38AFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D70C80D-2CC9-4B98-A719-09FD6E38AFB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50E3152F-89A7-4EA3-810B-10062C123992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50E3152F-89A7-4EA3-810B-10062C123992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50E3152F-89A7-4EA3-810B-10062C123992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50E3152F-89A7-4EA3-810B-10062C123992}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

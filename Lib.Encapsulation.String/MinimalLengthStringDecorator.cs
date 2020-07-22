@@ -15,6 +15,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from other encapsulated value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public MinimalLengthStringDecorator(int minLength, IEncapsulatedValue<string> decorated) : base(decorated)
         {
             if(decorated.Value.Length < minLength) throw new FormatException(TooShortMessage(minLength));
@@ -23,6 +24,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from raw value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public MinimalLengthStringDecorator(int minLength, string input) : base(input)
         {
             if (input.Length < minLength) throw new FormatException(TooShortMessage(minLength));

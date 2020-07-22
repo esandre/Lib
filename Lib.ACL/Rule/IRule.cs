@@ -2,13 +2,10 @@
 
 namespace Lib.ACL.Rule
 {
-    public interface IRule : IEquatable<IRule>
+    public interface IRule : IComparable<IRule>
     {
-        ITimeSlot TimeSlot { get; }
-        IRightBearer Subject { get; }
-        IRuleTarget Objet { get; }
-        DateTime CreationDate { get; }
         bool Authorize { get; }
-        int Priority { get; }
+        bool IsApplicableFor(ISubject subject, IObject @object, DateTime at);
+        ushort Priority { get; }
     }
 }

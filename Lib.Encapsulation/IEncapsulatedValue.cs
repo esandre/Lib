@@ -3,7 +3,7 @@
     /// <summary>
     /// An Encapsulated value
     /// </summary>
-    public interface IEncapsulatedValue<TValue>
+    public interface IEncapsulatedValue<out TValue>
     {
         /// <summary>
         /// InnerValue

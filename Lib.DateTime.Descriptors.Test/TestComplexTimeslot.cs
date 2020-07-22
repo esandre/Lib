@@ -1,12 +1,15 @@
 ﻿using System.Globalization;
 using Lib.DateTime.Descriptors.TimeSlot;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Lib.DateTime.Descriptors.Test
 {
     [TestClass]
     public class TestComplexTimeSlot
     {
+        private static readonly IAliasProvider NoAliasProvider = Mock.Of<IAliasProvider>(MockBehavior.Strict);
+
         [TestMethod]
         public void TestContains()
         {
@@ -62,7 +65,7 @@ namespace Lib.DateTime.Descriptors.Test
             {
                 var proof = ComplexTimeSlot.CreateOr(new AbsoluteTimeSlot(new System.DateTime(2015, 06, 12, 12, 21, 55), new System.DateTime(2015, 07, 03, 17, 4, 00)), new NeverTimeSlot());
                 const string descriptor = "BETWEEN 12/06/2015 12:21 AND 03/07/2015 17:04 OR NEVER";
-                Assert.AreEqual((object) proof, new TimeSlotBuilder().Build(descriptor));
+                Assert.AreEqual((object) proof, new TimeSlotBuilder(NoAliasProvider).Build(descriptor));
             }
 
             {
@@ -75,7 +78,7 @@ namespace Lib.DateTime.Descriptors.Test
                     new NeverTimeSlot());
 
                 const string descriptor = "(ALWAYS OR ((NEVER BUT ALWAYS) OR NEVER)) INTERSECTING NEVER";
-                Assert.AreEqual((object) proof, new TimeSlotBuilder().Build(descriptor));
+                Assert.AreEqual((object) proof, new TimeSlotBuilder(NoAliasProvider).Build(descriptor));
             }
         }
 
@@ -85,7 +88,7 @@ namespace Lib.DateTime.Descriptors.Test
             {
                 var proof = ComplexTimeSlot.CreateOr(new AbsoluteTimeSlot(new System.DateTime(2015, 06, 12, 12, 21, 55), new System.DateTime(2015, 07, 03, 17, 4, 00)), new NeverTimeSlot());
                 const string descriptor = "ENTRE 12/06/2015 12:21 ET 03/07/2015 17:04 OU JAMAIS";
-                Assert.AreEqual((object) proof, new TimeSlotBuilder(new CultureInfo("fr")).Build(descriptor));
+                Assert.AreEqual((object) proof, new TimeSlotBuilder(NoAliasProvider, new CultureInfo("fr")).Build(descriptor));
             }
 
             {
@@ -98,7 +101,7 @@ namespace Lib.DateTime.Descriptors.Test
                     new NeverTimeSlot());
 
                 const string descriptor = "(TOUJOURS OU ((JAMAIS SAUF TOUJOURS) OU JAMAIS)) RECOUPANT JAMAIS";
-                Assert.AreEqual((object) proof, new TimeSlotBuilder(new CultureInfo("fr")).Build(descriptor));
+                Assert.AreEqual((object) proof, new TimeSlotBuilder(NoAliasProvider, new CultureInfo("fr")).Build(descriptor));
             }
         }
     }

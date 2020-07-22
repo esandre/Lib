@@ -12,42 +12,43 @@ namespace Lib.SQL.SQLite
         {
         }
 
-        public static Adapter CreateFromScriptFile(string fileUrl, string scriptUrl, bool eraseIfExists = false)
+        public static Adapter CreateFromScriptFile(SQLiteConnectionStringBuilder connectionStringBuilder, string scriptUrl, bool eraseIfExists = false)
         {
             var uri = new Uri(scriptUrl);
-            return CreateFromPlainScript(fileUrl, File.ReadAllText(uri.LocalPath), eraseIfExists);
+            return CreateFromPlainScript(connectionStringBuilder, File.ReadAllText(uri.LocalPath), eraseIfExists);
         }
 
-        public static Adapter CreateFromPlainScript(string fileUrl, string script, bool eraseIfExists = false)
+        public static Adapter CreateFromPlainScript(SQLiteConnectionStringBuilder connectionStringBuilder, string script, bool eraseIfExists = false)
         {
-            return Create(fileUrl, script, eraseIfExists);
+            return Create(connectionStringBuilder, script, eraseIfExists);
         }
 
         private static readonly object CreationLock = new object();
-        private static Adapter Create(string fileUrl, string script, bool eraseIfExists = false)
+        private static Adapter Create(SQLiteConnectionStringBuilder connectionStringBuilder, string script, bool eraseIfExists = false)
         {
             lock (CreationLock)
             {
-                if (File.Exists(fileUrl) && !eraseIfExists)
+                if (connectionStringBuilder.DataSource != ":memory:"
+                    && File.Exists(connectionStringBuilder.DataSource) 
+                    && eraseIfExists)
                 {
-                    return Open(fileUrl);
+                    File.Delete(connectionStringBuilder.DataSource);
+                    SQLiteConnection.CreateFile(connectionStringBuilder.DataSource);
                 }
 
-                if (fileUrl != ":memory:")
-                {
-                    File.Delete(fileUrl);
-                    SQLiteConnection.CreateFile(fileUrl);
-                }
-
-                var adapter = Open(fileUrl);
+                var adapter = Open(connectionStringBuilder);
                 if (!string.IsNullOrEmpty(script)) adapter.Execute(script);
                 return adapter;
             }
         }
 
-        public static Adapter Open(string fileUrl)
+        public static Adapter Open(SQLiteConnectionStringBuilder connectionStringBuilder, bool threadSafe = false)
         {
-            return new Adapter(fileUrl != ":memory:" ? new Connection(fileUrl) : new MemoryConnection());
+            if(connectionStringBuilder.DataSource == ":memory:") 
+                return new Adapter(new MemoryConnection(connectionStringBuilder));
+
+            var connection = new Connection(connectionStringBuilder);
+            return new Adapter(threadSafe ? new ThreadSafeConnection(connection) : (IConnection) connection);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.IO;
 using Lib.SQL.Adapter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,7 +18,8 @@ namespace Lib.SQL.SQLite.Test
 
             InsertValueInNewDb(value, dbPath, true);
 
-            var adapter = Adapter.Open(Path.Combine(Path.GetTempPath(), dbPath));
+            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
+            var adapter = Adapter.Open(connString);
             Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
         }
 
@@ -29,23 +31,24 @@ namespace Lib.SQL.SQLite.Test
 
             InsertValueInNewDb(value, dbPath, false);
 
-            var adapter = Adapter.Open(Path.Combine(Path.GetTempPath(), dbPath));
+            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
+            var adapter = Adapter.Open(connString);
             Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
         private static void InsertValueInNewDb(string value, string dbName, bool commit)
         {
-            var script = Path.Combine(Path.GetTempPath(), dbName);
-            var adapter = Adapter.CreateFromPlainScript(script, Resources.TestCommitRollback, true);
+            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbName) };
+            var adapter = Adapter.CreateFromPlainScript(connString, Resources.TestCommitRollback, true);
 
-            adapter.ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
                 adapter.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, object>{{"@value", value}});
                 return commit ? TransactionResult.Commit : TransactionResult.Rollback;
             });
         }
 
-        private static int GetCount(DbAdapter adapter)
+        private static int GetCount(ICommandChannel adapter)
         {
             return Convert.ToInt32(adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
@@ -53,27 +56,27 @@ namespace Lib.SQL.SQLite.Test
         private static void InsertDoSomethingAndCommit(TransactionalDbAdapter adapter, string what, Action something)
         {
             var beforeCommit = 0;
-            adapter.ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
-                var initial = GetCount(adapter);
-                adapter.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
-                Assert.AreEqual(initial + 1, GetCount(adapter));
+                var initial = GetCount(scope);
+                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
+                Assert.AreEqual(initial + 1, GetCount(scope));
 
                 something.Invoke();
 
-                beforeCommit = GetCount(adapter);
+                beforeCommit = GetCount(scope);
                 return TransactionResult.Commit;
             });
             Assert.AreEqual(beforeCommit, GetCount(adapter));
         }
 
-        private static void InsertDoSomethingAndRollback(Adapter adapter, string what, Action something)
+        private static void InsertDoSomethingAndRollback(TransactionalDbAdapter adapter, string what, Action something)
         {
             var initial = GetCount(adapter);
-            adapter.ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
-                adapter.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
-                Assert.AreEqual(initial + 1, GetCount(adapter));
+                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
+                Assert.AreEqual(initial + 1, GetCount(scope));
                 something.Invoke();
                 return TransactionResult.Rollback;
             });
@@ -84,10 +87,10 @@ namespace Lib.SQL.SQLite.Test
         {
             var initial = GetCount(adapter);
 
-            adapter.ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
                 something.Invoke();
-                adapter.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
+                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
                 return  TransactionResult.Commit;
             });
 
@@ -98,14 +101,14 @@ namespace Lib.SQL.SQLite.Test
         {
             var initial = GetCount(adapter);
 
-            adapter.ExecuteInTransaction(() =>
+            adapter.ExecuteInTransaction(scope =>
             {
                 
                 something.Invoke();
 
-                var afterInvoke = GetCount(adapter);
-                adapter.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
-                Assert.AreEqual(afterInvoke + 1, GetCount(adapter));
+                var afterInvoke = GetCount(scope);
+                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
+                Assert.AreEqual(afterInvoke + 1, GetCount(scope));
 
                 return TransactionResult.Rollback;
             });
@@ -116,8 +119,8 @@ namespace Lib.SQL.SQLite.Test
         [TestMethod]
         public void TestNestedTransactions()
         {
-            var script = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db");
-            var adapter = Adapter.CreateFromPlainScript(script, Resources.TestCommitRollback, true);
+            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db") };
+            var adapter = Adapter.CreateFromPlainScript(connString, Resources.TestCommitRollback, true);
 
             DoSomethingInsertAndCommit(adapter, "B",
                 () => DoSomethingInsertAndRollback(adapter, "C",

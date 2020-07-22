@@ -11,10 +11,9 @@ namespace Lib.SQL.MySQL
     {
         private readonly MySqlConnection _dbCon;
 
-        public Connection(string hostname, string database, string userId, string password, string port)
+        public Connection(MySqlConnectionStringBuilder sqlConnectionString)
         {
-            string connectionString = $"Server={hostname};Database={database};Uid={userId};Pwd={password};Port={port}";
-            _dbCon = new MySqlConnection(connectionString);
+            _dbCon = new MySqlConnection(sqlConnectionString.ConnectionString);
         }
 
         private IDbCommand CreateCommand(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)

@@ -2,37 +2,37 @@
 
 namespace Lib.ACL.Rule
 {
-    public struct Rule : IRule
+    public class Rule : IRule
     {
-        public ITimeSlot TimeSlot { get; }
-        public IRightBearer Subject { get; }
-        public IRuleTarget Objet { get; }
-        public DateTime CreationDate { get; }
+        private ITimeSlot TimeSlot { get; }
+        private IMatcher<ISubject> Subject { get; }
+        private IMatcher<IObject> Objet { get; }
         public bool Authorize { get; }
-        public int Priority { get; }
 
-        public Rule(IRightBearer subject, IRuleTarget target, ITimeSlot timeSlot, bool authorize, DateTime creationDate)
+        public bool IsApplicableFor(ISubject subject, IObject @object, DateTime at)
+            => Subject.Includes(subject) && Objet.Includes(@object) && TimeSlot.Contains(at);
+
+        public ushort Priority { get; }
+
+        public Rule(
+            IMatcher<ISubject> subject,
+            bool isSubjectAGroup,
+            IMatcher<IObject> @object, 
+            bool isObjectAGroup,
+            ITimeSlot timeSlot,
+            bool authorize)
         {
-            CreationDate = creationDate;
-
             Subject = subject;
-            Objet = target;
+            Objet = @object;
             TimeSlot = timeSlot;
             Authorize = authorize;
 
-            Priority = (TimeSlot.IsAbsolute ? 0x1 : 0x0) +
-                               (Objet is IObject ? 0x2 : 0x0) +
-                               (Subject is ISubject ? 0x4 : 0x00);
+            Priority = (ushort) ((TimeSlot.IsAbsolute ? 0x1 : 0x0) +
+                                 (isObjectAGroup ? 0x0 : 0x2) +
+                                 (isSubjectAGroup ? 0x0 : 0x4) +
+                                 (authorize ? 0x8 : 0x0));
         }
 
-        public bool Equals(IRule other)
-        {
-            return other != null
-                   && Authorize == other.Authorize
-                   && TimeSlot.Equals(other.TimeSlot)
-                   && Subject.Equals(other.Subject)
-                   && Objet.Equals(other.Objet)
-                   && CreationDate.Equals(other.CreationDate);
-        }
+        public int CompareTo(IRule other) => Priority - other.Priority;
     }
 }

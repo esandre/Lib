@@ -13,6 +13,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from other encapsulated value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public AlphanumericStringDecorator(IEncapsulatedValue<string> decorated) : base(decorated)
         {
             if(!AlphanumericRegex.IsMatch(decorated.Value)) throw new FormatException(BadInputMessage);
@@ -21,6 +22,7 @@ namespace Lib.Encapsulation.String
         /// <summary>
         /// Constructor from raw value
         /// </summary>
+        /// <exception cref="FormatException"></exception>
         public AlphanumericStringDecorator(string input) : base(input)
         {
             if (!AlphanumericRegex.IsMatch(input)) throw new FormatException(BadInputMessage);

@@ -1,19 +1,22 @@
 ﻿using System;
 using Lib.DateTime.Descriptors.TimeSlot;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Lib.DateTime.Descriptors.Test
 {
     [TestClass]
     public class TestYearlyRecurrenceRule
     {
+        private static readonly IAliasProvider NoAliasProvider = Mock.Of<IAliasProvider>(MockBehavior.Strict);
+        
         [TestMethod]
         public void TestBuilder()
         {
             {
                 var proof = new YearlyRecurrentTimeSlot(11, 12, 13, 12);
                 const string str = "EVERY YEAR BETWEEN 11/12 00:00 AND 13/12 23:59";
-                var builded = new TimeSlotBuilder().Build(str);
+                var builded = new TimeSlotBuilder(NoAliasProvider).Build(str);
 
                 Assert.AreEqual(proof, builded);
             }
@@ -21,7 +24,7 @@ namespace Lib.DateTime.Descriptors.Test
             {
                 var proof = new YearlyRecurrentTimeSlot(11, 12, new TimeSpan(8, 30, 0), 13, 12, new TimeSpan(9, 15, 0));
                 const string str = "EVERY YEAR BETWEEN 11/12 08:30 AND 13/12 09:15";
-                var builded = new TimeSlotBuilder().Build(str);
+                var builded = new TimeSlotBuilder(NoAliasProvider).Build(str);
 
                 Assert.AreEqual(proof, builded);
             }

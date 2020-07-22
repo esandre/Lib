@@ -30,7 +30,7 @@ namespace Lib.Encapsulation
         /// <summary>
         /// Comparer used for values
         /// </summary>
-        protected virtual EqualityComparer<TValue> ValueComparer => EqualityComparer<TValue>.Default;
+        protected virtual IEqualityComparer<TValue> ValueComparer => EqualityComparer<TValue>.Default;
 
         /// <inheritdoc />
         public override string ToString() => Value.ToString();

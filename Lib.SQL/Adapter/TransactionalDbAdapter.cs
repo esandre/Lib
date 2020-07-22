@@ -1,15 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Lib.SQL.Adapter.Session;
 
 namespace Lib.SQL.Adapter
 {
-    public enum TransactionResult
-    {
-        Commit,
-        Rollback
-    }
-
-    public class TransactionalDbAdapter : DbAdapter
+    public class TransactionalDbAdapter : DbAdapter, ITransactionControl
     {
         private ISession Peek { get; set; }
 
@@ -30,22 +25,26 @@ namespace Lib.SQL.Adapter
             connection?.Close();
         }
 
-        public void ExecuteInTransaction(Func<TransactionResult> whatToDo)
+        private void CommitPeek() => ((ITransaction)Peek).Commit();
+        private void RollbackPeek() => ((ITransaction)Peek).Rollback();
+
+        public async Task ExecuteInTransactionAsync(Func<ICommandChannel, Task<TransactionResult>> whatToDo)
         {
-            Open();
+            await Task.Run(Open);
             var previousPeek = Peek;
             Peek = Peek.BeginTransaction();
+
             try
             {
-                var result = whatToDo.Invoke();
+                var result = await whatToDo(this);
 
                 switch (result)
                 {
                     case TransactionResult.Commit:
-                        ((ITransaction)Peek).Commit();
+                        await Task.Run(CommitPeek);
                         break;
                     case TransactionResult.Rollback:
-                        ((ITransaction)Peek).Rollback();
+                        await Task.Run(RollbackPeek);
                         break;
                     default:
                         throw new ApplicationException("Valeur impossible en retour d'une transaction");
@@ -53,7 +52,42 @@ namespace Lib.SQL.Adapter
             }
             catch (Exception)
             {
-                ((ITransaction)Peek).Rollback();
+                await Task.Run(RollbackPeek);
+                throw;
+            }
+            finally
+            {
+                Peek = previousPeek;
+                await Task.Run(Close);
+            }
+        }
+
+        public void ExecuteInTransaction(Func<ICommandChannel, TransactionResult> whatToDo)
+        {
+            Open();
+            var previousPeek = Peek;
+            Peek = Peek.BeginTransaction();
+
+            try
+            {
+                var result = whatToDo.Invoke(this);
+
+                switch (result)
+                {
+                    case TransactionResult.Commit:
+                        CommitPeek();
+                        break;
+                    case TransactionResult.Rollback:
+                        RollbackPeek();
+                        break;
+                    default:
+                        throw new ApplicationException("Valeur impossible en retour d'une transaction");
+                }
+            }
+            catch (Exception)
+            {
+                RollbackPeek();
+                throw;
             }
             finally
             {

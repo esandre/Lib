@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Lib.SQL.Adapter.Session;
 
 namespace Lib.SQL.SQLite
@@ -12,12 +11,10 @@ namespace Lib.SQL.SQLite
     {
         private SQLiteConnection _sqLiteConnection;
         private readonly string _connectionString;
-        private readonly Mutex _mutex = new Mutex(false, "ProjectsPartners.Sqlite");
 
-        public Connection(string fileUrl)
+        public Connection(SQLiteConnectionStringBuilder connectionStringBuilder)
         {
-            if (!File.Exists(fileUrl) && fileUrl != ":memory:") throw new FileNotFoundException();
-            _connectionString = new SQLiteConnectionStringBuilder { DataSource = fileUrl }.ConnectionString;
+            _connectionString = connectionStringBuilder.ConnectionString;
 
             try
             {
@@ -26,7 +23,7 @@ namespace Lib.SQL.SQLite
             }
             catch (SQLiteException e)
             {
-                throw new InvalidDataException("Database " + fileUrl + " is not sqlite3", e);
+                throw new InvalidDataException("Database " + connectionStringBuilder.DataSource + " is not sqlite3", e);
             }
             finally
             {
@@ -37,7 +34,7 @@ namespace Lib.SQL.SQLite
 
         public void Open()
         {
-            if (_sqLiteConnection == null) _sqLiteConnection = new SQLiteConnection(_connectionString).OpenAndReturn();
+            _sqLiteConnection ??= new SQLiteConnection(_connectionString).OpenAndReturn();
         }
 
         public virtual void Close()
@@ -66,12 +63,11 @@ namespace Lib.SQL.SQLite
 
         public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            using (var command = CreateCommand(sql, parameters))
+            using var command = CreateCommand(sql, parameters);
+
+            lock (_sqLiteConnection)
             {
-                _mutex.WaitOne(1000);
-                var result = command.ExecuteNonQuery();
-                _mutex.ReleaseMutex();
-                return result;
+                return command.ExecuteNonQuery();
             }
         }
 
@@ -119,7 +115,7 @@ namespace Lib.SQL.SQLite
             }
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Dispose(true);
             try

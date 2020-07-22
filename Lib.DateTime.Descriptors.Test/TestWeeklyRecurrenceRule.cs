@@ -1,19 +1,22 @@
 ﻿using System;
 using Lib.DateTime.Descriptors.TimeSlot;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Lib.DateTime.Descriptors.Test
 {
     [TestClass]
     public class TestWeeklyRecurrenceRule
     {
+        private static readonly IAliasProvider NoAliasProvider = Mock.Of<IAliasProvider>(MockBehavior.Strict);
+        
         [TestMethod]
         public void TestBuilder()
         {
             {
                 var proof = new WeeklyRecurrentTimeSlot(DayOfWeek.Monday, DayOfWeek.Thursday);
                 const string str = "EVERY WEEK BETWEEN MONDAY 00:00 AND THURSDAY 23:59";
-                var builded = new TimeSlotBuilder().Build(str);
+                var builded = new TimeSlotBuilder(NoAliasProvider).Build(str);
 
                 Assert.AreEqual(proof, builded);
             }
@@ -21,7 +24,7 @@ namespace Lib.DateTime.Descriptors.Test
             {
                 var proof = new WeeklyRecurrentTimeSlot(DayOfWeek.Monday, DayOfWeek.Thursday, new TimeSpan(8, 30, 00), new TimeSpan(9, 15, 00));
                 const string str = "EVERY WEEK BETWEEN MONDAY 08:30 AND THURSDAY 09:15";
-                var builded = new TimeSlotBuilder().Build(str);
+                var builded = new TimeSlotBuilder(NoAliasProvider).Build(str);
 
                 Assert.AreEqual(proof, builded);
             }

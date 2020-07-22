@@ -1,82 +1,85 @@
 ﻿using System;
 using System.IO;
 using Lib.SQL.Adapter;
+using Lib.SQL.Adapter.Session;
 using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL
 {
     public class Adapter : TransactionalDbAdapter
     {
-        public Adapter(MySQLCredentials creds, string dbName) : base(new Connection(creds.Server, dbName, creds.Username, creds.Password, creds.Port))
+        private Adapter(IConnection connection) : base(connection)
         {
         }
 
-        public static Adapter CreateFromScriptFile(MySQLCredentials creds, string dbName, string scriptUrl, bool eraseIfExists = false)
+        public static Adapter CreateFromScriptFile(MySqlConnectionStringBuilder connectionString, string scriptUrl, bool eraseIfExists = false)
         {
             var uri = new Uri(scriptUrl);
-            return CreateFromPlainScript(creds, dbName, File.ReadAllText(uri.LocalPath), eraseIfExists);
+            return CreateFromPlainScript(connectionString, File.ReadAllText(uri.LocalPath), eraseIfExists);
         }
 
-        public static Adapter CreateFromPlainScript(MySQLCredentials creds, string dbName, string script, bool eraseIfExists = false)
+        public static Adapter CreateFromPlainScript(MySqlConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
         {
-            return Create(creds, dbName, script, eraseIfExists);
+            return Create(connectionString, script, eraseIfExists);
         }
 
-        private static MySqlConnection RootConnection(MySQLCredentials creds)
+        private static MySqlConnection RootConnection(MySqlConnectionStringBuilder connectionString)
         {
-            string connectionString = $"Server={creds.Server};Uid={creds.Username};Pwd={creds.Password};Port={creds.Port}";
-            var conn = new MySqlConnection(connectionString);
-            return conn;
+            var rootConnectionString = new MySqlConnectionStringBuilder(connectionString.ConnectionString) { Database = string.Empty };
+            return new MySqlConnection(rootConnectionString.ConnectionString);
         }
 
-        public static bool DbExists(MySQLCredentials creds, string dbName)
+        public static bool DbExists(MySqlConnectionStringBuilder connectionString)
         {
-            using (var conn = RootConnection(creds))
-            using (var command = conn.CreateCommand())
-            {
-                command.CommandText =
-                    $"SHOW DATABASES LIKE '{dbName}'";
+            using var conn = RootConnection(connectionString);
+            using var command = conn.CreateCommand();
 
-                conn.Open();
-                return command.ExecuteScalar() != null;
-            }
+            command.CommandText =
+                $"SHOW DATABASES LIKE '{connectionString.Database}'";
+
+            conn.Open();
+            return command.ExecuteScalar() != null;
         }
 
-        public static void DeleteDb(MySQLCredentials creds, string dbName)
+        public static void DeleteDb(MySqlConnectionStringBuilder connectionString)
         {
-            using (var conn = RootConnection(creds))
-            using (var command = conn.CreateCommand())
-            {
-                command.CommandText =
-                    $"DROP DATABASE IF EXISTS {dbName}";
+            using var conn = RootConnection(connectionString);
+            using var command = conn.CreateCommand();
+            command.CommandText =
+                $"DROP DATABASE IF EXISTS {connectionString.Database}";
 
-                conn.Open();
-                command.ExecuteNonQuery();
-            }
+            conn.Open();
+            command.ExecuteNonQuery();
         }
 
-        private static void CreateDb(MySQLCredentials creds, string dbName)
+        private static void CreateDb(MySqlConnectionStringBuilder connectionString)
         {
-            using (var conn = RootConnection(creds))
-            using (var command = conn.CreateCommand())
-            {
-                conn.Open();
-                command.CommandText =
-                    $"CREATE DATABASE IF NOT EXISTS {dbName}; USE {dbName}; ";
-                command.ExecuteNonQuery();
-            }
+            using var conn = RootConnection(connectionString);
+            using var command = conn.CreateCommand();
+
+            conn.Open();
+            command.CommandText =
+                $"CREATE DATABASE IF NOT EXISTS {connectionString.Database}; USE {connectionString.Database}; ";
+            command.ExecuteNonQuery();
         }
         
-        private static Adapter Create(MySQLCredentials creds, string dbName, string script, bool eraseIfExists = false)
+        private static Adapter Create(MySqlConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
         {
-            if (DbExists(creds, dbName) && !eraseIfExists) return new Adapter(creds, dbName); 
+            if (DbExists(connectionString) && !eraseIfExists)
+                return Open(connectionString); 
 
-            DeleteDb(creds, dbName);
-            CreateDb(creds, dbName);
+            DeleteDb(connectionString);
+            CreateDb(connectionString);
 
-            var adapter = new Adapter(creds, dbName);
+            var adapter = Open(connectionString);
             if (!string.IsNullOrEmpty(script)) adapter.Execute(script);
             return adapter;
+        }
+
+        public static Adapter Open(MySqlConnectionStringBuilder connectionString, bool threadSafe = false)
+        {
+            var connection = new Connection(connectionString);
+            return new Adapter(threadSafe ? new ThreadSafeConnection(connection) : (IConnection)connection);
         }
     }
 }

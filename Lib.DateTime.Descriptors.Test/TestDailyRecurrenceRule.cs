@@ -1,18 +1,21 @@
 ﻿using System;
 using Lib.DateTime.Descriptors.TimeSlot;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Lib.DateTime.Descriptors.Test
 {
     [TestClass]
     public class TestDailyRecurrenceRule
     {
+        private static readonly IAliasProvider NoAliasProvider = Mock.Of<IAliasProvider>(MockBehavior.Strict);
+
         [TestMethod]
         public void TestBuilder()
         {
             var proof = new DailyRecurrentTimeSlot(new TimeSpan(8, 30, 00), new TimeSpan(9, 15, 00));
             const string str = "EVERY DAY BETWEEN 08:30 AND 09:15";
-            var builded = new TimeSlotBuilder().Build(str);
+            var builded = new TimeSlotBuilder(NoAliasProvider).Build(str);
 
             Assert.AreEqual(proof, builded);
         }
