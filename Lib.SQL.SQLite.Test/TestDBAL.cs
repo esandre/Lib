@@ -1,7 +1,7 @@
-﻿using System.Data.SQLite;
-using Lib.SQL.Adapter;
+﻿using Lib.SQL.Adapter;
 using Lib.SQL.Operation.QueryBuilder.Operator;
 using Lib.SQL.Operation.QueryBuilder.Sequences;
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.SQLite.Test
@@ -9,7 +9,7 @@ namespace Lib.SQL.SQLite.Test
     [TestClass]
     public class TestDbal
     {
-        private readonly DbAdapter _adapter =  Adapter.CreateFromPlainScript(new SQLiteConnectionStringBuilder { DataSource = ":memory:" }, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+        private readonly DbAdapter _adapter =  Adapter.CreateFromPlainScript(new SqliteConnectionStringBuilder { DataSource = ":memory:" }, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
         private readonly Table _table;
 
         public TestDbal()

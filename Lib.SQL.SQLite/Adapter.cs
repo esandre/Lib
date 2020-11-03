@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Data.SQLite;
 using System.IO;
 using Lib.SQL.Adapter;
 using Lib.SQL.Adapter.Session;
+using Microsoft.Data.Sqlite;
 
 namespace Lib.SQL.SQLite
 {
@@ -12,19 +12,19 @@ namespace Lib.SQL.SQLite
         {
         }
 
-        public static Adapter CreateFromScriptFile(SQLiteConnectionStringBuilder connectionStringBuilder, string scriptUrl, bool eraseIfExists = false)
+        public static Adapter CreateFromScriptFile(SqliteConnectionStringBuilder connectionStringBuilder, string scriptUrl, bool eraseIfExists = false)
         {
             var uri = new Uri(scriptUrl);
             return CreateFromPlainScript(connectionStringBuilder, File.ReadAllText(uri.LocalPath), eraseIfExists);
         }
 
-        public static Adapter CreateFromPlainScript(SQLiteConnectionStringBuilder connectionStringBuilder, string script, bool eraseIfExists = false)
+        public static Adapter CreateFromPlainScript(SqliteConnectionStringBuilder connectionStringBuilder, string script, bool eraseIfExists = false)
         {
             return Create(connectionStringBuilder, script, eraseIfExists);
         }
 
         private static readonly object CreationLock = new object();
-        private static Adapter Create(SQLiteConnectionStringBuilder connectionStringBuilder, string script, bool eraseIfExists = false)
+        private static Adapter Create(SqliteConnectionStringBuilder connectionStringBuilder, string script, bool eraseIfExists = false)
         {
             lock (CreationLock)
             {
@@ -33,7 +33,10 @@ namespace Lib.SQL.SQLite
                     && eraseIfExists)
                 {
                     File.Delete(connectionStringBuilder.DataSource);
-                    SQLiteConnection.CreateFile(connectionStringBuilder.DataSource);
+
+                    var derivedConnectionString = new SqliteConnectionStringBuilder(connectionStringBuilder.ToString()) 
+                        { Mode = SqliteOpenMode.ReadWriteCreate };
+                    new SqliteConnection(derivedConnectionString.ToString()).Open();
                 }
 
                 var adapter = Open(connectionStringBuilder);
@@ -42,7 +45,7 @@ namespace Lib.SQL.SQLite
             }
         }
 
-        public static Adapter Open(SQLiteConnectionStringBuilder connectionStringBuilder, bool threadSafe = false)
+        public static Adapter Open(SqliteConnectionStringBuilder connectionStringBuilder, bool threadSafe = false)
         {
             if(connectionStringBuilder.DataSource == ":memory:") 
                 return new Adapter(new MemoryConnection(connectionStringBuilder));

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.IO;
 using Lib.SQL.Adapter;
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.SQLite.Test
@@ -18,7 +18,7 @@ namespace Lib.SQL.SQLite.Test
 
             InsertValueInNewDb(value, dbPath, true);
 
-            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
+            var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
             var adapter = Adapter.Open(connString);
             Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
         }
@@ -31,14 +31,14 @@ namespace Lib.SQL.SQLite.Test
 
             InsertValueInNewDb(value, dbPath, false);
 
-            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
+            var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
             var adapter = Adapter.Open(connString);
             Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
         private static void InsertValueInNewDb(string value, string dbName, bool commit)
         {
-            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbName) };
+            var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbName) };
             var adapter = Adapter.CreateFromPlainScript(connString, Resources.TestCommitRollback, true);
 
             adapter.ExecuteInTransaction(scope =>
@@ -119,7 +119,7 @@ namespace Lib.SQL.SQLite.Test
         [TestMethod]
         public void TestNestedTransactions()
         {
-            var connString = new SQLiteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db") };
+            var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db") };
             var adapter = Adapter.CreateFromPlainScript(connString, Resources.TestCommitRollback, true);
 
             DoSomethingInsertAndCommit(adapter, "B",

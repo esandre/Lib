@@ -1,10 +1,10 @@
-﻿using System.Data.SQLite;
+﻿using Microsoft.Data.Sqlite;
 
 namespace Lib.SQL.SQLite
 {
     internal class MemoryConnection : Connection
     {
-        public MemoryConnection(SQLiteConnectionStringBuilder connectionStringBuilder) 
+        public MemoryConnection(SqliteConnectionStringBuilder connectionStringBuilder) 
             : base(connectionStringBuilder)
         {
         }

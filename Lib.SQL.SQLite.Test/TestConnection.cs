@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.SQLite.Test
@@ -15,7 +15,7 @@ namespace Lib.SQL.SQLite.Test
         {
             var script = Path.GetTempFileName();
             var db = Path.GetTempFileName();
-            var connString = new SQLiteConnectionStringBuilder { DataSource = db };
+            var connString = new SqliteConnectionStringBuilder { DataSource = db };
 
             CreateSqlFileFromScriptDoSomethingAndDelete(Resources.TestCreationSuccess, script,
                 () => Adapter.CreateFromScriptFile(connString, script, true));
@@ -27,11 +27,10 @@ namespace Lib.SQL.SQLite.Test
         {
             var script = Path.Combine(Path.GetTempPath(), "TestCreationFailFromScriptFile.sql");
             var db = Path.Combine(Path.GetTempPath(), "TestCreationFailFromScriptFile.s3db");
-            var connString = new SQLiteConnectionStringBuilder { DataSource = db };
+            var connString = new SqliteConnectionStringBuilder { DataSource = db };
 
             CreateSqlFileFromScriptDoSomethingAndDelete(Resources.TestCreationFail, script,
                 () => Adapter.CreateFromScriptFile(connString, script, true));
-
         }
 
         private static void CreateSqlFileFromScriptDoSomethingAndDelete(string script, string file, Action something)
@@ -51,7 +50,7 @@ namespace Lib.SQL.SQLite.Test
         public void TestCreationSuccessFromPlainSql()
         {
             var db = Path.Combine(Path.GetTempPath(), "TestCreationSuccessFromPlainSql.s3db");
-            var connString = new SQLiteConnectionStringBuilder { DataSource = db };
+            var connString = new SqliteConnectionStringBuilder { DataSource = db };
             Adapter.CreateFromPlainScript(connString, Resources.TestCreationSuccess, true);
         }
 
@@ -60,7 +59,7 @@ namespace Lib.SQL.SQLite.Test
         public void TestCreationFailFromFromPlainSql()
         {
             var db = Path.Combine(Path.GetTempPath(), "TestCreationFailFromFromPlainSql.s3db");
-            var connString = new SQLiteConnectionStringBuilder { DataSource = db };
+            var connString = new SqliteConnectionStringBuilder { DataSource = db };
             Adapter.CreateFromPlainScript(connString, Resources.TestCreationFail, true);
         }
 
@@ -68,14 +67,14 @@ namespace Lib.SQL.SQLite.Test
         public void TestOpeningSuccess()
         {
             var db = Path.Combine(Path.GetTempPath(), "TestOpeningSuccess.s3db");
-            var connString = new SQLiteConnectionStringBuilder { DataSource = db };
+            var connString = new SqliteConnectionStringBuilder { DataSource = db };
             Adapter.CreateFromPlainScript(connString, "", true);
         }
 
         [TestMethod]
         public void TestDispose()
         {
-            var connString = new SQLiteConnectionStringBuilder { DataSource = ":memory:" };
+            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
             Adapter.CreateFromPlainScript(connString, "", true).Dispose();
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -84,7 +83,7 @@ namespace Lib.SQL.SQLite.Test
         [TestMethod]
         public void TestSuccessiveConnections()
         {
-            var connString = new SQLiteConnectionStringBuilder { DataSource = ":memory:" };
+            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
 
             var adapter = Adapter.CreateFromPlainScript(connString, "CREATE TABLE a (b TEXT)", true);
             adapter.Execute("INSERT INTO a VALUES ('c')");
@@ -93,36 +92,19 @@ namespace Lib.SQL.SQLite.Test
         }
 
         [TestMethod]
-        public void TestMultithreading()
+        public async Task TestMultithreading()
         {
-            var connString = new SQLiteConnectionStringBuilder { DataSource = ":memory:" };
-
+            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
             var adapter = Adapter.CreateFromPlainScript(connString, "CREATE TABLE a (b TEXT)", true);
 
-            var t1 = new Thread(() =>
+            var tasks = Enumerable.Range(1, 10).Select(async _ =>
             {
-                foreach (var _ in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
+                foreach (var __ in Enumerable.Repeat(0, 500)) await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
             });
 
-            var t2 = new Thread(() =>
-            {
-                foreach (var _ in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
-            });
+            await Task.WhenAll(tasks);
 
-            var t3 = new Thread(() =>
-            {
-                foreach (var _ in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
-            });
-
-            t1.Start();
-            t2.Start();
-            t3.Start();
-
-            t1.Join();
-            t2.Join();
-            t3.Join();
-
-            Assert.AreEqual(1500, adapter.FetchLines("SELECT * FROM a").Count());
+            Assert.AreEqual(5000, (await adapter.FetchLinesAsync("SELECT * FROM a")).Count());
         }
     }
 }

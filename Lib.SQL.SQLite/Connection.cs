@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using Lib.SQL.Adapter.Session;
+using Microsoft.Data.Sqlite;
 
 namespace Lib.SQL.SQLite
 {
     internal class Connection : Session, IConnection
     {
-        private SQLiteConnection _sqLiteConnection;
+        private SqliteCommand _lastInsertedCommand;
+        private SqliteConnection _sqLiteConnection;
         private readonly string _connectionString;
 
-        public Connection(SQLiteConnectionStringBuilder connectionStringBuilder)
+        public Connection(SqliteConnectionStringBuilder connectionStringBuilder)
         {
             _connectionString = connectionStringBuilder.ConnectionString;
 
@@ -21,7 +22,7 @@ namespace Lib.SQL.SQLite
                 Open();
                 Execute("PRAGMA schema_version");
             }
-            catch (SQLiteException e)
+            catch (SqliteException e)
             {
                 throw new InvalidDataException("Database " + connectionStringBuilder.DataSource + " is not sqlite3", e);
             }
@@ -34,50 +35,65 @@ namespace Lib.SQL.SQLite
 
         public void Open()
         {
-            _sqLiteConnection ??= new SQLiteConnection(_connectionString).OpenAndReturn();
+            if (!(_sqLiteConnection is null)) return;
+
+            var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            _sqLiteConnection ??= connection;
+            _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
         }
 
         public virtual void Close()
         {
             if (_sqLiteConnection == null) return;
+
             _sqLiteConnection.Close();
+            _lastInsertedCommand.Dispose();
             _sqLiteConnection.Dispose();
+            _lastInsertedCommand = null;
             _sqLiteConnection = null;
         }
 
-        public override ITransaction BeginTransaction()
-        {
-            return new Savepoint(this);
-        }
+        public override ITransaction BeginTransaction() => new Savepoint(this);
 
-        public long LastInsertedId => _sqLiteConnection.LastInsertRowId;
+        public long LastInsertedId { get; private set; }
 
-        private SQLiteCommand CreateCommand(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        private TReturn ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, TReturn> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            var command = new SQLiteCommand(sql, _sqLiteConnection);
+            var command = new SqliteCommand(sql, _sqLiteConnection);
+
             if (parameters != null)
                 command.Parameters.AddRange(
-                    parameters.Select(parameter => new SQLiteParameter(parameter.Key, parameter.Value)).ToArray());
-            return command;
-        }
+                    parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
 
-        public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-        {
-            using var command = CreateCommand(sql, parameters);
+            var result = whatToDo(command);
 
-            lock (_sqLiteConnection)
+            try
             {
-                return command.ExecuteNonQuery();
+                LastInsertedId = (long) _lastInsertedCommand.ExecuteScalar();
             }
+            catch
+            {
+                LastInsertedId = 0;
+            }
+
+            try
+            {
+                command.Dispose();
+            }
+            catch
+            {
+                //ignore if dispose fails
+            }
+
+            return result;
         }
+
+        public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+            => ExecuteSomethingInCommand(command => command.ExecuteNonQuery(), sql, parameters);
 
         public object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-        {
-            using (var command = CreateCommand(sql, parameters))
-            {
-                return command.ExecuteScalar();
-            }
-        }
+            => ExecuteSomethingInCommand(command => command.ExecuteScalar(), sql, parameters);
 
         public IDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
@@ -85,10 +101,10 @@ namespace Lib.SQL.SQLite
         }
 
         public IEnumerable<IDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-        {
-            using (var command = CreateCommand(sql, parameters))
-            using(var reader = command.ExecuteReader())
+            => ExecuteSomethingInCommand(command =>
             {
+                using var reader = command.ExecuteReader();
+
                 var output = new List<Dictionary<string, object>>();
                 while (reader.Read())
                 {
@@ -97,9 +113,8 @@ namespace Lib.SQL.SQLite
                     output.Add(line);
                 }
                 return output;
-            }
-        }
-        
+            }, sql, parameters);
+
         private bool _isDisposed;
 
         private void Dispose(bool disposing)
@@ -118,6 +133,7 @@ namespace Lib.SQL.SQLite
         public virtual void Dispose()
         {
             Dispose(true);
+
             try
             {
                 Close();
