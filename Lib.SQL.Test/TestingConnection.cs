@@ -23,7 +23,8 @@ namespace Lib.SQL.Test
             return null;
         }
 
-        public long LastInsertedId { get; private set; }
+        public long LastInsertedId => 0;
+
         public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             throw new System.NotImplementedException();

@@ -60,7 +60,7 @@ namespace Lib.Patterns
             _innerLazy = new Lazy<Task<T>>(valueFactory, mode);
         }
 
-        public override string? ToString() => IsValueCreated ? GetValue().ToString() : _innerLazy.ToString();
+        public override string ToString() => IsValueCreated ? GetValue().ToString() : _innerLazy.ToString();
         public bool IsValueCreated => _innerLazy.IsValueCreated && _innerLazy.Value.IsCompletedSuccessfully;
         public async Task<T> GetValue() => IsValueCreated ? await _innerLazy.Value : _innerLazy.Value.Result;
     }

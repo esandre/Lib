@@ -1,5 +1,4 @@
 ﻿using System;
-using Lib.Encapsulation.String;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NFluent;

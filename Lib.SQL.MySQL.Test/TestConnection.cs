@@ -86,19 +86,19 @@ namespace Lib.SQL.MySQL.Test
             var t1 = new Thread(() =>
             {
                 var adapter = Adapter.Open(Credentials);
-                foreach (var n in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
+                foreach (var _ in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             var t2 = new Thread(() =>
             {
                 var adapter = Adapter.Open(Credentials);
-                foreach (var n in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
+                foreach (var _ in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             var t3 = new Thread(() =>
             {
                 var adapter = Adapter.Open(Credentials);
-                foreach (var n in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
+                foreach (var _ in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             t1.Start();

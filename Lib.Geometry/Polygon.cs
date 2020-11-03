@@ -22,7 +22,6 @@ namespace Lib.Geometry
             _ntsPolygon = new Lazy<NTSPolygon>(() => polygon);
         }
 
-        /// <inheritdoc />
         public Polygon(params IPoint[] shell)
         {
             Shell = shell;

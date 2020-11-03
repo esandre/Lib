@@ -101,17 +101,17 @@ namespace Lib.SQL.SQLite.Test
 
             var t1 = new Thread(() =>
             {
-                foreach (var n in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
+                foreach (var _ in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             var t2 = new Thread(() =>
             {
-                foreach (var n in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
+                foreach (var _ in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             var t3 = new Thread(() =>
             {
-                foreach (var n in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
+                foreach (var _ in Enumerable.Repeat(0, 500)) adapter.Execute("INSERT INTO a VALUES ('c')");
             });
 
             t1.Start();

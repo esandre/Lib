@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IsTestProject>false</IsTestProject>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Description>Geometry related classes</Description>
     <Version>2.0.5</Version>
     <Authors>Enzo Sandré</Authors>
-    <Company> </Company>
-    <Product>Toolbox</Product>
+    <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
 
   <ItemGroup>

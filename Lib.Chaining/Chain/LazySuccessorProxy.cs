@@ -7,7 +7,6 @@ namespace Lib.Chaining.Chain
     {
         private readonly Lazy<ISuccessor<TPayload>> _lazy;
 
-        /// <inheritdoc />
         public LazySuccessorProxy(Func<ISuccessor<TPayload>> lazy)
         {
             _lazy = new Lazy<ISuccessor<TPayload>>(lazy);

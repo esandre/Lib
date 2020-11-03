@@ -8,25 +8,25 @@ namespace Lib.SQL.Adapter
     {
         IConvertible LastInsertedId { get; }
 
-        public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
+        int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
 
-        public Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
+        Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
 
-        public object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
+        object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
 
-        public Task<object> FetchValueAsync(string sql,
+        Task<object> FetchValueAsync(string sql,
             IEnumerable<KeyValuePair<string, object>> parameters = null);
 
-        public IDictionary<string, object> FetchLine(string sql,
+        IDictionary<string, object> FetchLine(string sql,
             IEnumerable<KeyValuePair<string, object>> parameters = null);
 
-        public Task<IDictionary<string, object>> FetchLineAsync(string sql,
+        Task<IDictionary<string, object>> FetchLineAsync(string sql,
             IEnumerable<KeyValuePair<string, object>> parameters = null);
 
-        public IEnumerable<IDictionary<string, object>> FetchLines(string sql,
+        IEnumerable<IDictionary<string, object>> FetchLines(string sql,
             IEnumerable<KeyValuePair<string, object>> parameters = null);
 
-        public Task<IEnumerable<IDictionary<string, object>>> FetchLinesAsync(string sql,
+        Task<IEnumerable<IDictionary<string, object>>> FetchLinesAsync(string sql,
             IEnumerable<KeyValuePair<string, object>> parameters = null);
     }
 }

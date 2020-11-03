@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IsTestProject>false</IsTestProject>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Lib.Geometry abstractions</Description>
     <Version>1.0.2</Version>
     <Authors>Enzo Sandré</Authors>
-    <Company> </Company>
-    <Product>Toolbox</Product>
+    <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
 
   <ItemGroup>

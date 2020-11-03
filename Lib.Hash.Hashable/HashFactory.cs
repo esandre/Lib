@@ -20,14 +20,12 @@ namespace Lib.Hash.Hashable
         private readonly Func<THashAlgorithm> _algorithmGenerator;
         private readonly IByteExtractor _byteExtractor;
 
-        /// <inheritdoc />
         public HashFactory(Func<THashAlgorithm> algorithmGenerator, IByteExtractor byteExtractor)
         {
             _algorithmGenerator = algorithmGenerator;
             _byteExtractor = byteExtractor;
         }
 
-        /// <inheritdoc />
         public HashFactory(Func<THashAlgorithm> algorithmGenerator, params IByteExtractor[] byteExtractor)
         {
             _algorithmGenerator = algorithmGenerator;

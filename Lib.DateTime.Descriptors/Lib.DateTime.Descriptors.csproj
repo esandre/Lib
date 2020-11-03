@@ -1,13 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Company />
-    <Authors>Enzo Sandré</Authors>
-    <Product>Toolbox</Product>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Datetime natural language descriptors</Description>
     <Version>1.2.0</Version>
+    <Authors>Enzo Sandré</Authors>
+    <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IsTestProject>false</IsTestProject>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Description>Mocked instances and stubs automatic generator</Description>
     <Version>0.2.1</Version>
     <Authors>Enzo Sandré</Authors>
-    <Company> </Company>
-    <Product>Toolbox</Product>
+    <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
 
   <ItemGroup>

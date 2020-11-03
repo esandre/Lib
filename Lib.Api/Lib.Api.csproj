@@ -1,18 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IsTestProject>false</IsTestProject>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Api Client toolbox to handle easily HTTP operations</Description>
     <Version>0.0.6</Version>
     <Authors>Enzo Sandré</Authors>
-    <Product>Toolbox</Product>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <GenerateSerializationAssemblies>On</GenerateSerializationAssemblies>
+    <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
 
   <ItemGroup>
