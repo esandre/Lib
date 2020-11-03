@@ -12,11 +12,4 @@
     <Folder Include="Executor\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NuGet.CommandLine" Version="5.5.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
 </Project>

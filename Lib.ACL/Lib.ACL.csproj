@@ -8,11 +8,4 @@
     <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NuGet.CommandLine" Version="5.7.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
 </Project>
