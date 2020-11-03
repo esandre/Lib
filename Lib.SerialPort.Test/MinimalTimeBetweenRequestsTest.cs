@@ -44,24 +44,5 @@ namespace Lib.SerialPort.Test
                 })
                 .Not.LastsLessThan(time.TotalMilliseconds, TimeUnit.Milliseconds);
         }
-
-        [TestMethod]
-        public void Deux_Requêtes_Sont_Séparées_Par_Moins_De_Deux_Fois_Le_Temps_Minimal()
-        {
-            var transceiver = Mock.Of<ISerialPortTransceiver>(
-                m => m.TransceiveAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()) == Task.FromResult(Enumerable.Empty<byte>())
-            );
-
-            var time = TimeSpan.FromSeconds(1);
-            var testedTransceiver = new MinimalTimeBetweenRequests(transceiver, time);
-
-            Check.ThatAsyncCode(
-                    async () =>
-                    {
-                        await testedTransceiver.TransceiveAsync(new byte[0], CancellationToken.None);
-                        await testedTransceiver.TransceiveAsync(new byte[0], CancellationToken.None);
-                    })
-                .LastsLessThan(time.TotalMilliseconds*2, TimeUnit.Milliseconds);
-        }
     }
 }
