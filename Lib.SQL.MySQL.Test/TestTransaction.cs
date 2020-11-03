@@ -26,7 +26,7 @@ namespace Lib.SQL.MySQL.Test
             Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
-        private static void InsertValueInNewDb(bool commit)
+        private void InsertValueInNewDb(bool commit)
         {
             var adapter = Adapter.CreateFromPlainScript(Credentials, Resources.TestCommitRollback, true);
 

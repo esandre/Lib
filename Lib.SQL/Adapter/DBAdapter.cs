@@ -45,7 +45,7 @@ namespace Lib.SQL.Adapter
             }
         }
 
-        public IConvertible LastInsertedId { get; private set; }
+        public IConvertible LastInsertedId { get; private set; } = 0;
 
         public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) =>
             OpenCloseReturnSomething(() =>

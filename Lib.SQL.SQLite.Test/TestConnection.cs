@@ -124,14 +124,5 @@ namespace Lib.SQL.SQLite.Test
 
             Assert.AreEqual(1500, adapter.FetchLines("SELECT * FROM a").Count());
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(FileNotFoundException), AllowDerivedTypes = true)]
-        public void TestOpeningFail()
-        {
-            var db = Path.Combine(Path.GetTempPath(), "TestOpeningFail.s3db");
-            var connString = new SQLiteConnectionStringBuilder { DataSource = db };
-            Adapter.Open(connString);
-        }
     }
 }

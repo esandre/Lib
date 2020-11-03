@@ -46,7 +46,7 @@ namespace Lib.SQL.MySQL
             using var conn = RootConnection(connectionString);
             using var command = conn.CreateCommand();
             command.CommandText =
-                $"DROP DATABASE IF EXISTS {connectionString.Database}";
+                $"DROP DATABASE IF EXISTS `{connectionString.Database}`";
 
             conn.Open();
             command.ExecuteNonQuery();
@@ -59,7 +59,7 @@ namespace Lib.SQL.MySQL
 
             conn.Open();
             command.CommandText =
-                $"CREATE DATABASE IF NOT EXISTS {connectionString.Database}; USE {connectionString.Database}; ";
+                $"CREATE DATABASE IF NOT EXISTS `{connectionString.Database}`; USE `{connectionString.Database}`; ";
             command.ExecuteNonQuery();
         }
         
