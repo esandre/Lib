@@ -1,7 +1,8 @@
 ﻿using System;
 using Lib.SQL.Adapter;
-using Lib.SQL.Operation.QueryBuilder.Operator;
-using Lib.SQL.Operation.QueryBuilder.Sequences;
+using Lib.SQL.QueryBuilder.Operator;
+using Lib.SQL.QueryBuilder.Sequences;
+using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.MySQL.Test

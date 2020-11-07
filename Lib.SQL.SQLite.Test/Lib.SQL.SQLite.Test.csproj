@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lib.SQL.SQLite\Lib.SQL.SQLite.csproj" />
+    <ProjectReference Include="..\Lib.SQL.Tables\Lib.SQL.Tables.csproj" />
   </ItemGroup>
 
   <ItemGroup>

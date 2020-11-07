@@ -1,5 +1,5 @@
-﻿using Lib.SQL.Operation.QueryBuilder;
-using Lib.SQL.Operation.QueryBuilder.Sequences;
+﻿using Lib.SQL.QueryBuilder;
+using Lib.SQL.QueryBuilder.Sequences;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.Test.QueryBuilder

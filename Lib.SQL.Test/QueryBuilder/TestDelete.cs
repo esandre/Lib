@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Lib.SQL.Operation.QueryBuilder;
-using Lib.SQL.Operation.QueryBuilder.Operator;
+using Lib.SQL.QueryBuilder;
+using Lib.SQL.QueryBuilder.Operator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.Test.QueryBuilder

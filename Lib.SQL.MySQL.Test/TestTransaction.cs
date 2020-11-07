@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Lib.SQL.Adapter;
+using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.MySQL.Test

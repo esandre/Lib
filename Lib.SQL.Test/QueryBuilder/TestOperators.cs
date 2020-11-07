@@ -1,4 +1,4 @@
-﻿using Lib.SQL.Operation.QueryBuilder.Operator;
+﻿using Lib.SQL.QueryBuilder.Operator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.Test.QueryBuilder
