@@ -7,10 +7,10 @@ using Lib.SQL.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public class TableSelect<TExecutor, TResultType> : TableOperation<Select, TExecutor, TResultType> 
-        where TExecutor : ExecutorAbstract<TResultType>, new()
+    public class TableSelect<TResultType> : TableOperation<Select, TResultType>
     {
-        public TableSelect(Table table, string[] columns = null) : base(table, FactorySelect(table, columns))
+        public TableSelect(IExecutor<TResultType> executor, Table table, string[] columns = null) 
+            : base(table, FactorySelect(table, columns), executor)
         {
         }
 
@@ -18,65 +18,64 @@ namespace Lib.SQL.Tables.Operation
         {
             return columns == null
                 ? Select.AllFrom(table.Name)
-                : Select.From(table.Name, columns)
-            ;
+                : Select.From(table.Name, columns);
         }
 
-        public TableSelect<TExecutor, TResultType> And(Action<SubSequence> sub)
+        public TableSelect<TResultType> And(Action<SubSequence> sub)
         {
             Statement.And(sub);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public TableSelect<TResultType> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Where(key, comparisonOperator, value);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public TableSelect<TResultType> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Or(key, comparisonOperator, value);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public TableSelect<TResultType> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.And(key, comparisonOperator, value);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> Or(Action<SubSequence> sub)
+        public TableSelect<TResultType> Or(Action<SubSequence> sub)
         {
             Statement.Or(sub);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> Join(string tableName, string onClause, JoinType type = JoinType.Inner)
+        public TableSelect<TResultType> Join(string tableName, string onClause, JoinType type = JoinType.Inner)
         {
             Statement.Join(tableName, onClause, type);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> OrderBy(string expr, OrderDirection direction)
+        public TableSelect<TResultType> OrderBy(string expr, OrderDirection direction)
         {
             Statement.OrderBy(expr, direction);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> GroupBy(string expr, string havingExpr = "")
+        public TableSelect<TResultType> GroupBy(string expr, string havingExpr = "")
         {
             Statement.GroupBy(expr, havingExpr);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> Limit(int limit, int offset = 0)
+        public TableSelect<TResultType> Limit(int limit, int offset = 0)
         {
             Statement.Limit(limit, offset);
             return this;
         }
 
-        public TableSelect<TExecutor, TResultType> Distinct()
+        public TableSelect<TResultType> Distinct()
         {
             Statement.Distinct();
             return this;

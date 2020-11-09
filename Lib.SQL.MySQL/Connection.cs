@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Lib.SQL.Adapter.Session;
+using Lib.SQL.Adapter;
 using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL
 {
-    public class Connection : IConnection
+    internal class Connection : IConnection
     {
         private readonly MySqlConnection _dbCon;
 
@@ -56,25 +56,24 @@ namespace Lib.SQL.MySQL
             return CreateCommand(sql, parameters).ExecuteScalar();
         }
 
-        public IDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             return FetchLines(sql, parameters).First();
         }
 
-        public IEnumerable<IDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            using (var command = CreateCommand(sql, parameters))
-            using (var reader = command.ExecuteReader())
+            using var command = CreateCommand(sql, parameters);
+            using var reader = command.ExecuteReader();
+
+            var output = new List<Dictionary<string, object>>();
+            while (reader.Read())
             {
-                var output = new List<Dictionary<string, object>>();
-                while (reader.Read())
-                {
-                    var line = Enumerable.Range(0, reader.FieldCount)
-                        .ToDictionary(reader.GetName, reader.GetValue);
-                    output.Add(line);
-                }
-                return output;
+                var line = Enumerable.Range(0, reader.FieldCount)
+                    .ToDictionary(reader.GetName, reader.GetValue);
+                output.Add(line);
             }
+            return output;
         }
     }
 }

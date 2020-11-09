@@ -1,5 +1,4 @@
-﻿using Lib.SQL.Adapter;
-using Lib.SQL.QueryBuilder.Operator;
+﻿using Lib.SQL.QueryBuilder.Operator;
 using Lib.SQL.QueryBuilder.Sequences;
 using Lib.SQL.Tables;
 using Microsoft.Data.Sqlite;
@@ -10,7 +9,8 @@ namespace Lib.SQL.SQLite.Test
     [TestClass]
     public class TestDbal
     {
-        private readonly DbAdapter _adapter =  Adapter.CreateFromPlainScript(new SqliteConnectionStringBuilder { DataSource = ":memory:" }, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+        private readonly ICommandChannel _adapter = new SqLiteCommandChannelFactory()
+            .Create(new SqliteConnectionStringBuilder { DataSource = ":memory:" }, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
         private readonly Table _table;
 
         public TestDbal()

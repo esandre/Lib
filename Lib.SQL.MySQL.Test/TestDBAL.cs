@@ -1,5 +1,4 @@
 ﻿using System;
-using Lib.SQL.Adapter;
 using Lib.SQL.QueryBuilder.Operator;
 using Lib.SQL.QueryBuilder.Sequences;
 using Lib.SQL.Tables;
@@ -10,13 +9,13 @@ namespace Lib.SQL.MySQL.Test
     [TestClass]
     public class TestDbal : TestAbstract
     {
-        private DbAdapter _adapter;
+        private ICommandChannel _adapter;
         private readonly Table _table;
 
         [TestInitialize]
         public void Init()
         {
-            _adapter = Adapter.CreateFromPlainScript(Credentials, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+            _adapter = new MySQLCommandChannelFactory().Create(Credentials, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
         }
 
         public TestDbal()

@@ -1,6 +1,4 @@
-﻿using Lib.SQL.Executor;
-using Lib.SQL.Executor.Collections;
-using Lib.SQL.QueryBuilder;
+﻿using Lib.SQL.QueryBuilder;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.Tables.Test
@@ -31,15 +29,6 @@ namespace Lib.SQL.Tables.Test
         {
             var classicWay = Delete.From("table");
             var dbalWay = new Table("table", "colA", "colB").Delete();
-
-            Assert.AreEqual(classicWay.Sql, dbalWay.Sql);
-        }
-
-        [TestMethod]
-        public void TestSelect()
-        {
-            var classicWay = Select.AllFrom("table");
-            var dbalWay = new Table("table", "colA", "colB").SelectCustom<SingleLineExecutor, ResultLine>();
 
             Assert.AreEqual(classicWay.Sql, dbalWay.Sql);
         }

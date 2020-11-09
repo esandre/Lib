@@ -1,10 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Description>SQL querying tools</Description>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>SQL query composition</Description>
     <Version>3.0.0-alpha2</Version>
     <Authors>Enzo Sandré</Authors>
     <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
+
 </Project>

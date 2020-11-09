@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Description>MySQL adapter</Description>
-    <Version>2.1.1</Version>
+    <Version>3.0.0-alpha2</Version>
     <Authors>Enzo Sandré</Authors>
     <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>

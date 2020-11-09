@@ -1,4 +1,4 @@
-﻿using Lib.SQL.Adapter.Session;
+﻿using Lib.SQL.Adapter;
 
 namespace Lib.SQL.MySQL
 {

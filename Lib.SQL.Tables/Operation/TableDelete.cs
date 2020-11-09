@@ -6,9 +6,9 @@ using Lib.SQL.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public class TableDelete : TableOperation<Delete, AffectedLinesExecutor, int>
+    public class TableDelete : TableOperation<Delete, int>
     {
-        public TableDelete(Table table) : base(table, Delete.From(table.Name))
+        public TableDelete(Table table) : base(table, Delete.From(table.Name), new AffectedLinesExecutor())
         {
         }
 

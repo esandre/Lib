@@ -47,7 +47,7 @@ namespace Lib.SQL.MySQL.Test
         [TestCleanup]
         public void CleanDb()
         {
-            Adapter.DeleteDb(Credentials);
+            new MySQLCommandChannelFactory().Delete(Credentials);
         }
 
         protected MySqlConnectionStringBuilder Credentials { get; private set; }

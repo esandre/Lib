@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Lib.SQL.Adapter;
-using Lib.SQL.Executor.Collections;
 
 namespace Lib.SQL.Executor
 {
-    public class SingleLineExecutor : ExecutorAbstract<ResultLine>
+    public class SingleLineExecutor : IExecutor<IReadOnlyDictionary<string, object>>
     {
-        protected override ResultLine ExecuteOnAdapter(ICommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => new ResultLine(adapter.FetchLine(sql, parameters));
+        public IReadOnlyDictionary<string, object> ExecuteOnAdapter(ICommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+            => adapter.FetchLine(sql, parameters);
 
-        protected override async Task<ResultLine> ExecuteOnAdapterAsync(ICommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-            => new ResultLine(await adapter.FetchLineAsync(sql, parameters));
+        public async Task<IReadOnlyDictionary<string, object>> ExecuteOnAdapterAsync(IAsyncCommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => await adapter.FetchLineAsync(sql, parameters);
     }
 }

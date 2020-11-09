@@ -6,9 +6,9 @@ using Lib.SQL.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public class TableExists : TableOperation<Exists, ExistsExecutor, bool>
+    public class TableExists : TableOperation<Exists, bool>
     {
-        public TableExists(Table table) : base(table, Exists.InTable(table.Name))
+        public TableExists(Table table) : base(table, Exists.InTable(table.Name), new ExistsExecutor())
         {
         }
 

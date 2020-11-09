@@ -8,9 +8,9 @@ using Lib.SQL.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public class TableUpdate : TableOperation<Update, AffectedLinesExecutor, int>
+    public class TableUpdate : TableOperation<Update, int>
     {
-        public TableUpdate(Table table) : base(table, Update.Table(table.Name))
+        public TableUpdate(Table table) : base(table, Update.Table(table.Name), new AffectedLinesExecutor())
         {
         }
 

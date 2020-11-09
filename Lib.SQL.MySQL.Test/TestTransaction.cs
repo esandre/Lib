@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Lib.SQL.Adapter;
 using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,7 +13,7 @@ namespace Lib.SQL.MySQL.Test
         {
             InsertValueInNewDb(true);
 
-            var adapter = Adapter.Open(Credentials);
+            var adapter = new MySQLCommandChannelFactory().Open(Credentials);
             Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
         }
 
@@ -23,13 +22,13 @@ namespace Lib.SQL.MySQL.Test
         {
             InsertValueInNewDb(false);
 
-            var adapter = Adapter.Open(Credentials);
+            var adapter = new MySQLCommandChannelFactory().Open(Credentials);
             Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
         private void InsertValueInNewDb(bool commit)
         {
-            var adapter = Adapter.CreateFromPlainScript(Credentials, Resources.TestCommitRollback, true);
+            var adapter = new MySQLCommandChannelFactory().Create(Credentials, Resources.TestCommitRollback, true);
 
             adapter.ExecuteInTransaction(scope =>
             {
@@ -43,10 +42,10 @@ namespace Lib.SQL.MySQL.Test
             return Convert.ToInt32(table.Select("COUNT(*)").ExecuteOn(adapter));
         }
 
-        private static void InsertDoSomethingAndCommit(TransactionalDbAdapter adapter, Table table, string what, Action something)
+        private static void InsertDoSomethingAndCommit(ICommandChannel commandChannel, Table table, string what, Action something)
         {
             var beforeCommit = 0;
-            adapter.ExecuteInTransaction(scope =>
+            commandChannel.ExecuteInTransaction(scope =>
             {
                 var initial = GetCount(table, scope);
                 table.Insert().Values(what).ExecuteOn(scope);
@@ -57,41 +56,41 @@ namespace Lib.SQL.MySQL.Test
                 beforeCommit = GetCount(table, scope);
                 return TransactionResult.Commit;
             });
-            Assert.AreEqual(beforeCommit, GetCount(table, adapter));
+            Assert.AreEqual(beforeCommit, GetCount(table, commandChannel));
         }
 
-        private static void InsertDoSomethingAndRollback(TransactionalDbAdapter adapter, Table table, string what, Action something)
+        private static void InsertDoSomethingAndRollback(ICommandChannel commandChannel, Table table, string what, Action something)
         {
-            var initial = GetCount(table, adapter);
-            adapter.ExecuteInTransaction(scope =>
+            var initial = GetCount(table, commandChannel);
+            commandChannel.ExecuteInTransaction(scope =>
             {
                 table.Insert().Values(what).ExecuteOn(scope);
                 Assert.AreEqual(initial + 1, GetCount(table, scope));
                 something.Invoke();
                 return TransactionResult.Rollback;
             });
-            Assert.AreEqual(initial, GetCount(table, adapter));
+            Assert.AreEqual(initial, GetCount(table, commandChannel));
         }
 
-        private static void DoSomethingInsertAndCommit(TransactionalDbAdapter adapter, Table table, string what, Action something)
+        private static void DoSomethingInsertAndCommit(ICommandChannel commandChannel, Table table, string what, Action something)
         {
-            var initial = GetCount(table, adapter);
+            var initial = GetCount(table, commandChannel);
 
-            adapter.ExecuteInTransaction(scope =>
+            commandChannel.ExecuteInTransaction(scope =>
             {
                 something.Invoke();
                 table.Insert().Values(what).ExecuteOn(scope);
                 return  TransactionResult.Commit;
             });
 
-            Assert.AreEqual(initial + 1, GetCount(table, adapter));
+            Assert.AreEqual(initial + 1, GetCount(table, commandChannel));
         }
 
-        private static void DoSomethingInsertAndRollback(TransactionalDbAdapter adapter, Table table, string what, Action something)
+        private static void DoSomethingInsertAndRollback(ICommandChannel commandChannel, Table table, string what, Action something)
         {
-            var initial = GetCount(table, adapter);
+            var initial = GetCount(table, commandChannel);
 
-            adapter.ExecuteInTransaction(scope =>
+            commandChannel.ExecuteInTransaction(scope =>
             {
                 something.Invoke();
 
@@ -102,13 +101,13 @@ namespace Lib.SQL.MySQL.Test
                 return TransactionResult.Rollback;
             });
 
-            Assert.AreEqual(initial, GetCount(table, adapter));
+            Assert.AreEqual(initial, GetCount(table, commandChannel));
         }
 
         [TestMethod]
         public void TestNestedTransactions()
         {
-            var adapter = Adapter.CreateFromPlainScript(Credentials, Resources.TestCommitRollback, true);
+            var adapter = new MySQLCommandChannelFactory().Create(Credentials, Resources.TestCommitRollback, true);
             var table = new Table("test", "reference");
 
             DoSomethingInsertAndCommit(adapter, table, "B",

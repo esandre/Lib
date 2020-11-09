@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
-using Lib.SQL.Adapter.Session;
+using Lib.SQL.Adapter;
 
 namespace Lib.SQL
 {
@@ -49,10 +49,10 @@ namespace Lib.SQL
         public object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
             => _connectionImplementation.FetchValue(sql, parameters);
 
-        public IDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+        public IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
             => _connectionImplementation.FetchLine(sql, parameters);
 
-        public IEnumerable<IDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+        public IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
             => _connectionImplementation.FetchLines(sql, parameters);
     }
 }

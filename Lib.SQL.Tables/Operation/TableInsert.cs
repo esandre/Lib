@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Lib.SQL.Adapter;
 using Lib.SQL.Executor;
 using Lib.SQL.QueryBuilder;
 using Lib.SQL.QueryBuilder.Sequences;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public class TableInsert : TableOperation<Insert, AffectedLinesExecutor, int>
+    public class TableInsert : TableOperation<Insert, int>
     {
         private int _values;
 
-        public TableInsert(Table table) : base(table, Insert.Into(table.Name, table.Columns))
+        public TableInsert(Table table) : base(table, Insert.Into(table.Name, table.Columns), new AffectedLinesExecutor())
         {
         }
 
@@ -30,7 +29,7 @@ namespace Lib.SQL.Tables.Operation
             return affectedLines;
         }
 
-        public override async Task<int> ExecuteOnAsync(ICommandChannel on)
+        public override async Task<int> ExecuteOnAsync(IAsyncCommandChannel on)
         {
             var affectedLines = await base.ExecuteOnAsync(on);
             if (affectedLines != _values)
@@ -44,10 +43,10 @@ namespace Lib.SQL.Tables.Operation
             return on.LastInsertedId;
         }
 
-        public async Task<IConvertible> ExecuteOnAndReturnRowIdAsync(ICommandChannel on)
+        public async Task<IConvertible> ExecuteOnAndReturnRowIdAsync(IAsyncCommandChannel on)
         {
             await ExecuteOnAsync(on);
-            return on.LastInsertedId;
+            return await on.LastInsertedIdAsync();
         }
 
         public TableInsert OnError(OrType handler)
