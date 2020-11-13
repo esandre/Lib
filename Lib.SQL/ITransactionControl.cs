@@ -11,7 +11,11 @@ namespace Lib.SQL
 
     public interface ITransactionControl
     {
-        Task ExecuteInTransactionAsync(Func<ICommandChannel, Task<TransactionResult>> whatToDo);
         void ExecuteInTransaction(Func<ICommandChannel, TransactionResult> whatToDo);
+    }
+
+    public interface IAsyncTransactionControl
+    {
+        Task ExecuteInTransactionAsync(Func<IAsyncCommandChannel, Task<TransactionResult>> whatToDo);
     }
 }

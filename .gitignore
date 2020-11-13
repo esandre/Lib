@@ -26,7 +26,7 @@ TestResult.xml
 *.pdb
 *.tmp
 *.log
-!.log/
+!Lib.SQL.Log/
 *.vspscc
 *.vssscc
 *.svclog

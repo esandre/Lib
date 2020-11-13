@@ -19,7 +19,7 @@ namespace Lib.SQL
             IEnumerable<KeyValuePair<string, object>> parameters = null);
     }
 
-    public interface IAsyncCommandChannel
+    public interface IAsyncCommandChannel : IAsyncTransactionControl
     {
         Task<IConvertible> LastInsertedIdAsync();
 

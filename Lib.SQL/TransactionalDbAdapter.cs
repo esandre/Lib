@@ -34,7 +34,7 @@ namespace Lib.SQL
         private void CommitPeek() => ((ITransaction)Peek).Commit();
         private void RollbackPeek() => ((ITransaction)Peek).Rollback();
 
-        public async Task ExecuteInTransactionAsync(Func<ICommandChannel, Task<TransactionResult>> whatToDo)
+        public async Task ExecuteInTransactionAsync(Func<IAsyncCommandChannel, Task<TransactionResult>> whatToDo)
         {
             await Task.Run(Open);
             var previousPeek = Peek;
