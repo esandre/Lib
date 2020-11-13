@@ -12,17 +12,35 @@ namespace Lib.SQL.SQLite
     {
         private static readonly ReaderWriterLockSlim CreationOrDeletionLock = new ReaderWriterLockSlim();
 
-        private static TransactionalDbAdapter OpenAdapter(SqliteConnectionStringBuilder connectionString)
+        private static CommandChannel OpenAdapter(SqliteConnectionStringBuilder connectionString)
         {
             if (connectionString.DataSource == ":memory:")
-                return new TransactionalDbAdapter(new MemoryConnection(connectionString));
+                return new CommandChannel(new MemoryConnection(connectionString));
 
             CreationOrDeletionLock.EnterReadLock();
 
             try
             {
                 var connection = new Connection(connectionString);
-                return new TransactionalDbAdapter(new ThreadSafeConnection(connection));
+                return new CommandChannel(new ThreadSafeConnection(connection));
+            }
+            finally
+            {
+                CreationOrDeletionLock.ExitReadLock();
+            }
+        }
+
+        private static Task<AsyncCommandChannel> OpenAdapterAsync(SqliteConnectionStringBuilder connectionString)
+        {
+            if (connectionString.DataSource == ":memory:")
+                return Task.FromResult(new AsyncCommandChannel(new AsyncMemoryConnection(connectionString)));
+
+            CreationOrDeletionLock.EnterReadLock();
+
+            try
+            {
+                var connection = new AsyncConnection(connectionString);
+                return Task.FromResult(new AsyncCommandChannel(new AsyncThreadSafeConnection(connection)));
             }
             finally
             {
@@ -50,17 +68,14 @@ namespace Lib.SQL.SQLite
         public ICommandChannel Open(SqliteConnectionStringBuilder connectionString)
             => OpenAdapter(connectionString);
 
-        public Task<IAsyncCommandChannel> OpenAsync(SqliteConnectionStringBuilder connectionString)
-            => Task.FromResult((IAsyncCommandChannel) OpenAdapter(connectionString));
+        public async Task<IAsyncCommandChannel> OpenAsync(SqliteConnectionStringBuilder connectionString)
+            => await OpenAdapterAsync(connectionString);
 
         public ICommandChannel Create(
             SqliteConnectionStringBuilder connectionString, 
-            string script, 
+            string script,
             bool eraseIfExists = false)
         {
-            if (connectionString.DataSource == ":memory:") 
-                return new TransactionalDbAdapter(new MemoryConnection(connectionString));
-
             CreationOrDeletionLock.EnterUpgradeableReadLock();
 
             try
@@ -74,15 +89,26 @@ namespace Lib.SQL.SQLite
                     var derivedConnectionString = new SqliteConnectionStringBuilder(connectionString.ToString()) 
                         { Mode = SqliteOpenMode.ReadWriteCreate };
 
-                    var connection = new SqliteConnection(derivedConnectionString.ToString());
-                    connection.Open();
+                    CommandChannel adapter;
+
+                    if (connectionString.DataSource == ":memory:") 
+                        adapter = new CommandChannel(new MemoryConnection(connectionString));
+                    else
+                    {
+                        var connection = new SqliteConnection(derivedConnectionString.ToString());
+                        connection.Open();
+                        adapter = new CommandChannel(new ThreadSafeConnection(new Connection(connectionString)));
+                    }
+
+                    if(!string.IsNullOrWhiteSpace(script))
+                        adapter.Execute(script);
+
+                    return adapter;
                 }
                 finally
                 {
                     CreationOrDeletionLock.ExitWriteLock();
                 }
-
-                return new TransactionalDbAdapter(new ThreadSafeConnection(new Connection(connectionString)));
             }
             finally
             {
@@ -95,9 +121,6 @@ namespace Lib.SQL.SQLite
             string script,
             bool eraseIfExists = false)
         {
-            if (connectionString.DataSource == ":memory:") 
-                return new TransactionalDbAdapter(new MemoryConnection(connectionString));
-
             CreationOrDeletionLock.EnterUpgradeableReadLock();
 
             try
@@ -111,15 +134,26 @@ namespace Lib.SQL.SQLite
                     var derivedConnectionString = new SqliteConnectionStringBuilder(connectionString.ToString()) 
                         { Mode = SqliteOpenMode.ReadWriteCreate };
 
-                    var connection = new SqliteConnection(derivedConnectionString.ToString());
-                    await connection.OpenAsync();
+                    AsyncCommandChannel adapter;
+
+                    if (connectionString.DataSource == ":memory:") 
+                        adapter = new AsyncCommandChannel(new AsyncMemoryConnection(connectionString));
+                    else
+                    {
+                        var connection = new SqliteConnection(derivedConnectionString.ToString());
+                        connection.Open();
+                        adapter = new AsyncCommandChannel(new AsyncThreadSafeConnection(new AsyncConnection(connectionString)));
+                    }
+
+                    if(!string.IsNullOrWhiteSpace(script))
+                        await adapter.ExecuteAsync(script);
+
+                    return adapter;
                 }
                 finally
                 {
                     CreationOrDeletionLock.ExitWriteLock();
                 }
-
-                return new TransactionalDbAdapter(new ThreadSafeConnection(new Connection(connectionString)));
             }
             finally
             {

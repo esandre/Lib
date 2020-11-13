@@ -2,11 +2,10 @@
 using System.Threading.Tasks;
 using Lib.SQL.Executor;
 using Lib.SQL.QueryBuilder;
-using Lib.SQL.QueryBuilder.Sequences;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public class TableInsert : TableOperation<Insert, int>
+    internal class TableInsert : TableOperation<Insert, int>, ITableInsert
     {
         private int _values;
 
@@ -14,7 +13,7 @@ namespace Lib.SQL.Tables.Operation
         {
         }
 
-        public TableInsert Values(params IConvertible[] values)
+        public ITableInsert Values(params IConvertible[] values)
         {
             Statement.Values(values);
             _values ++;
@@ -35,24 +34,6 @@ namespace Lib.SQL.Tables.Operation
             if (affectedLines != _values)
                 throw new Exception($"Tentative d'insertion de {_values} lignes, seulement {affectedLines} insérée(s)");
             return affectedLines;
-        }
-
-        public IConvertible ExecuteOnAndReturnRowId(ICommandChannel on)
-        {
-            ExecuteOn(on);
-            return on.LastInsertedId;
-        }
-
-        public async Task<IConvertible> ExecuteOnAndReturnRowIdAsync(IAsyncCommandChannel on)
-        {
-            await ExecuteOnAsync(on);
-            return await on.LastInsertedIdAsync();
-        }
-
-        public TableInsert OnError(OrType handler)
-        {
-            Statement.OnError(handler);
-            return this;
         }
     }
 }

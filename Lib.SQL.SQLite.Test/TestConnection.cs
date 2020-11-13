@@ -62,12 +62,13 @@ namespace Lib.SQL.SQLite.Test
 
             var tasks = Enumerable.Range(1, 10).Select(async _ =>
             {
-                foreach (var __ in Enumerable.Repeat(0, 500)) await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
+                foreach (var __ in Enumerable.Repeat(0, 500)) 
+                    await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
             });
 
             await Task.WhenAll(tasks);
 
-            Assert.AreEqual(5000, (await adapter.FetchLinesAsync("SELECT * FROM a")).Count());
+            Assert.AreEqual(5000, (await adapter.FetchLinesAsync("SELECT * FROM a")).Count);
         }
     }
 }

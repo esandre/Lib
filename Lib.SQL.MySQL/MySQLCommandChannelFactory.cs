@@ -38,13 +38,13 @@ namespace Lib.SQL.MySQL
         public ICommandChannel Open(MySqlConnectionStringBuilder connectionString)
         {
             var connection = new Connection(connectionString);
-            return new TransactionalDbAdapter(new ThreadSafeConnection(connection));
+            return new CommandChannel(new ThreadSafeConnection(connection));
         }
 
         public Task<IAsyncCommandChannel> OpenAsync(MySqlConnectionStringBuilder connectionString)
         {
-            var connection = new Connection(connectionString);
-            return Task.FromResult((IAsyncCommandChannel) new TransactionalDbAdapter(new ThreadSafeConnection(connection)));
+            var connection = new AsyncConnection(connectionString);
+            return Task.FromResult<IAsyncCommandChannel>(new AsyncCommandChannel(new AsyncThreadSafeConnection(connection)));
         }
 
         public ICommandChannel Create(MySqlConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)

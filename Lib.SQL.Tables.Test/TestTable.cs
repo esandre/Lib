@@ -1,4 +1,5 @@
 ﻿using Lib.SQL.QueryBuilder;
+using Lib.SQL.QueryBuilder.Operator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.Tables.Test
@@ -27,8 +28,8 @@ namespace Lib.SQL.Tables.Test
         [TestMethod]
         public void TestDelete()
         {
-            var classicWay = Delete.From("table");
-            var dbalWay = new Table("table", "colA", "colB").Delete();
+            var classicWay = Delete.From("table").Where("1", Is.EqualWith, "1");
+            var dbalWay = new Table("table", "colA", "colB").Delete().Where("1", Is.EqualWith, "1");
 
             Assert.AreEqual(classicWay.Sql, dbalWay.Sql);
         }
@@ -72,8 +73,8 @@ namespace Lib.SQL.Tables.Test
         [TestMethod]
         public void TestExists()
         {
-            var classicWay = Exists.InTable("table");
-            var dbalWay = new Table("table", "colA", "colB").Exists();
+            var classicWay = Exists.InTable("table").Where("1", Is.DifferentWith, "1");
+            var dbalWay = new Table("table", "colA", "colB").Exists().Where("1", Is.DifferentWith, "1");
 
             Assert.AreEqual(classicWay.Sql, dbalWay.Sql);
         }

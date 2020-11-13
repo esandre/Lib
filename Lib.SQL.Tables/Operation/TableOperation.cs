@@ -4,7 +4,7 @@ using Lib.SQL.QueryBuilder;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public abstract class TableOperation<TStatement, TResultType>
+    internal abstract class TableOperation<TStatement, TResultType> : ITableOperation<TResultType>
         where TStatement : StatementAbstract
     {
         protected readonly TStatement Statement;

@@ -6,10 +6,7 @@ namespace Lib.SQL.Adapter
 {
     public interface IConnection : ISession, IDisposable
     {
-        void Open();
-        void Close();
         long LastInsertedId { get; }
-
         int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
         object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
         IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
@@ -18,10 +15,7 @@ namespace Lib.SQL.Adapter
 
     public interface IAsyncConnection : IAsyncSession, IAsyncDisposable
     {
-        Task OpenAsync();
-        Task CloseAsync();
         Task<long> LastInsertedIdAsync();
-
         Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
         Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
         Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);

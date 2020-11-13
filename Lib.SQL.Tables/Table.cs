@@ -5,7 +5,7 @@ using Lib.SQL.Tables.Operation;
 
 namespace Lib.SQL.Tables
 {
-    public class Table
+    public class Table : ITable
     {
         public readonly string Name;
         public readonly string[] Columns;
@@ -16,41 +16,41 @@ namespace Lib.SQL.Tables
             Columns = columns;
         }
 
-        public TableInsert Insert() => new TableInsert(this);
+        public ITableInsert Insert() => new TableInsert(this);
 
-        public TableUpdate Update() => new TableUpdate(this);
+        public ITableUpdate Update() => new TableUpdate(this);
 
-        public TableDelete Delete() => new TableDelete(this);
+        public IWhereFilterable<ITableOperation<int>> Delete() => new TableDelete(this);
 
-        private TableSelect<TResultType> SelectCustom<TResultType>(
-            IExecutor<TResultType> executor,
-            params string[] columns) 
-            => columns.Any() 
-                ? new TableSelect<TResultType>(executor, this, columns) 
-                : new TableSelect<TResultType>(executor, this);
-
-        public TableSelect<object> Select(string column)
+        public ITableSelect<object> Select(string column)
         {
             var executor = new SingleValueExecutor();
             return SelectCustom(executor, column);
         }
 
-        public TableSelect<IReadOnlyDictionary<string, object>> SelectLine(params string[] columns)
+        public ITableSelect<IReadOnlyDictionary<string, object>> SelectLine(params string[] columns)
         {
             var executor = new SingleLineExecutor();
             return SelectCustom(executor, columns);
         }
 
-        public TableSelect<IReadOnlyList<object>> SelectColumn(string column) 
+        public ITableSelect<IReadOnlyList<object>> SelectColumn(string column) 
             => new TableSelect<IReadOnlyList<object>>(new SingleColumnExecutor(), this, new[] {column});
 
-        public TableSelect<IReadOnlyList<IReadOnlyDictionary<string, object>>> SelectLines(params string[] columns)
+        public ITableSelect<IReadOnlyList<IReadOnlyDictionary<string, object>>> SelectLines(params string[] columns)
         {
             var executor = new MultipleLinesExecutor();
             return SelectCustom(executor, columns);
         }
 
-        public TableExists Exists() 
+        public IWhereFilterable<ITableOperation<bool>> Exists() 
             => new TableExists(this);
+
+        private ITableSelect<TResultType> SelectCustom<TResultType>(
+            IExecutor<TResultType> executor,
+            params string[] columns) 
+            => columns.Any() 
+                ? new TableSelect<TResultType>(executor, this, columns) 
+                : new TableSelect<TResultType>(executor, this);
     }
 }

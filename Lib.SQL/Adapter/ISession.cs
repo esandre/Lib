@@ -1,12 +1,23 @@
-﻿namespace Lib.SQL.Adapter
+﻿using System.Threading.Tasks;
+
+namespace Lib.SQL.Adapter
 {
     public interface ISession
     {
-        ITransaction BeginTransaction();
+        ISession BeginTransaction();
+        void Commit();
+        void Rollback();
+        void Open();
+        void Close();
     }
 
     public interface IAsyncSession
     {
-        IAsyncTransaction BeginTransactionAsync();
+        Task<IAsyncSession> BeginTransactionAsync();
+
+        Task CommitAsync();
+        Task RollbackAsync();
+        Task OpenAsync();
+        Task CloseAsync();
     }
 }

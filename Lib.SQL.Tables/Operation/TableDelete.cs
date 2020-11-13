@@ -6,7 +6,7 @@ using Lib.SQL.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Tables.Operation
 {
-    public class TableDelete : TableOperation<Delete, int>
+    internal class TableDelete : TableOperation<Delete, int>, IWhereFilterable<TableDelete>
     {
         public TableDelete(Table table) : base(table, Delete.From(table.Name), new AffectedLinesExecutor())
         {
