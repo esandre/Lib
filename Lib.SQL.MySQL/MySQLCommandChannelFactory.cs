@@ -41,10 +41,10 @@ namespace Lib.SQL.MySQL
             return new CommandChannel(new ThreadSafeConnection(connection));
         }
 
-        public Task<IAsyncCommandChannel> OpenAsync(MySqlConnectionStringBuilder connectionString)
+        public IAsyncCommandChannel OpenAsync(MySqlConnectionStringBuilder connectionString)
         {
             var connection = new AsyncConnection(connectionString);
-            return Task.FromResult<IAsyncCommandChannel>(new AsyncCommandChannel(new AsyncThreadSafeConnection(connection)));
+            return new AsyncCommandChannel(new AsyncThreadSafeConnection(connection));
         }
 
         public ICommandChannel Create(MySqlConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
@@ -63,12 +63,12 @@ namespace Lib.SQL.MySQL
         public async Task<IAsyncCommandChannel> CreateAsync(MySqlConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
         {
             if (await ExistsAsync(connectionString) && !eraseIfExists)
-                return await OpenAsync(connectionString); 
+                return OpenAsync(connectionString); 
 
             await DeleteAsync(connectionString);
             await CreateDbAsync(connectionString);
 
-            var adapter = await OpenAsync(connectionString);
+            var adapter = OpenAsync(connectionString);
             if (!string.IsNullOrEmpty(script)) await adapter.ExecuteAsync(script);
             return adapter;
         }

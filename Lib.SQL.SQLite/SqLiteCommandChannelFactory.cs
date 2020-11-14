@@ -30,17 +30,17 @@ namespace Lib.SQL.SQLite
             }
         }
 
-        private static Task<AsyncCommandChannel> OpenAdapterAsync(SqliteConnectionStringBuilder connectionString)
+        private static AsyncCommandChannel OpenAdapterAsync(SqliteConnectionStringBuilder connectionString)
         {
             if (connectionString.DataSource == ":memory:")
-                return Task.FromResult(new AsyncCommandChannel(new AsyncMemoryConnection(connectionString)));
+                return new AsyncCommandChannel(new AsyncMemoryConnection(connectionString));
 
             CreationOrDeletionLock.EnterReadLock();
 
             try
             {
                 var connection = new AsyncConnection(connectionString);
-                return Task.FromResult(new AsyncCommandChannel(new AsyncThreadSafeConnection(connection)));
+                return new AsyncCommandChannel(new AsyncThreadSafeConnection(connection));
             }
             finally
             {
@@ -68,8 +68,8 @@ namespace Lib.SQL.SQLite
         public ICommandChannel Open(SqliteConnectionStringBuilder connectionString)
             => OpenAdapter(connectionString);
 
-        public async Task<IAsyncCommandChannel> OpenAsync(SqliteConnectionStringBuilder connectionString)
-            => await OpenAdapterAsync(connectionString);
+        public IAsyncCommandChannel OpenAsync(SqliteConnectionStringBuilder connectionString)
+            => OpenAdapterAsync(connectionString);
 
         public ICommandChannel Create(
             SqliteConnectionStringBuilder connectionString, 

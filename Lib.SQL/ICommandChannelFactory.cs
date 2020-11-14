@@ -15,7 +15,7 @@ namespace Lib.SQL
     public interface IAsyncCommandChannelFactory<in TConnectionString> 
         where TConnectionString : DbConnectionStringBuilder
     {
-        Task<IAsyncCommandChannel> OpenAsync(TConnectionString connectionString);
+        IAsyncCommandChannel OpenAsync(TConnectionString connectionString);
         Task<IAsyncCommandChannel> CreateAsync(TConnectionString connectionString, string script, bool eraseIfExists = false);
         Task DeleteAsync(TConnectionString connectionString);
         Task<bool> ExistsAsync(TConnectionString connectionString);
