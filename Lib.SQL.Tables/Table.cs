@@ -20,7 +20,7 @@ namespace Lib.SQL.Tables
 
         public ITableUpdate Update() => new TableUpdate(this);
 
-        public IWhereFilterable<ITableOperation<int>> Delete() => new TableDelete(this);
+        public IWhereFilterable<ITableOperation<int>, int> Delete() => new TableDelete(this);
 
         public ITableSelect<object> Select(string column)
         {
@@ -43,7 +43,7 @@ namespace Lib.SQL.Tables
             return SelectCustom(executor, columns);
         }
 
-        public IWhereFilterable<ITableOperation<bool>> Exists() 
+        public IWhereFilterable<ITableOperation<bool>, bool> Exists() 
             => new TableExists(this);
 
         private ITableSelect<TResultType> SelectCustom<TResultType>(

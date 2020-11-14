@@ -6,37 +6,37 @@ using Lib.SQL.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Tables.Operation
 {
-    internal class TableDelete : TableOperation<Delete, int>, IWhereFilterable<TableDelete>
+    internal class TableDelete : TableOperation<Delete, int>, IWhereFilterable<TableDelete, int>
     {
         public TableDelete(Table table) : base(table, Delete.From(table.Name), new AffectedLinesExecutor())
         {
         }
 
-        public TableDelete And(Action<SubSequence> sub)
+        public IWhereFilterable<TableDelete, int> And(Action<SubSequence> sub)
         {
             Statement.And(sub);
             return this;
         }
 
-        public TableDelete Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<TableDelete, int> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Where(key, comparisonOperator, value);
             return this;
         }
 
-        public TableDelete Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<TableDelete, int> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Or(key, comparisonOperator, value);
             return this;
         }
 
-        public TableDelete And(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<TableDelete, int> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.And(key, comparisonOperator, value);
             return this;
         }
 
-        public TableDelete Or(Action<SubSequence> sub)
+        public IWhereFilterable<TableDelete, int> Or(Action<SubSequence> sub)
         {
             Statement.Or(sub);
             return this;

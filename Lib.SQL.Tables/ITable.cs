@@ -9,9 +9,9 @@ namespace Lib.SQL.Tables
         ITableSelect<IReadOnlyDictionary<string, object>> SelectLine(params string[] columns);
         ITableSelect<IReadOnlyList<object>> SelectColumn(string column);
         ITableSelect<IReadOnlyList<IReadOnlyDictionary<string, object>>> SelectLines(params string[] columns);
-        IWhereFilterable<ITableOperation<bool>> Exists();
+        IWhereFilterable<ITableOperation<bool>, bool> Exists();
         ITableInsert Insert();
         ITableUpdate Update();
-        IWhereFilterable<ITableOperation<int>> Delete();
+        IWhereFilterable<ITableOperation<int>, int> Delete();
     }
 }

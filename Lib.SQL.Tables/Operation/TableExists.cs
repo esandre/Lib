@@ -6,37 +6,37 @@ using Lib.SQL.QueryBuilder.Sequences.Where;
 
 namespace Lib.SQL.Tables.Operation
 {
-    internal class TableExists : TableOperation<Exists, bool>, IWhereFilterable<ITableOperation<bool>>
+    internal class TableExists : TableOperation<Exists, bool>, IWhereFilterable<ITableOperation<bool>, bool>
     {
         public TableExists(Table table) : base(table, Exists.InTable(table.Name), new ExistsExecutor())
         {
         }
 
-        public ITableOperation<bool> And(Action<SubSequence> sub)
+        public IWhereFilterable<ITableOperation<bool>, bool> And(Action<SubSequence> sub)
         {
             Statement.And(sub);
             return this;
         }
 
-        public ITableOperation<bool> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableOperation<bool>, bool> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Where(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableOperation<bool> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableOperation<bool>, bool> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Or(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableOperation<bool> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableOperation<bool>, bool> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.And(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableOperation<bool> Or(Action<SubSequence> sub)
+        public IWhereFilterable<ITableOperation<bool>, bool> Or(Action<SubSequence> sub)
         {
             Statement.Or(sub);
             return this;

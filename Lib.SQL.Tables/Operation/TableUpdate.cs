@@ -25,31 +25,31 @@ namespace Lib.SQL.Tables.Operation
             return this;
         }
 
-        public ITableUpdate And(Action<SubSequence> sub)
+        public IWhereFilterable<ITableUpdate, int> And(Action<SubSequence> sub)
         {
             Statement.And(sub);
             return this;
         }
 
-        public ITableUpdate Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableUpdate, int> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Where(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableUpdate Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableUpdate, int> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Or(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableUpdate And(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableUpdate, int> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.And(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableUpdate Or(Action<SubSequence> sub)
+        public IWhereFilterable<ITableUpdate, int> Or(Action<SubSequence> sub)
         {
             Statement.Or(sub);
             return this;

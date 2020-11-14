@@ -21,31 +21,31 @@ namespace Lib.SQL.Tables.Operation
                 : Select.From(table.Name, columns);
         }
 
-        public ITableSelect<TResultType> And(Action<SubSequence> sub)
+        public IWhereFilterable<ITableSelect<TResultType>, TResultType> And(Action<SubSequence> sub)
         {
             Statement.And(sub);
             return this;
         }
 
-        public ITableSelect<TResultType> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableSelect<TResultType>, TResultType> Where(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Where(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableSelect<TResultType> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableSelect<TResultType>, TResultType> Or(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.Or(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableSelect<TResultType> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
+        public IWhereFilterable<ITableSelect<TResultType>, TResultType> And(string key, IBinaryOperator comparisonOperator, IConvertible value)
         {
             Statement.And(key, comparisonOperator, value);
             return this;
         }
 
-        public ITableSelect<TResultType> Or(Action<SubSequence> sub)
+        public IWhereFilterable<ITableSelect<TResultType>, TResultType> Or(Action<SubSequence> sub)
         {
             Statement.Or(sub);
             return this;

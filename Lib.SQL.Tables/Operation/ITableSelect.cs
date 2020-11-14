@@ -2,7 +2,7 @@
 
 namespace Lib.SQL.Tables.Operation
 {
-    public interface ITableSelect<TResultType> : IWhereFilterable<ITableSelect<TResultType>>, ITableOperation<TResultType>
+    public interface ITableSelect<TResultType> : IWhereFilterable<ITableSelect<TResultType>, TResultType>
     {
         ITableSelect<TResultType> Join(string tableName, string onClause, JoinType type = JoinType.Inner);
         ITableSelect<TResultType> OrderBy(string expr, OrderDirection direction);
