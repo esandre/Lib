@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Lib.Patterns
 {
@@ -11,6 +12,20 @@ namespace Lib.Patterns
         {
             Left.SelectIfHasItem(ifLeft);
             Right.SelectIfHasItem(ifRight);
+        }
+
+        public async Task<TReturn> SelectAsync<TReturn>(Func<TLeft, Task<TReturn>> ifLeft, Func<TRight, Task<TReturn>> ifRight)
+        {
+            TReturn retValue = default;
+
+            async Task SetLeftAsync(TLeft left) => retValue = await ifLeft(left);
+            async Task SetRightAsync(TRight right) => retValue = await ifRight(right);
+
+            await Left.SelectIfHasItemAsync(SetLeftAsync);
+            await Right.SelectIfHasItemAsync(SetRightAsync);
+
+            return retValue;
+
         }
 
         public Either<TDestinationLeft, TDestinationRight> Transform<TDestinationLeft, TDestinationRight>(
