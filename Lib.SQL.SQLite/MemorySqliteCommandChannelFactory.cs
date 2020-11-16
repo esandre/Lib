@@ -14,26 +14,34 @@ namespace Lib.SQL.SQLite
 
         public ICommandChannel Create(MemorySqliteConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
         {
+            var mustPlayCreationScripts = true;
             var connection = Instances.AddOrUpdate(
                 connectionString.MemoryInstanceGuid,
                 guid => new SqliteConnection(connectionString.ConnectionString),
-                (guid, previous) => previous
-            );
+                (guid, previous) =>
+                {
+                    mustPlayCreationScripts = eraseIfExists;
+                    return eraseIfExists ? new SqliteConnection(connectionString.ConnectionString) : previous;
+                });
 
             var channel = new CommandChannel(new MemoryConnection(connection));
-            channel.Execute(script);
+            if(mustPlayCreationScripts) channel.Execute(script);
             return channel;
         }
         public async Task<IAsyncCommandChannel> CreateAsync(MemorySqliteConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
         {
+            var mustPlayCreationScripts = true;
             var connection = Instances.AddOrUpdate(
                 connectionString.MemoryInstanceGuid,
                 guid => new SqliteConnection(connectionString.ConnectionString),
-                (guid, previous) => previous
-            );
+                (guid, previous) =>
+                {
+                    mustPlayCreationScripts = eraseIfExists;
+                    return eraseIfExists ? new SqliteConnection(connectionString.ConnectionString) : previous;
+                });
 
             var channel = new AsyncCommandChannel(new AsyncMemoryConnection(connection));
-            await channel.ExecuteAsync(script);
+            if(mustPlayCreationScripts) await channel.ExecuteAsync(script);
             return channel;
         }
 

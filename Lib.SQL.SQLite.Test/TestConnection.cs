@@ -66,7 +66,9 @@ namespace Lib.SQL.SQLite.Test
             var adapter = _memoryCommandChannelFactory.Create(connString, "CREATE TABLE a (b TEXT)", true);
             adapter.Execute("INSERT INTO a VALUES ('c')");
 
-            adapter = _memoryCommandChannelFactory.Create(connString, "CREATE TABLE IF NOT EXISTS a (b TEXT); INSERT INTO a VALUES ('d');", true);
+            adapter = _memoryCommandChannelFactory.Open(connString);
+            adapter.Execute("INSERT INTO a VALUES ('d');");
+
             Assert.AreEqual(2, adapter.FetchLines("SELECT * FROM a").Count);
         }
 
