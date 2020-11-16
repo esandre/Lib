@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
@@ -72,33 +73,33 @@ namespace Lib.SQL.SQLite
         public IAsyncCommandChannel OpenAsync(SqliteConnectionStringBuilder connectionString)
             => OpenAdapterAsync(connectionString);
 
-        public ICommandChannel Create(
-            SqliteConnectionStringBuilder connectionString, 
-            string script,
-            bool eraseIfExists = false)
+        public ICommandChannel Create(CreationParameters<SqliteConnectionStringBuilder> creationParameters)
         {
-            if (connectionString.DataSource == ":memory:") 
+            if (creationParameters.ConnectionString.DataSource == ":memory:") 
                 throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
 
             CreationOrDeletionLock.EnterUpgradeableReadLock();
 
             try
             {
-                if(eraseIfExists) DeleteIfExists(connectionString);
+                if(creationParameters.EraseIfExists) DeleteIfExists(creationParameters.ConnectionString);
 
                 CreationOrDeletionLock.EnterWriteLock();
 
                 try
                 {
-                    var derivedConnectionString = new SqliteConnectionStringBuilder(connectionString.ToString()) 
+                    var derivedConnectionString = new SqliteConnectionStringBuilder(creationParameters.ConnectionString.ToString()) 
                         { Mode = SqliteOpenMode.ReadWriteCreate };
 
                     var connection = new SqliteConnection(derivedConnectionString.ToString());
                     connection.Open();
-                    var adapter = new CommandChannel(new ThreadSafeConnection(new Connection(new SqliteConnection(connectionString.ToString()))));
+                    var adapter = new CommandChannel(new ThreadSafeConnection(new Connection(new SqliteConnection(creationParameters.ConnectionString.ToString()))));
 
-                    if(!string.IsNullOrWhiteSpace(script))
-                        adapter.Execute(script);
+                    foreach (var script in creationParameters.AdditionalScripts.Prepend(creationParameters.Script))
+                    {
+                        if(!string.IsNullOrWhiteSpace(script))
+                            adapter.Execute(script);
+                    }
 
                     return adapter;
                 }
@@ -113,33 +114,39 @@ namespace Lib.SQL.SQLite
             }
         }
 
-        public async Task<IAsyncCommandChannel> CreateAsync(
-            SqliteConnectionStringBuilder connectionString, 
-            string script,
-            bool eraseIfExists = false)
+        public async Task<IAsyncCommandChannel> CreateAsync(CreationParameters<SqliteConnectionStringBuilder> creationParameters)
         {
-            if (connectionString.DataSource == ":memory:") 
+            if (creationParameters.ConnectionString.DataSource == ":memory:") 
                 throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
 
             CreationOrDeletionLock.EnterUpgradeableReadLock();
 
             try
             {
-                if(eraseIfExists) DeleteIfExists(connectionString);
+                if(creationParameters.EraseIfExists) DeleteIfExists(creationParameters.ConnectionString);
 
                 CreationOrDeletionLock.EnterWriteLock();
 
                 try
                 {
-                    var derivedConnectionString = new SqliteConnectionStringBuilder(connectionString.ToString()) 
+                    var derivedConnectionString = new SqliteConnectionStringBuilder(creationParameters.ConnectionString.ToString()) 
                         { Mode = SqliteOpenMode.ReadWriteCreate };
 
                     var connection = new SqliteConnection(derivedConnectionString.ToString());
                     connection.Open();
-                    var adapter = new AsyncCommandChannel(new AsyncThreadSafeConnection(new AsyncConnection(new SqliteConnection(connectionString.ToString()))));
+                    var adapter = new AsyncCommandChannel(
+                        new AsyncThreadSafeConnection(
+                            new AsyncConnection(
+                                new SqliteConnection(creationParameters.ConnectionString.ToString())
+                            )
+                        )
+                    );
 
-                    if(!string.IsNullOrWhiteSpace(script))
-                        await adapter.ExecuteAsync(script);
+                    foreach (var script in creationParameters.AdditionalScripts.Prepend(creationParameters.Script))
+                    {
+                        if(!string.IsNullOrWhiteSpace(script))
+                            await adapter.ExecuteAsync(script);
+                    }
 
                     return adapter;
                 }

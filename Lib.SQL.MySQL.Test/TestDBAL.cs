@@ -3,6 +3,7 @@ using Lib.SQL.QueryBuilder.Operator;
 using Lib.SQL.QueryBuilder.Sequences;
 using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL.Test
 {
@@ -15,7 +16,7 @@ namespace Lib.SQL.MySQL.Test
         [TestInitialize]
         public void Init()
         {
-            _adapter = new MySQLCommandChannelFactory().Create(Credentials, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+            _adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE example(colA TEXT, colB TEXT)", true));
         }
 
         public TestDbal()

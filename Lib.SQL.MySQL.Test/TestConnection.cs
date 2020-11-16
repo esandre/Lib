@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL.Test
 {
@@ -11,35 +12,35 @@ namespace Lib.SQL.MySQL.Test
         [TestMethod]
         public void TestCreationSuccessFromPlainSql()
         {
-            new MySQLCommandChannelFactory().Create(Credentials, Resources.TestCreationSuccess, true);
+            new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCreationSuccess, true));
         }
 
         [TestMethod]
         [ExpectedException(typeof(Exception), AllowDerivedTypes = true)]
         public void TestCreationFailFromFromPlainSql()
         {
-            new MySQLCommandChannelFactory().Create(Credentials, Resources.TestCreationFail, true);
+            new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCreationFail, true));
         }
 
         [TestMethod]
         public void TestOpeningSuccess()
         {
-            new MySQLCommandChannelFactory().Create(Credentials, "", true);
+            new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "", true));
         }
 
         [TestMethod]
         public void TestSuccessiveConnections()
         {
-            var adapter =new MySQLCommandChannelFactory().Create(Credentials, "CREATE TABLE a (b TEXT)", true);
+            var adapter =new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
             adapter.Execute("INSERT INTO a VALUES ('c')");
-            adapter = new MySQLCommandChannelFactory().Create(Credentials, "CREATE TABLE a (b TEXT)", true);
-            Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count());
+            adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
+            Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count);
         }
 
         [TestMethod]
         public void TestMultithreading()
         {
-            var mainAdapter = new MySQLCommandChannelFactory().Create(Credentials, "CREATE TABLE a (b TEXT)", true);
+            var mainAdapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
 
             var t1 = new Thread(() =>
             {
@@ -67,7 +68,7 @@ namespace Lib.SQL.MySQL.Test
             t2.Join();
             t3.Join();
 
-            Assert.AreEqual(150, mainAdapter.FetchLines("SELECT * FROM a").Count());
+            Assert.AreEqual(150, mainAdapter.FetchLines("SELECT * FROM a").Count);
         }
     }
 }

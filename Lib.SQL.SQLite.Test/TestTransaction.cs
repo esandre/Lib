@@ -38,7 +38,7 @@ namespace Lib.SQL.SQLite.Test
         private static void InsertValueInNewDb(string value, string dbName, bool commit)
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbName) };
-            var adapter =  new SqliteCommandChannelFactory().Create(connString, Resources.TestCommitRollback, true);
+            var adapter =  new SqliteCommandChannelFactory().Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
 
             adapter.ExecuteInTransaction(scope =>
             {
@@ -119,7 +119,7 @@ namespace Lib.SQL.SQLite.Test
         public void TestNestedTransactions()
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db") };
-            var adapter =  new SqliteCommandChannelFactory().Create(connString, Resources.TestCommitRollback, true);
+            var adapter =  new SqliteCommandChannelFactory().Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
 
             DoSomethingInsertAndCommit(adapter, "B",
                 () => DoSomethingInsertAndRollback(adapter, "C",

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL.Test
 {
@@ -28,7 +29,7 @@ namespace Lib.SQL.MySQL.Test
 
         private void InsertValueInNewDb(bool commit)
         {
-            var adapter = new MySQLCommandChannelFactory().Create(Credentials, Resources.TestCommitRollback, true);
+            var adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCommitRollback, true));
 
             adapter.ExecuteInTransaction(scope =>
             {
@@ -107,7 +108,7 @@ namespace Lib.SQL.MySQL.Test
         [TestMethod]
         public void TestNestedTransactions()
         {
-            var adapter = new MySQLCommandChannelFactory().Create(Credentials, Resources.TestCommitRollback, true);
+            var adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCommitRollback, true));
             var table = new Table("test", "reference");
 
             DoSomethingInsertAndCommit(adapter, table, "B",

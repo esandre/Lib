@@ -12,36 +12,48 @@ namespace Lib.SQL.SQLite
         private static readonly ConcurrentDictionary<Guid, SqliteConnection> Instances 
             = new ConcurrentDictionary<Guid, SqliteConnection>();
 
-        public ICommandChannel Create(MemorySqliteConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
+        public ICommandChannel Create(CreationParameters<MemorySqliteConnectionStringBuilder> creationParameters)
         {
             var mustPlayCreationScripts = true;
             var connection = Instances.AddOrUpdate(
-                connectionString.MemoryInstanceGuid,
-                guid => new SqliteConnection(connectionString.ConnectionString),
+                creationParameters.ConnectionString.MemoryInstanceGuid,
+                guid => new SqliteConnection(creationParameters.ConnectionString.ConnectionString),
                 (guid, previous) =>
                 {
-                    mustPlayCreationScripts = eraseIfExists;
-                    return eraseIfExists ? new SqliteConnection(connectionString.ConnectionString) : previous;
+                    mustPlayCreationScripts = creationParameters.EraseIfExists;
+                    return creationParameters.EraseIfExists ? new SqliteConnection(creationParameters.ConnectionString.ConnectionString) : previous;
                 });
 
             var channel = new CommandChannel(new MemoryConnection(connection));
-            if(mustPlayCreationScripts) channel.Execute(script);
+            if (mustPlayCreationScripts)
+            {
+                channel.Execute(creationParameters.Script);
+                foreach (var creationParametersAdditionalScript in creationParameters.AdditionalScripts)
+                    channel.Execute(creationParametersAdditionalScript);
+            }
             return channel;
         }
-        public async Task<IAsyncCommandChannel> CreateAsync(MemorySqliteConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
+        public async Task<IAsyncCommandChannel> CreateAsync(CreationParameters<MemorySqliteConnectionStringBuilder> creationParameters)
         {
             var mustPlayCreationScripts = true;
             var connection = Instances.AddOrUpdate(
-                connectionString.MemoryInstanceGuid,
-                guid => new SqliteConnection(connectionString.ConnectionString),
+                creationParameters.ConnectionString.MemoryInstanceGuid,
+                guid => new SqliteConnection(creationParameters.ConnectionString.ConnectionString),
                 (guid, previous) =>
                 {
-                    mustPlayCreationScripts = eraseIfExists;
-                    return eraseIfExists ? new SqliteConnection(connectionString.ConnectionString) : previous;
+                    mustPlayCreationScripts = creationParameters.EraseIfExists;
+                    return creationParameters.EraseIfExists ? new SqliteConnection(creationParameters.ConnectionString.ConnectionString) : previous;
                 });
 
             var channel = new AsyncCommandChannel(new AsyncMemoryConnection(connection));
-            if(mustPlayCreationScripts) await channel.ExecuteAsync(script);
+
+            if (mustPlayCreationScripts)
+            {
+                await channel.ExecuteAsync(creationParameters.Script);
+                foreach (var creationParametersAdditionalScript in creationParameters.AdditionalScripts)
+                    await channel.ExecuteAsync(creationParametersAdditionalScript);
+            }
+
             return channel;
         }
 

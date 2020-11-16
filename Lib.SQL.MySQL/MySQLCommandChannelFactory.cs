@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL
@@ -47,29 +48,41 @@ namespace Lib.SQL.MySQL
             return new AsyncCommandChannel(new AsyncThreadSafeConnection(connection));
         }
 
-        public ICommandChannel Create(MySqlConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
+        public ICommandChannel Create(CreationParameters<MySqlConnectionStringBuilder> creationParameters)
         {
-            if (Exists(connectionString) && !eraseIfExists)
-                return Open(connectionString); 
+            if (Exists(creationParameters.ConnectionString) && !creationParameters.EraseIfExists)
+                return Open(creationParameters.ConnectionString); 
 
-            Delete(connectionString);
-            CreateDb(connectionString);
+            Delete(creationParameters.ConnectionString);
+            CreateDb(creationParameters.ConnectionString);
 
-            var adapter = Open(connectionString);
-            if (!string.IsNullOrEmpty(script)) adapter.Execute(script);
+            var adapter = Open(creationParameters.ConnectionString);
+
+            foreach (var script in creationParameters.AdditionalScripts.Prepend(creationParameters.Script))
+            {
+                if (!string.IsNullOrEmpty(script)) 
+                    adapter.Execute(script);
+            }
+            
             return adapter;
         }
 
-        public async Task<IAsyncCommandChannel> CreateAsync(MySqlConnectionStringBuilder connectionString, string script, bool eraseIfExists = false)
+        public async Task<IAsyncCommandChannel> CreateAsync(CreationParameters<MySqlConnectionStringBuilder> creationParameters)
         {
-            if (await ExistsAsync(connectionString) && !eraseIfExists)
-                return OpenAsync(connectionString); 
+            if (await ExistsAsync(creationParameters.ConnectionString) && !creationParameters.EraseIfExists)
+                return OpenAsync(creationParameters.ConnectionString); 
 
-            await DeleteAsync(connectionString);
-            await CreateDbAsync(connectionString);
+            await DeleteAsync(creationParameters.ConnectionString);
+            await CreateDbAsync(creationParameters.ConnectionString);
 
-            var adapter = OpenAsync(connectionString);
-            if (!string.IsNullOrEmpty(script)) await adapter.ExecuteAsync(script);
+            var adapter = OpenAsync(creationParameters.ConnectionString);
+
+            foreach (var script in creationParameters.AdditionalScripts.Prepend(creationParameters.Script))
+            {
+                if (!string.IsNullOrEmpty(script)) 
+                    await adapter.ExecuteAsync(script);
+            }
+
             return adapter;
         }
 

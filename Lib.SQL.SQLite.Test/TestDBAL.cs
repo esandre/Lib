@@ -9,7 +9,9 @@ namespace Lib.SQL.SQLite.Test
     public class TestDbal
     {
         private readonly ICommandChannel _adapter = new MemorySqliteCommandChannelFactory()
-            .Create(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+            .Create(
+                new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA TEXT, colB TEXT)", true)
+                );
 
         private readonly Table _table;
 
