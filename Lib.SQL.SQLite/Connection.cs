@@ -37,6 +37,20 @@ namespace Lib.SQL.SQLite
                 // ignored
             }
         }
+
+        public override void Dispose()
+        {
+            try
+            {
+                _lastInsertedCommand.Dispose();
+                _sqLiteConnection.Close();
+                _sqLiteConnection.Dispose();
+            }
+            catch
+            {
+                // ignored
+            }
+        }
         
         public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
             => await ExecuteSomethingInCommand(async command => await command.ExecuteNonQueryAsync(), sql, parameters);

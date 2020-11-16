@@ -12,6 +12,7 @@ namespace Lib.SQL.Adapter
         public abstract Task OpenAsync();
         public abstract Task CloseAsync();
         public abstract ValueTask DisposeAsync();
+        public abstract void Dispose();
         public abstract Task<long> LastInsertedIdAsync();
         public abstract Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
         public abstract Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);

@@ -13,7 +13,7 @@ namespace Lib.SQL.Adapter
         IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
     }
 
-    public interface IAsyncConnection : IAsyncSession, IAsyncDisposable
+    public interface IAsyncConnection : IAsyncSession, IAsyncDisposable, IDisposable
     {
         Task<long> LastInsertedIdAsync();
         Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);

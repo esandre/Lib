@@ -5,7 +5,7 @@ using Lib.SQL.Adapter;
 
 namespace Lib.SQL
 {
-    public class AsyncCommandChannel : IAsyncCommandChannel, IAsyncDisposable
+    public class AsyncCommandChannel : IAsyncCommandChannel, IAsyncDisposable, IDisposable
     {
         private IAsyncSession Peek { get; set; }
         private readonly IAsyncConnection _connection;
@@ -85,6 +85,7 @@ namespace Lib.SQL
         private async Task CloseAsync() => await Peek.CloseAsync();
 
         public async ValueTask DisposeAsync() => await _connection.DisposeAsync();
+        public void Dispose() => _connection.Dispose();
     }
 
     public class CommandChannel : ICommandChannel, IDisposable

@@ -31,6 +31,8 @@ namespace Lib.SQL.MySQL
         public override async Task OpenAsync() => await _dbCon.OpenAsync();
         public override async Task CloseAsync() => await _dbCon.OpenAsync();
         public override async ValueTask DisposeAsync() => await _dbCon.DisposeAsync();
+        public override void Dispose() => _dbCon.Dispose();
+
         public override async Task<long> LastInsertedIdAsync() => Convert.ToInt64(await FetchValueAsync("SELECT LAST_INSERT_ID();"));
 
         public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
