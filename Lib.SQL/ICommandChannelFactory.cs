@@ -12,8 +12,7 @@ namespace Lib.SQL
         bool Exists(TConnectionString connectionString);
     }
 
-    public interface IAsyncCommandChannelFactory<in TConnectionString> 
-        where TConnectionString : DbConnectionStringBuilder
+    public interface IAsyncCommandChannelFactory<in TConnectionString>
     {
         IAsyncCommandChannel OpenAsync(TConnectionString connectionString);
         Task<IAsyncCommandChannel> CreateAsync(TConnectionString connectionString, string script, bool eraseIfExists = false);

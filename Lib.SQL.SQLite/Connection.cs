@@ -9,37 +9,20 @@ namespace Lib.SQL.SQLite
 {
     internal class AsyncConnection : AsyncConnectionAbstract
     {
-        private SqliteCommand _lastInsertedCommand;
-        private SqliteConnection _sqLiteConnection;
-        private readonly string _connectionString;
-        public AsyncConnection(SqliteConnectionStringBuilder connectionStringBuilder)
+        private readonly SqliteConnection _sqLiteConnection;
+        private readonly SqliteCommand _lastInsertedCommand;
+        public AsyncConnection(SqliteConnection connection)
         {
-            _connectionString = connectionStringBuilder.ConnectionString;
+            _sqLiteConnection = connection;
+            _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
         }
 
         public override async Task<IAsyncSession> BeginTransactionAsync()
             => await AsyncSavepoint.ConstructAsync(this);
 
-        public override async Task OpenAsync()
-        {
-            if (!(_sqLiteConnection is null)) return;
-
-            var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync();
-            _sqLiteConnection ??= connection;
-            _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
-        }
-
-        public override async Task CloseAsync()
-        {
-            if (_sqLiteConnection == null) return;
-
-            await _sqLiteConnection.CloseAsync();
-            await _lastInsertedCommand.DisposeAsync();
-            await _sqLiteConnection.DisposeAsync();
-            _lastInsertedCommand = null;
-            _sqLiteConnection = null;
-        }
+        public override async Task<long> LastInsertedIdAsync() => Convert.ToInt64(await _lastInsertedCommand.ExecuteScalarAsync());
+        public override async Task OpenAsync() => await _sqLiteConnection.OpenAsync();
+        public override async Task CloseAsync() => await _sqLiteConnection.CloseAsync();
 
         public override async ValueTask DisposeAsync()
         {
@@ -54,9 +37,7 @@ namespace Lib.SQL.SQLite
                 // ignored
             }
         }
-
-        public override async Task<long> LastInsertedIdAsync() => Convert.ToInt64(await _lastInsertedCommand.ExecuteScalarAsync());
-
+        
         public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
             => await ExecuteSomethingInCommand(async command => await command.ExecuteNonQueryAsync(), sql, parameters);
 
@@ -84,61 +65,29 @@ namespace Lib.SQL.SQLite
 
         private async Task<TReturn> ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, Task<TReturn>> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            var command = new SqliteCommand(sql, _sqLiteConnection);
+            await using var command = new SqliteCommand(sql, _sqLiteConnection);
 
-            try
-            {
-                if (parameters != null)
-                    command.Parameters.AddRange(
-                        parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
+            if (parameters != null)
+                command.Parameters.AddRange(
+                    parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
 
-                return await whatToDo(command);
-            }
-            finally
-            {
-                try
-                {
-                    command.Dispose();
-                }
-                catch
-                {
-                    //ignore if dispose fails
-                }
-            }
+            return await whatToDo(command);
         }
     }
 
     internal class Connection : ConnectionAbstract
     {
-        private SqliteCommand _lastInsertedCommand;
-        private SqliteConnection _sqLiteConnection;
-        private readonly string _connectionString;
+        private readonly SqliteCommand _lastInsertedCommand;
+        private readonly SqliteConnection _sqLiteConnection;
 
-        public Connection(SqliteConnectionStringBuilder connectionStringBuilder)
+        public Connection(SqliteConnection connection)
         {
-            _connectionString = connectionStringBuilder.ConnectionString;
-        }
-
-        public override void Open()
-        {
-            if (!(_sqLiteConnection is null)) return;
-
-            var connection = new SqliteConnection(_connectionString);
-            connection.Open();
-            _sqLiteConnection ??= connection;
+            _sqLiteConnection = connection;
             _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
         }
 
-        public override void Close()
-        {
-            if (_sqLiteConnection == null) return;
-
-            _sqLiteConnection.Close();
-            _lastInsertedCommand.Dispose();
-            _sqLiteConnection.Dispose();
-            _lastInsertedCommand = null;
-            _sqLiteConnection = null;
-        }
+        public override void Open() => _sqLiteConnection.Open();
+        public override void Close() => _sqLiteConnection.Close();
 
         public override ISession BeginTransaction() => new Savepoint(this);
 
@@ -146,24 +95,13 @@ namespace Lib.SQL.SQLite
 
         private TReturn ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, TReturn> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            var command = new SqliteCommand(sql, _sqLiteConnection);
+            using var command = new SqliteCommand(sql, _sqLiteConnection);
 
             if (parameters != null)
                 command.Parameters.AddRange(
                     parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
 
-            var result = whatToDo(command);
-
-            try
-            {
-                command.Dispose();
-            }
-            catch
-            {
-                //ignore if dispose fails
-            }
-
-            return result;
+            return whatToDo(command);
         }
 
         public override int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 

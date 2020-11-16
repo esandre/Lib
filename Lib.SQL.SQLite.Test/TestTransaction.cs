@@ -18,7 +18,7 @@ namespace Lib.SQL.SQLite.Test
             InsertValueInNewDb(value, dbPath, true);
 
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
-            var adapter = new SqLiteCommandChannelFactory().Open(connString);
+            var adapter = new SqliteCommandChannelFactory().Open(connString);
             Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
         }
 
@@ -31,14 +31,14 @@ namespace Lib.SQL.SQLite.Test
             InsertValueInNewDb(value, dbPath, false);
 
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
-            var adapter =  new SqLiteCommandChannelFactory().Open(connString);
+            var adapter =  new SqliteCommandChannelFactory().Open(connString);
             Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
         private static void InsertValueInNewDb(string value, string dbName, bool commit)
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbName) };
-            var adapter =  new SqLiteCommandChannelFactory().Create(connString, Resources.TestCommitRollback, true);
+            var adapter =  new SqliteCommandChannelFactory().Create(connString, Resources.TestCommitRollback, true);
 
             adapter.ExecuteInTransaction(scope =>
             {
@@ -119,7 +119,7 @@ namespace Lib.SQL.SQLite.Test
         public void TestNestedTransactions()
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db") };
-            var adapter =  new SqLiteCommandChannelFactory().Create(connString, Resources.TestCommitRollback, true);
+            var adapter =  new SqliteCommandChannelFactory().Create(connString, Resources.TestCommitRollback, true);
 
             DoSomethingInsertAndCommit(adapter, "B",
                 () => DoSomethingInsertAndRollback(adapter, "C",

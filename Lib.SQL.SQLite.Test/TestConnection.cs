@@ -10,12 +10,14 @@ namespace Lib.SQL.SQLite.Test
     [TestClass]
     public sealed class TestConnection
     {
-        private SqLiteCommandChannelFactory _commandChannelFactory;
+        private SqliteCommandChannelFactory _commandChannelFactory;
+        private MemorySqliteCommandChannelFactory _memoryCommandChannelFactory;
 
         [TestInitialize]
         public void Initializa()
         {
-            _commandChannelFactory = new SqLiteCommandChannelFactory();
+            _commandChannelFactory = new SqliteCommandChannelFactory();
+            _memoryCommandChannelFactory = new MemorySqliteCommandChannelFactory();
         }
 
         [TestMethod]
@@ -44,21 +46,35 @@ namespace Lib.SQL.SQLite.Test
         }
 
         [TestMethod]
-        public void TestSuccessiveConnections()
+        public void TestIsolationOfMemoryConnections()
         {
-            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
+            var connStringA = new MemorySqliteConnectionStringBuilder(Guid.NewGuid());
+            var connStringB = new MemorySqliteConnectionStringBuilder(Guid.NewGuid());
 
-            var adapter = _commandChannelFactory.Create(connString, "CREATE TABLE a (b TEXT)", true);
+            var adapter = _memoryCommandChannelFactory.Create(connStringA, "CREATE TABLE a (b TEXT)", true);
             adapter.Execute("INSERT INTO a VALUES ('c')");
-            adapter = _commandChannelFactory.Create(connString, "CREATE TABLE a (b TEXT)", true);
-            Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count());
+
+            adapter = _memoryCommandChannelFactory.Create(connStringB, "CREATE TABLE a (b TEXT)", true);
+            Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count);
+        }
+
+        [TestMethod]
+        public void TestPersistenceOfMemoryConnections()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var adapter = _memoryCommandChannelFactory.Create(connString, "CREATE TABLE a (b TEXT)", true);
+            adapter.Execute("INSERT INTO a VALUES ('c')");
+
+            adapter = _memoryCommandChannelFactory.Create(connString, "CREATE TABLE IF NOT EXISTS a (b TEXT); INSERT INTO a VALUES ('d');", true);
+            Assert.AreEqual(2, adapter.FetchLines("SELECT * FROM a").Count);
         }
 
         [TestMethod]
         public async Task TestMultithreading()
         {
-            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
-            var adapter = await _commandChannelFactory.CreateAsync(connString, "CREATE TABLE a (b TEXT)", true);
+            var connString = new MemorySqliteConnectionStringBuilder();
+            var adapter = await _memoryCommandChannelFactory.CreateAsync(connString, "CREATE TABLE a (b TEXT)", true);
 
             var tasks = Enumerable.Range(1, 10).Select(async _ =>
             {

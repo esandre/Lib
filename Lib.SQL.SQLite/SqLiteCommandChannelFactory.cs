@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 
 namespace Lib.SQL.SQLite
 {
-    public class SqLiteCommandChannelFactory : 
+    public class SqliteCommandChannelFactory : 
         ICommandChannelFactory<SqliteConnectionStringBuilder>, 
         IAsyncCommandChannelFactory<SqliteConnectionStringBuilder>
     {
@@ -14,14 +14,14 @@ namespace Lib.SQL.SQLite
 
         private static CommandChannel OpenAdapter(SqliteConnectionStringBuilder connectionString)
         {
-            if (connectionString.DataSource == ":memory:")
-                return new CommandChannel(new MemoryConnection(connectionString));
+            if (connectionString.DataSource == ":memory:") 
+                throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
 
             CreationOrDeletionLock.EnterReadLock();
 
             try
             {
-                var connection = new Connection(connectionString);
+                var connection = new Connection(new SqliteConnection(connectionString.ToString()));
                 return new CommandChannel(new ThreadSafeConnection(connection));
             }
             finally
@@ -32,14 +32,14 @@ namespace Lib.SQL.SQLite
 
         private static AsyncCommandChannel OpenAdapterAsync(SqliteConnectionStringBuilder connectionString)
         {
-            if (connectionString.DataSource == ":memory:")
-                return new AsyncCommandChannel(new AsyncMemoryConnection(connectionString));
+            if (connectionString.DataSource == ":memory:") 
+                throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
 
             CreationOrDeletionLock.EnterReadLock();
 
             try
             {
-                var connection = new AsyncConnection(connectionString);
+                var connection = new AsyncConnection(new SqliteConnection(connectionString.ToString()));
                 return new AsyncCommandChannel(new AsyncThreadSafeConnection(connection));
             }
             finally
@@ -50,7 +50,8 @@ namespace Lib.SQL.SQLite
 
         private static void DeleteIfExists(SqliteConnectionStringBuilder connectionString)
         {
-            if (connectionString.DataSource == ":memory:") return;
+            if (connectionString.DataSource == ":memory:") 
+                throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
 
             CreationOrDeletionLock.EnterWriteLock();
 
@@ -76,6 +77,9 @@ namespace Lib.SQL.SQLite
             string script,
             bool eraseIfExists = false)
         {
+            if (connectionString.DataSource == ":memory:") 
+                throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
+
             CreationOrDeletionLock.EnterUpgradeableReadLock();
 
             try
@@ -89,16 +93,9 @@ namespace Lib.SQL.SQLite
                     var derivedConnectionString = new SqliteConnectionStringBuilder(connectionString.ToString()) 
                         { Mode = SqliteOpenMode.ReadWriteCreate };
 
-                    CommandChannel adapter;
-
-                    if (connectionString.DataSource == ":memory:") 
-                        adapter = new CommandChannel(new MemoryConnection(connectionString));
-                    else
-                    {
-                        var connection = new SqliteConnection(derivedConnectionString.ToString());
-                        connection.Open();
-                        adapter = new CommandChannel(new ThreadSafeConnection(new Connection(connectionString)));
-                    }
+                    var connection = new SqliteConnection(derivedConnectionString.ToString());
+                    connection.Open();
+                    var adapter = new CommandChannel(new ThreadSafeConnection(new Connection(new SqliteConnection(connectionString.ToString()))));
 
                     if(!string.IsNullOrWhiteSpace(script))
                         adapter.Execute(script);
@@ -121,6 +118,9 @@ namespace Lib.SQL.SQLite
             string script,
             bool eraseIfExists = false)
         {
+            if (connectionString.DataSource == ":memory:") 
+                throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
+
             CreationOrDeletionLock.EnterUpgradeableReadLock();
 
             try
@@ -134,16 +134,9 @@ namespace Lib.SQL.SQLite
                     var derivedConnectionString = new SqliteConnectionStringBuilder(connectionString.ToString()) 
                         { Mode = SqliteOpenMode.ReadWriteCreate };
 
-                    AsyncCommandChannel adapter;
-
-                    if (connectionString.DataSource == ":memory:") 
-                        adapter = new AsyncCommandChannel(new AsyncMemoryConnection(connectionString));
-                    else
-                    {
-                        var connection = new SqliteConnection(derivedConnectionString.ToString());
-                        connection.Open();
-                        adapter = new AsyncCommandChannel(new AsyncThreadSafeConnection(new AsyncConnection(connectionString)));
-                    }
+                    var connection = new SqliteConnection(derivedConnectionString.ToString());
+                    connection.Open();
+                    var adapter = new AsyncCommandChannel(new AsyncThreadSafeConnection(new AsyncConnection(new SqliteConnection(connectionString.ToString()))));
 
                     if(!string.IsNullOrWhiteSpace(script))
                         await adapter.ExecuteAsync(script);
@@ -163,7 +156,8 @@ namespace Lib.SQL.SQLite
 
         public void Delete(SqliteConnectionStringBuilder connectionString)
         {
-            if (connectionString.DataSource == ":memory:") return;
+            if (connectionString.DataSource == ":memory:") 
+                throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
 
             CreationOrDeletionLock.EnterUpgradeableReadLock();
 
@@ -196,8 +190,8 @@ namespace Lib.SQL.SQLite
 
         public bool Exists(SqliteConnectionStringBuilder connectionString)
         {
-            if (connectionString.DataSource == ":memory:")
-                throw new NotSupportedException(":memory: exists only for reference holder");
+            if (connectionString.DataSource == ":memory:") 
+                throw new NotSupportedException("Use " + nameof(MemorySqliteCommandChannelFactory));
 
             CreationOrDeletionLock.EnterReadLock();
 
