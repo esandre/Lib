@@ -73,6 +73,51 @@ namespace Lib.SQL.SQLite.Test
         }
 
         [TestMethod]
+        public async Task TestPersistenceOfMemoryConnectionsAsync()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var adapter = await _memoryCommandChannelFactory.CreateAsync(connString, "CREATE TABLE a (b TEXT)", true);
+            await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
+
+            adapter = _memoryCommandChannelFactory.OpenAsync(connString);
+            await adapter.ExecuteAsync("INSERT INTO a VALUES ('d');");
+
+            var lines = await adapter.FetchLinesAsync("SELECT * FROM a");
+            Assert.AreEqual(2, lines.Count);
+        }
+
+        [TestMethod]
+        public async Task TestPersistenceOfMemoryConnectionsSyncAndAsync()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var syncAdapter = _memoryCommandChannelFactory.Create(connString, "CREATE TABLE a (b TEXT)", true);
+            syncAdapter.Execute("INSERT INTO a VALUES ('c')");
+
+            var asyncAdapter = _memoryCommandChannelFactory.OpenAsync(connString);
+            await asyncAdapter.ExecuteAsync("INSERT INTO a VALUES ('d');");
+
+            var lines = await asyncAdapter.FetchLinesAsync("SELECT * FROM a");
+            Assert.AreEqual(2, lines.Count);
+        }
+
+        [TestMethod]
+        public async Task TestPersistenceOfMemoryConnectionsAsyncAndSync()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var syncAdapter = _memoryCommandChannelFactory.Create(connString, "CREATE TABLE a (b TEXT)", true);
+            syncAdapter.Execute("INSERT INTO a VALUES ('c')");
+
+            var asyncAdapter = _memoryCommandChannelFactory.OpenAsync(connString);
+            await asyncAdapter.ExecuteAsync("INSERT INTO a VALUES ('d');");
+
+            var lines = await asyncAdapter.FetchLinesAsync("SELECT * FROM a");
+            Assert.AreEqual(2, lines.Count);
+        }
+
+        [TestMethod]
         public async Task TestMultithreading()
         {
             var connString = new MemorySqliteConnectionStringBuilder();
