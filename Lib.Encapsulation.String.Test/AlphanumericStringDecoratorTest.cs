@@ -50,12 +50,10 @@ namespace Lib.Encapsulation.String.Test
             if (shouldFail)
             {
                 Check.ThatCode(() => new AlphanumericStringDecorator(encapsulatedStringMock))
-                    .Throws<FormatException>()
-                    .WithMessage(AlphanumericStringDecorator.BadInputMessage);
+                    .Throws<FormatException>();
 
                 Check.ThatCode(() => new AlphanumericStringDecorator(input))
-                    .Throws<FormatException>()
-                    .WithMessage(AlphanumericStringDecorator.BadInputMessage);
+                    .Throws<FormatException>();
             }
             else
             {

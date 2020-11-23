@@ -6,7 +6,7 @@ namespace Lib.Encapsulation.String
     /// <summary>
     /// Enforces that the string is alphanumerical ([A-Za-z0-9])
     /// </summary>
-    public class AlphanumericStringDecorator : EncapsulatedValueAbstract<string>
+    public class AlphanumericStringDecorator : RegexStringDecorator
     {
         private static readonly Regex AlphanumericRegex = new Regex("^[A-Za-z0-9]*$");
 
@@ -14,23 +14,16 @@ namespace Lib.Encapsulation.String
         /// Constructor from other encapsulated value
         /// </summary>
         /// <exception cref="FormatException"></exception>
-        public AlphanumericStringDecorator(IEncapsulatedValue<string> decorated) : base(decorated)
+        public AlphanumericStringDecorator(IEncapsulatedValue<string> decorated) : base(decorated, AlphanumericRegex)
         {
-            if(!AlphanumericRegex.IsMatch(decorated.Value)) throw new FormatException(BadInputMessage);
         }
 
         /// <summary>
         /// Constructor from raw value
         /// </summary>
         /// <exception cref="FormatException"></exception>
-        public AlphanumericStringDecorator(string input) : base(input)
+        public AlphanumericStringDecorator(string input) : base(input, AlphanumericRegex)
         {
-            if (!AlphanumericRegex.IsMatch(input)) throw new FormatException(BadInputMessage);
         }
-
-        /// <summary>
-        /// Message for when the input is not alphanumerical
-        /// </summary>
-        public static string BadInputMessage => $"Input doest not matches regex {AlphanumericRegex}";
     }
 }
