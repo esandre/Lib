@@ -17,6 +17,6 @@ namespace Lib.SQL
 
         public static IConvertible AsConvertible(this object obj) => obj as IConvertible ??
                                                                      throw new ArrayTypeMismatchException(
-                                                                         "Not IConvertible returned by Db");
+                                                                         $"Not IConvertible returned by Db : {obj} of type {obj.GetType()}");
     }
 }
