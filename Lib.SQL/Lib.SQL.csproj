@@ -3,8 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Description>SQL querying tools</Description>
-    <Version>3.0.0-alpha7</Version>
+    <Version>3.0.0-alpha8</Version>
     <Authors>Enzo Sandré</Authors>
     <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lib.Patterns\Lib.Patterns.csproj" />
+  </ItemGroup>
 </Project>

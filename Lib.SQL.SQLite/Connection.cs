@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lib.Patterns;
 using Lib.SQL.Adapter;
 using Microsoft.Data.Sqlite;
 
@@ -79,13 +80,17 @@ namespace Lib.SQL.SQLite
 
         private async Task<TReturn> ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, Task<TReturn>> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            await using var command = new SqliteCommand(sql, _sqLiteConnection);
+            return await AsyncRectifyDispose<SqliteCommand>.UseDisposableResource(
+                new SqliteCommand(sql, _sqLiteConnection),
+                async command =>
+                {
+                    if (parameters != null)
+                        command.Parameters.AddRange(
+                            parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value))
+                                .ToArray());
 
-            if (parameters != null)
-                command.Parameters.AddRange(
-                    parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
-
-            return await whatToDo(command);
+                    return await whatToDo(command);
+                });
         }
     }
 
@@ -109,13 +114,17 @@ namespace Lib.SQL.SQLite
 
         private TReturn ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, TReturn> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            using var command = new SqliteCommand(sql, _sqLiteConnection);
+            return RectifyDispose<SqliteCommand>.UseDisposableResource(
+                new SqliteCommand(sql, _sqLiteConnection),
+                command =>
+                {
+                    if (parameters != null)
+                        command.Parameters.AddRange(
+                            parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value))
+                                .ToArray());
 
-            if (parameters != null)
-                command.Parameters.AddRange(
-                    parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
-
-            return whatToDo(command);
+                    return whatToDo(command);
+                });
         }
 
         public override int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
