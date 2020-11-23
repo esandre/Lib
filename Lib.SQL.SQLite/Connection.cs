@@ -1,106 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Lib.SQL.Adapter.Session;
+using System.Threading.Tasks;
+using Lib.SQL.Adapter;
 using Microsoft.Data.Sqlite;
 
 namespace Lib.SQL.SQLite
 {
-    internal class Connection : Session, IConnection
+    internal class AsyncConnection : AsyncConnectionAbstract
     {
-        private SqliteCommand _lastInsertedCommand;
-        private SqliteConnection _sqLiteConnection;
-        private readonly string _connectionString;
-
-        public Connection(SqliteConnectionStringBuilder connectionStringBuilder)
+        private readonly SqliteConnection _sqLiteConnection;
+        private readonly SqliteCommand _lastInsertedCommand;
+        public AsyncConnection(SqliteConnection connection)
         {
-            _connectionString = connectionStringBuilder.ConnectionString;
-
-            try
-            {
-                Open();
-                Execute("PRAGMA schema_version");
-            }
-            catch (SqliteException e)
-            {
-                throw new InvalidDataException("Database " + connectionStringBuilder.DataSource + " is not sqlite3", e);
-            }
-            finally
-            {
-                // ReSharper disable once DoNotCallOverridableMethodsInConstructor
-                Close();
-            }
-        }
-
-        public void Open()
-        {
-            if (!(_sqLiteConnection is null)) return;
-
-            var connection = new SqliteConnection(_connectionString);
-            connection.Open();
-            _sqLiteConnection ??= connection;
+            _sqLiteConnection = connection;
             _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
         }
 
-        public virtual void Close()
-        {
-            if (_sqLiteConnection == null) return;
+        public override async Task<IAsyncSession> BeginTransactionAsync()
+            => await AsyncSavepoint.ConstructAsync(this);
 
-            _sqLiteConnection.Close();
-            _lastInsertedCommand.Dispose();
-            _sqLiteConnection.Dispose();
-            _lastInsertedCommand = null;
-            _sqLiteConnection = null;
+        public override async Task<long> LastInsertedIdAsync() => Convert.ToInt64(await _lastInsertedCommand.ExecuteScalarAsync());
+        public override async Task OpenAsync() => await _sqLiteConnection.OpenAsync();
+        public override async Task CloseAsync() => await _sqLiteConnection.CloseAsync();
+
+        public override async ValueTask DisposeAsync()
+        {
+            try
+            {
+                await CloseAsync();
+                _lastInsertedCommand.Dispose();
+                await _sqLiteConnection.DisposeAsync();
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
-        public override ITransaction BeginTransaction() => new Savepoint(this);
-
-        public long LastInsertedId { get; private set; }
-
-        private TReturn ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, TReturn> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public override void Dispose()
         {
-            var command = new SqliteCommand(sql, _sqLiteConnection);
+            try
+            {
+                _lastInsertedCommand.Dispose();
+                _sqLiteConnection.Close();
+                _sqLiteConnection.Dispose();
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+        
+        public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => await ExecuteSomethingInCommand(async command => await command.ExecuteNonQueryAsync(), sql, parameters);
+
+        public override async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => await ExecuteSomethingInCommand(async command => await command.ExecuteScalarAsync(), sql, parameters);
+
+        public override async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql,
+            IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => (await FetchLinesAsync(sql, parameters)).FirstOrDefault();
+
+        public override async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => await ExecuteSomethingInCommand(async command =>
+            {
+                await using var reader = await command.ExecuteReaderAsync();
+
+                var output = new List<Dictionary<string, object>>();
+                while (await reader.ReadAsync())
+                {
+                    var line = Enumerable.Range(0, reader.FieldCount)
+                        .ToDictionary(reader.GetName, reader.GetValue);
+                    output.Add(line);
+                }
+                return output;
+            }, sql, parameters);
+
+        private async Task<TReturn> ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, Task<TReturn>> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        {
+            await using var command = new SqliteCommand(sql, _sqLiteConnection);
 
             if (parameters != null)
                 command.Parameters.AddRange(
                     parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
 
-            var result = whatToDo(command);
+            return await whatToDo(command);
+        }
+    }
 
-            try
-            {
-                LastInsertedId = (long) _lastInsertedCommand.ExecuteScalar();
-            }
-            catch
-            {
-                LastInsertedId = 0;
-            }
+    internal class Connection : ConnectionAbstract
+    {
+        private readonly SqliteCommand _lastInsertedCommand;
+        private readonly SqliteConnection _sqLiteConnection;
 
-            try
-            {
-                command.Dispose();
-            }
-            catch
-            {
-                //ignore if dispose fails
-            }
-
-            return result;
+        public Connection(SqliteConnection connection)
+        {
+            _sqLiteConnection = connection;
+            _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
         }
 
-        public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+        public override void Open() => _sqLiteConnection.Open();
+        public override void Close() => _sqLiteConnection.Close();
+
+        public override ISession BeginTransaction() => new Savepoint(this);
+
+        public override long LastInsertedId => Convert.ToInt64(_lastInsertedCommand.ExecuteScalar());
+
+        private TReturn ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, TReturn> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        {
+            using var command = new SqliteCommand(sql, _sqLiteConnection);
+
+            if (parameters != null)
+                command.Parameters.AddRange(
+                    parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value)).ToArray());
+
+            return whatToDo(command);
+        }
+
+        public override int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
             => ExecuteSomethingInCommand(command => command.ExecuteNonQuery(), sql, parameters);
 
-        public object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public override object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
             => ExecuteSomethingInCommand(command => command.ExecuteScalar(), sql, parameters);
 
-        public IDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-        {
-            return FetchLines(sql, parameters).FirstOrDefault();
-        }
+        public override IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => FetchLines(sql, parameters).FirstOrDefault();
 
-        public IEnumerable<IDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public override IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
             => ExecuteSomethingInCommand(command =>
             {
                 using var reader = command.ExecuteReader();
@@ -115,38 +142,19 @@ namespace Lib.SQL.SQLite
                 return output;
             }, sql, parameters);
 
-        private bool _isDisposed;
 
-        private void Dispose(bool disposing)
+        public override void Dispose()
         {
-            if (_isDisposed)
-            {
-                return;
-            }
-            _isDisposed = true;
-            if (disposing)
-            {
-                GC.SuppressFinalize(this);
-            }
-        }
-
-        public virtual void Dispose()
-        {
-            Dispose(true);
-
             try
             {
                 Close();
+                _lastInsertedCommand.Dispose();
+                _sqLiteConnection.Dispose();
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
             }
-        }
-
-        ~Connection()
-        {
-            Dispose(false);
         }
     }
 }

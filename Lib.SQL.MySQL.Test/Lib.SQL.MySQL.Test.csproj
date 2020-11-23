@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lib.SQL.MySQL\Lib.SQL.MySQL.csproj" />
+    <ProjectReference Include="..\Lib.SQL.QueryBuilder\Lib.SQL.QueryBuilder.csproj" />
+    <ProjectReference Include="..\Lib.SQL.Tables\Lib.SQL.Tables.csproj" />
     <ProjectReference Include="..\Lib.SQL\Lib.SQL.csproj" />
   </ItemGroup>
 

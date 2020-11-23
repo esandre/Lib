@@ -10,40 +10,14 @@ namespace Lib.SQL.SQLite.Test
     [TestClass]
     public sealed class TestConnection
     {
-        [TestMethod]
-        public void TestCreationSuccessFromScriptFile()
+        private SqliteCommandChannelFactory _commandChannelFactory;
+        private MemorySqliteCommandChannelFactory _memoryCommandChannelFactory;
+
+        [TestInitialize]
+        public void Initializa()
         {
-            var script = Path.GetTempFileName();
-            var db = Path.GetTempFileName();
-            var connString = new SqliteConnectionStringBuilder { DataSource = db };
-
-            CreateSqlFileFromScriptDoSomethingAndDelete(Resources.TestCreationSuccess, script,
-                () => Adapter.CreateFromScriptFile(connString, script, true));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(Exception), AllowDerivedTypes = true)]
-        public void TestCreationFailFromScriptFile()
-        {
-            var script = Path.Combine(Path.GetTempPath(), "TestCreationFailFromScriptFile.sql");
-            var db = Path.Combine(Path.GetTempPath(), "TestCreationFailFromScriptFile.s3db");
-            var connString = new SqliteConnectionStringBuilder { DataSource = db };
-
-            CreateSqlFileFromScriptDoSomethingAndDelete(Resources.TestCreationFail, script,
-                () => Adapter.CreateFromScriptFile(connString, script, true));
-        }
-
-        private static void CreateSqlFileFromScriptDoSomethingAndDelete(string script, string file, Action something)
-        {
-            try
-            {
-                File.WriteAllText(file, script);
-                something.Invoke();
-            }
-            finally
-            {
-                File.Delete(file);
-            }
+            _commandChannelFactory = new SqliteCommandChannelFactory();
+            _memoryCommandChannelFactory = new MemorySqliteCommandChannelFactory();
         }
 
         [TestMethod]
@@ -51,7 +25,7 @@ namespace Lib.SQL.SQLite.Test
         {
             var db = Path.Combine(Path.GetTempPath(), "TestCreationSuccessFromPlainSql.s3db");
             var connString = new SqliteConnectionStringBuilder { DataSource = db };
-            Adapter.CreateFromPlainScript(connString, Resources.TestCreationSuccess, true);
+            _commandChannelFactory.Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCreationSuccess, true));
         }
 
         [TestMethod]
@@ -60,7 +34,7 @@ namespace Lib.SQL.SQLite.Test
         {
             var db = Path.Combine(Path.GetTempPath(), "TestCreationFailFromFromPlainSql.s3db");
             var connString = new SqliteConnectionStringBuilder { DataSource = db };
-            Adapter.CreateFromPlainScript(connString, Resources.TestCreationFail, true);
+            _commandChannelFactory.Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCreationFail, true));
         }
 
         [TestMethod]
@@ -68,43 +42,96 @@ namespace Lib.SQL.SQLite.Test
         {
             var db = Path.Combine(Path.GetTempPath(), "TestOpeningSuccess.s3db");
             var connString = new SqliteConnectionStringBuilder { DataSource = db };
-            Adapter.CreateFromPlainScript(connString, "", true);
+            _commandChannelFactory.Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, "", true));
         }
 
         [TestMethod]
-        public void TestDispose()
+        public void TestIsolationOfMemoryConnections()
         {
-            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
-            Adapter.CreateFromPlainScript(connString, "", true).Dispose();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-        }
+            var connStringA = new MemorySqliteConnectionStringBuilder(Guid.NewGuid());
+            var connStringB = new MemorySqliteConnectionStringBuilder(Guid.NewGuid());
 
-        [TestMethod]
-        public void TestSuccessiveConnections()
-        {
-            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
-
-            var adapter = Adapter.CreateFromPlainScript(connString, "CREATE TABLE a (b TEXT)", true);
+            var adapter = _memoryCommandChannelFactory.Create(new CreationParameters<MemorySqliteConnectionStringBuilder>(connStringA, "CREATE TABLE a (b TEXT)", true));
             adapter.Execute("INSERT INTO a VALUES ('c')");
-            adapter = Adapter.CreateFromPlainScript(connString, "CREATE TABLE a (b TEXT)", true);
-            Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count());
+
+            adapter = _memoryCommandChannelFactory.Create(new CreationParameters<MemorySqliteConnectionStringBuilder>(connStringB, "CREATE TABLE a (b TEXT)", true));
+            Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count);
+        }
+
+        [TestMethod]
+        public void TestPersistenceOfMemoryConnections()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var adapter = _memoryCommandChannelFactory.Create(new CreationParameters<MemorySqliteConnectionStringBuilder>(connString, "CREATE TABLE a (b TEXT)", true));
+            adapter.Execute("INSERT INTO a VALUES ('c')");
+
+            adapter = _memoryCommandChannelFactory.Open(connString);
+            adapter.Execute("INSERT INTO a VALUES ('d');");
+
+            Assert.AreEqual(2, adapter.FetchLines("SELECT * FROM a").Count);
+        }
+
+        [TestMethod]
+        public async Task TestPersistenceOfMemoryConnectionsAsync()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var adapter = await _memoryCommandChannelFactory.CreateAsync(new CreationParameters<MemorySqliteConnectionStringBuilder>(connString, "CREATE TABLE a (b TEXT)", true));
+            await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
+
+            adapter = _memoryCommandChannelFactory.OpenAsync(connString);
+            await adapter.ExecuteAsync("INSERT INTO a VALUES ('d');");
+
+            var lines = await adapter.FetchLinesAsync("SELECT * FROM a");
+            Assert.AreEqual(2, lines.Count);
+        }
+
+        [TestMethod]
+        public async Task TestPersistenceOfMemoryConnectionsSyncAndAsync()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var syncAdapter = _memoryCommandChannelFactory.Create(new CreationParameters<MemorySqliteConnectionStringBuilder>(connString, "CREATE TABLE a (b TEXT)", true));
+            syncAdapter.Execute("INSERT INTO a VALUES ('c')");
+
+            var asyncAdapter = _memoryCommandChannelFactory.OpenAsync(connString);
+            await asyncAdapter.ExecuteAsync("INSERT INTO a VALUES ('d');");
+
+            var lines = await asyncAdapter.FetchLinesAsync("SELECT * FROM a");
+            Assert.AreEqual(2, lines.Count);
+        }
+
+        [TestMethod]
+        public async Task TestPersistenceOfMemoryConnectionsAsyncAndSync()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var syncAdapter = _memoryCommandChannelFactory.Create(new CreationParameters<MemorySqliteConnectionStringBuilder>(connString, "CREATE TABLE a (b TEXT)", true));
+            syncAdapter.Execute("INSERT INTO a VALUES ('c')");
+
+            var asyncAdapter = _memoryCommandChannelFactory.OpenAsync(connString);
+            await asyncAdapter.ExecuteAsync("INSERT INTO a VALUES ('d');");
+
+            var lines = await asyncAdapter.FetchLinesAsync("SELECT * FROM a");
+            Assert.AreEqual(2, lines.Count);
         }
 
         [TestMethod]
         public async Task TestMultithreading()
         {
-            var connString = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
-            var adapter = Adapter.CreateFromPlainScript(connString, "CREATE TABLE a (b TEXT)", true);
+            var connString = new MemorySqliteConnectionStringBuilder();
+            var adapter = await _memoryCommandChannelFactory.CreateAsync(new CreationParameters<MemorySqliteConnectionStringBuilder>(connString, "CREATE TABLE a (b TEXT)", true));
 
             var tasks = Enumerable.Range(1, 10).Select(async _ =>
             {
-                foreach (var __ in Enumerable.Repeat(0, 500)) await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
+                foreach (var __ in Enumerable.Repeat(0, 500)) 
+                    await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
             });
 
             await Task.WhenAll(tasks);
 
-            Assert.AreEqual(5000, (await adapter.FetchLinesAsync("SELECT * FROM a")).Count());
+            Assert.AreEqual(5000, (await adapter.FetchLinesAsync("SELECT * FROM a")).Count);
         }
     }
 }

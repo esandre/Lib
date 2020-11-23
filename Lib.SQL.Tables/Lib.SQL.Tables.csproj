@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Description>SQL nano-ORM</Description>
+    <Version>3.0.0-alpha4</Version>
+    <Authors>Enzo Sandré</Authors>
+    <Company>Atelier Logiciel Sandré</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lib.SQL.QueryBuilder\Lib.SQL.QueryBuilder.csproj" />
+    <ProjectReference Include="..\Lib.SQL\Lib.SQL.csproj" />
+  </ItemGroup>
+
+</Project>

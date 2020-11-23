@@ -1,7 +1,6 @@
-﻿using Lib.SQL.Adapter;
-using Lib.SQL.Operation.QueryBuilder.Operator;
-using Lib.SQL.Operation.QueryBuilder.Sequences;
-using Microsoft.Data.Sqlite;
+﻿using Lib.SQL.QueryBuilder.Operator;
+using Lib.SQL.QueryBuilder.Sequences;
+using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lib.SQL.SQLite.Test
@@ -9,7 +8,11 @@ namespace Lib.SQL.SQLite.Test
     [TestClass]
     public class TestDbal
     {
-        private readonly DbAdapter _adapter =  Adapter.CreateFromPlainScript(new SqliteConnectionStringBuilder { DataSource = ":memory:" }, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+        private readonly ICommandChannel _adapter = new MemorySqliteCommandChannelFactory()
+            .Create(
+                new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA TEXT, colB TEXT)", true)
+                );
+
         private readonly Table _table;
 
         public TestDbal()
@@ -67,7 +70,7 @@ namespace Lib.SQL.SQLite.Test
         [TestMethod]
         public void TestExists()
         {
-            var selected = _table.Exists().ExecuteOn(_adapter);
+            var selected = _table.Exists().Where("1", Is.DifferentWith, "1").ExecuteOn(_adapter);
             Assert.AreEqual(false, selected);
 
             _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
@@ -79,7 +82,7 @@ namespace Lib.SQL.SQLite.Test
         public void TestLastInsertedId()
         {
             var notInserted = _adapter.LastInsertedId;
-            Assert.AreEqual(0, notInserted);
+            Assert.AreEqual((long) 0, notInserted);
 
             var id = _table.Insert().Values("a", "b").ExecuteOnAndReturnRowId(_adapter);
 

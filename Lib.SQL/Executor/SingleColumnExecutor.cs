@@ -1,30 +1,29 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Lib.SQL.Adapter;
-using Lib.SQL.Executor.Collections;
 
 namespace Lib.SQL.Executor
 {
-    public class SingleColumnExecutor : ExecutorAbstract<object[]>
+    public class SingleColumnExecutor : IExecutor<IReadOnlyList<object>>
     {
-        protected override object[] ExecuteOnAdapter(ICommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public IReadOnlyList<object> ExecuteOnAdapter(ICommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            var resultLines = new ResultLines(adapter.FetchLines(sql, parameters));
+            var resultLines = adapter.FetchLines(sql, parameters);
             return ParseResultLines(resultLines);
         }
 
-        private static object[] ParseResultLines(ResultLines lines)
+        private static IReadOnlyList<object> ParseResultLines(IEnumerable<IReadOnlyDictionary<string, object>> lines)
         {
-            var columnName = lines.FirstOrDefault()?.First().Key;
+            var linesAsArray = lines.ToArray();
+            var columnName = linesAsArray.FirstOrDefault()?.First().Key;
             return columnName is null 
                 ? new object[0] 
-                : lines.Select(line => line[columnName]).ToArray();
+                : linesAsArray.Select(line => line[columnName]).ToArray();
         }
 
-        protected override async Task<object[]> ExecuteOnAdapterAsync(ICommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<IReadOnlyList<object>> ExecuteOnAdapterAsync(IAsyncCommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, object>> parameters)
         {
-            var lines = new ResultLines(await adapter.FetchLinesAsync(sql, parameters));
+            var lines = await adapter.FetchLinesAsync(sql, parameters);
             return ParseResultLines(lines);
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Lib.SQL.Adapter;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,7 +18,7 @@ namespace Lib.SQL.SQLite.Test
             InsertValueInNewDb(value, dbPath, true);
 
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
-            var adapter = Adapter.Open(connString);
+            var adapter = new SqliteCommandChannelFactory().Open(connString);
             Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
         }
 
@@ -32,14 +31,14 @@ namespace Lib.SQL.SQLite.Test
             InsertValueInNewDb(value, dbPath, false);
 
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
-            var adapter = Adapter.Open(connString);
+            var adapter =  new SqliteCommandChannelFactory().Open(connString);
             Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
         private static void InsertValueInNewDb(string value, string dbName, bool commit)
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbName) };
-            var adapter = Adapter.CreateFromPlainScript(connString, Resources.TestCommitRollback, true);
+            var adapter =  new SqliteCommandChannelFactory().Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
 
             adapter.ExecuteInTransaction(scope =>
             {
@@ -53,7 +52,7 @@ namespace Lib.SQL.SQLite.Test
             return Convert.ToInt32(adapter.FetchValue("SELECT COUNT(*) FROM test"));
         }
 
-        private static void InsertDoSomethingAndCommit(TransactionalDbAdapter adapter, string what, Action something)
+        private static void InsertDoSomethingAndCommit(ICommandChannel adapter, string what, Action something)
         {
             var beforeCommit = 0;
             adapter.ExecuteInTransaction(scope =>
@@ -70,7 +69,7 @@ namespace Lib.SQL.SQLite.Test
             Assert.AreEqual(beforeCommit, GetCount(adapter));
         }
 
-        private static void InsertDoSomethingAndRollback(TransactionalDbAdapter adapter, string what, Action something)
+        private static void InsertDoSomethingAndRollback(ICommandChannel adapter, string what, Action something)
         {
             var initial = GetCount(adapter);
             adapter.ExecuteInTransaction(scope =>
@@ -83,7 +82,7 @@ namespace Lib.SQL.SQLite.Test
             Assert.AreEqual(initial, GetCount(adapter));
         }
 
-        private static void DoSomethingInsertAndCommit(TransactionalDbAdapter adapter, string what, Action something)
+        private static void DoSomethingInsertAndCommit(ICommandChannel adapter, string what, Action something)
         {
             var initial = GetCount(adapter);
 
@@ -97,7 +96,7 @@ namespace Lib.SQL.SQLite.Test
             Assert.AreEqual(initial + 1, GetCount(adapter));
         }
 
-        private static void DoSomethingInsertAndRollback(TransactionalDbAdapter adapter, string what, Action something)
+        private static void DoSomethingInsertAndRollback(ICommandChannel adapter, string what, Action something)
         {
             var initial = GetCount(adapter);
 
@@ -120,7 +119,7 @@ namespace Lib.SQL.SQLite.Test
         public void TestNestedTransactions()
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db") };
-            var adapter = Adapter.CreateFromPlainScript(connString, Resources.TestCommitRollback, true);
+            var adapter =  new SqliteCommandChannelFactory().Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
 
             DoSomethingInsertAndCommit(adapter, "B",
                 () => DoSomethingInsertAndRollback(adapter, "C",

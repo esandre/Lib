@@ -1,21 +1,22 @@
 ﻿using System;
-using Lib.SQL.Adapter;
-using Lib.SQL.Operation.QueryBuilder.Operator;
-using Lib.SQL.Operation.QueryBuilder.Sequences;
+using Lib.SQL.QueryBuilder.Operator;
+using Lib.SQL.QueryBuilder.Sequences;
+using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL.Test
 {
     [TestClass]
     public class TestDbal : TestAbstract
     {
-        private DbAdapter _adapter;
+        private ICommandChannel _adapter;
         private readonly Table _table;
 
         [TestInitialize]
         public void Init()
         {
-            _adapter = Adapter.CreateFromPlainScript(Credentials, "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+            _adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE example(colA TEXT, colB TEXT)", true));
         }
 
         public TestDbal()
@@ -73,7 +74,7 @@ namespace Lib.SQL.MySQL.Test
         [TestMethod]
         public void TestExists()
         {
-            var selected = _table.Exists().ExecuteOn(_adapter);
+            var selected = _table.Exists().Where("1", Is.DifferentWith, "1").ExecuteOn(_adapter);
             Assert.AreEqual(false, selected);
 
             _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
@@ -85,7 +86,7 @@ namespace Lib.SQL.MySQL.Test
         public void TestLastInsertedId()
         {
             var notInserted = _adapter.LastInsertedId;
-            Assert.AreEqual(0, notInserted);
+            Assert.AreEqual((long) 0, notInserted);
 
             var id = _table.Insert().Values("a", "b").ExecuteOnAndReturnRowId(_adapter);
 

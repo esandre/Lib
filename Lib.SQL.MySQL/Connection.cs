@@ -2,12 +2,71 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Lib.SQL.Adapter.Session;
+using System.Threading.Tasks;
+using Lib.SQL.Adapter;
 using MySql.Data.MySqlClient;
 
 namespace Lib.SQL.MySQL
 {
-    public class Connection : IConnection
+    internal class AsyncConnection : AsyncConnectionAbstract
+    {
+        private readonly MySqlConnection _dbCon;
+
+        public AsyncConnection(MySqlConnectionStringBuilder sqlConnectionString)
+        {
+            _dbCon = new MySqlConnection(sqlConnectionString.ConnectionString);
+        }
+
+        private MySqlCommand CreateCommand(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        {
+            var command = new MySqlCommand(sql, _dbCon);
+            if (parameters != null)
+                command.Parameters.AddRange(
+                    parameters.Select(parameter => new MySqlParameter(parameter.Key, parameter.Value)).ToArray());
+            return command;
+        }
+
+        public override async Task<IAsyncSession> BeginTransactionAsync() => await AsyncSavepoint.ConstructAsync(this);
+
+        public override async Task OpenAsync() => await _dbCon.OpenAsync();
+        public override async Task CloseAsync() => await _dbCon.OpenAsync();
+        public override async ValueTask DisposeAsync() => await _dbCon.DisposeAsync();
+        public override void Dispose() => _dbCon.Dispose();
+
+        public override async Task<long> LastInsertedIdAsync() => Convert.ToInt64(await FetchValueAsync("SELECT LAST_INSERT_ID();"));
+
+        public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        {
+            await using var command = CreateCommand(sql, parameters);
+            return await command.ExecuteNonQueryAsync();
+        }
+
+        public override async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        {
+            await using var command = CreateCommand(sql, parameters);
+            return await command.ExecuteScalarAsync();
+        }
+
+        public override async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => (await FetchLinesAsync(sql, parameters)).First();
+
+        public override async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        {
+            await using var command = CreateCommand(sql, parameters);
+            await using var reader = command.ExecuteReader();
+
+            var output = new List<Dictionary<string, object>>();
+            while (reader.Read())
+            {
+                var line = Enumerable.Range(0, reader.FieldCount)
+                    .ToDictionary(reader.GetName, reader.GetValue);
+                output.Add(line);
+            }
+            return output;
+        }
+    }
+
+    internal class Connection : ConnectionAbstract
     {
         private readonly MySqlConnection _dbCon;
 
@@ -25,56 +84,53 @@ namespace Lib.SQL.MySQL
             return command;
         }
 
-        public ITransaction BeginTransaction()
-        {
-            return new Savepoint(this);
-        }
+        public override ISession BeginTransaction() => new Savepoint(this);
 
-        public void Dispose()
+        public override void Dispose()
         {
             _dbCon.Dispose();
         }
 
-        public void Open()
+        public override void Open()
         {
             _dbCon.Open();
         }
 
-        public void Close()
+        public override void Close()
         {
             _dbCon.Close();
         }
 
-        public long LastInsertedId => Convert.ToInt64(FetchValue("SELECT LAST_INSERT_ID();"));
-        public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public override long LastInsertedId => Convert.ToInt64(FetchValue("SELECT LAST_INSERT_ID();"));
+
+        public override int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            return CreateCommand(sql, parameters).ExecuteNonQuery();
+            using var command = CreateCommand(sql, parameters);
+            return command.ExecuteNonQuery();
         }
 
-        public object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public override object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            return CreateCommand(sql, parameters).ExecuteScalar();
+            using var command = CreateCommand(sql, parameters);
+            return command.ExecuteScalar();
         }
 
-        public IDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-        {
-            return FetchLines(sql, parameters).First();
-        }
+        public override IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+            => FetchLines(sql, parameters).First();
 
-        public IEnumerable<IDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public override IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            using (var command = CreateCommand(sql, parameters))
-            using (var reader = command.ExecuteReader())
+            using var command = CreateCommand(sql, parameters);
+            using var reader = command.ExecuteReader();
+
+            var output = new List<Dictionary<string, object>>();
+            while (reader.Read())
             {
-                var output = new List<Dictionary<string, object>>();
-                while (reader.Read())
-                {
-                    var line = Enumerable.Range(0, reader.FieldCount)
-                        .ToDictionary(reader.GetName, reader.GetValue);
-                    output.Add(line);
-                }
-                return output;
+                var line = Enumerable.Range(0, reader.FieldCount)
+                    .ToDictionary(reader.GetName, reader.GetValue);
+                output.Add(line);
             }
+            return output;
         }
     }
 }
