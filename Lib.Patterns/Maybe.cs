@@ -65,6 +65,12 @@ namespace Lib.Patterns
             return HasItem ? ifPresent(Item) : ifAbsent();
         }
 
+        public void Select(Action<T> ifPresent, Action ifAbsent)
+        {
+            if (HasItem) ifPresent(Item);
+            else ifAbsent();
+        }
+
         public async Task<TReturn> SelectAsync<TReturn>(Func<T, Task<TReturn>> ifPresent, Func<Task<TReturn>> ifAbsent)
         {
             return HasItem ? await ifPresent(Item) : await ifAbsent();
