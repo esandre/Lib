@@ -2,6 +2,7 @@
 using Lib.SQL.QueryBuilder.Sequences;
 using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+// ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 namespace Lib.SQL.SQLite.Test
 {

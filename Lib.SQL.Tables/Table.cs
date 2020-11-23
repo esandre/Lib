@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Lib.SQL.Executor;
 using Lib.SQL.Tables.Operation;
@@ -22,22 +23,22 @@ namespace Lib.SQL.Tables
 
         public IWhereFilterable<ITableOperation<int>, int> Delete() => new TableDelete(this);
 
-        public ITableSelect<object> Select(string column)
+        public ITableSelect<IConvertible> Select(string column)
         {
             var executor = new SingleValueExecutor();
             return SelectCustom(executor, column);
         }
 
-        public ITableSelect<IReadOnlyDictionary<string, object>> SelectLine(params string[] columns)
+        public ITableSelect<IReadOnlyDictionary<string, IConvertible>> SelectLine(params string[] columns)
         {
             var executor = new SingleLineExecutor();
             return SelectCustom(executor, columns);
         }
 
-        public ITableSelect<IReadOnlyList<object>> SelectColumn(string column) 
-            => new TableSelect<IReadOnlyList<object>>(new SingleColumnExecutor(), this, new[] {column});
+        public ITableSelect<IReadOnlyList<IConvertible>> SelectColumn(string column) 
+            => new TableSelect<IReadOnlyList<IConvertible>>(new SingleColumnExecutor(), this, new[] {column});
 
-        public ITableSelect<IReadOnlyList<IReadOnlyDictionary<string, object>>> SelectLines(params string[] columns)
+        public ITableSelect<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>> SelectLines(params string[] columns)
         {
             var executor = new MultipleLinesExecutor();
             return SelectCustom(executor, columns);

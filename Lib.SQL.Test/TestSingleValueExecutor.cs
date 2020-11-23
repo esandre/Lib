@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Lib.SQL.Executor;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+// ReSharper disable PossibleUnintendedReferenceComparison
+#pragma warning disable 252,253
 
 namespace Lib.SQL.Test
 {
@@ -13,7 +15,7 @@ namespace Lib.SQL.Test
         public void TestString()
         {
             var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, object>>>()) == (object) "str"
+                    m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == "str"
             );
 
             var executor = new SingleValueExecutor();
@@ -24,7 +26,7 @@ namespace Lib.SQL.Test
         public void TestInt()
         {
             var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, object>>>()) == (object) 1
+                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == (IConvertible) 1
             );
 
             var executor = new SingleValueExecutor();
@@ -35,7 +37,7 @@ namespace Lib.SQL.Test
         public void TestDouble()
         {
             var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, object>>>()) == (object) 8.0
+                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == (IConvertible) 8.0
             );
 
             var executor = new SingleValueExecutor();
@@ -46,7 +48,7 @@ namespace Lib.SQL.Test
         public void TestDateTime()
         {
             var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, object>>>()) == (object) DateTime.MinValue
+                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == (IConvertible) DateTime.MinValue
             );
 
             var executor = new SingleValueExecutor();

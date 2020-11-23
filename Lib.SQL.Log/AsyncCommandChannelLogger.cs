@@ -40,7 +40,7 @@ namespace Lib.SQL.Log
         }
 
         private void LogInputParameters(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null)
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             if (_logger.IsEnabled(LogLevel.Trace))
             {
@@ -52,43 +52,43 @@ namespace Lib.SQL.Log
             }
         }
 
-        public async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(ExecuteAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
             var lines = await _logged.ExecuteAsync(sql, enumeratedParameters);
             return lines;
         }
 
-        public async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<IConvertible> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchValueAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
             var value = await _logged.FetchValueAsync(sql, enumeratedParameters);
 
             return value;
         }
 
-        public async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<IReadOnlyDictionary<string, IConvertible>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchLineAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
             var line = await _logged.FetchLineAsync(sql, enumeratedParameters);
 
             return line;
         }
 
-        public async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchLinesAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
             var lines = await _logged.FetchLinesAsync(sql, enumeratedParameters);
 

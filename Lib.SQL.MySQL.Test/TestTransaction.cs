@@ -33,7 +33,7 @@ namespace Lib.SQL.MySQL.Test
 
             adapter.ExecuteInTransaction(scope =>
             {
-                scope.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, object>{{"@value", "committed" } });
+                scope.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, IConvertible>{{"@value", "committed" } });
                 return commit ? TransactionResult.Commit : TransactionResult.Rollback;
             });
         }

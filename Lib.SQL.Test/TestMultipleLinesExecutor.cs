@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Lib.SQL.Executor;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+// ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 namespace Lib.SQL.Test
 {
@@ -12,11 +14,11 @@ namespace Lib.SQL.Test
         public void TestMultipleLines()
         {
             var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchLines(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, object>>>()) ==
+                m.FetchLines(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
                 new[]
                 {
-                    new Dictionary<string, object> {{"a", "b"}, {"c", "d"}},
-                    new Dictionary<string, object> {{"a", "f"}, {"c", "h"}},
+                    new Dictionary<string, IConvertible> {{"a", "b"}, {"c", "d"}},
+                    new Dictionary<string, IConvertible> {{"a", "f"}, {"c", "h"}},
                 }
             );
 

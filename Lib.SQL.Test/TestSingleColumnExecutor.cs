@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Lib.SQL.Executor;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -12,11 +13,11 @@ namespace Lib.SQL.Test
         public void TestSingleColumn()
         {
             var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchLines(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, object>>>()) ==
+                m.FetchLines(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
                 new[]
                 {
-                    new Dictionary<string, object> {{"_", "b"}},
-                    new Dictionary<string, object> {{"_", "f"}},
+                    new Dictionary<string, IConvertible> {{"_", "b"}},
+                    new Dictionary<string, IConvertible> {{"_", "f"}},
                 }
             );
 

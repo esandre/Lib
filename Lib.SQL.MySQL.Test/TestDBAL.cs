@@ -4,6 +4,7 @@ using Lib.SQL.QueryBuilder.Sequences;
 using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySql.Data.MySqlClient;
+// ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 namespace Lib.SQL.MySQL.Test
 {

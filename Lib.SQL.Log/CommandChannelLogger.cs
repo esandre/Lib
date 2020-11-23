@@ -42,7 +42,7 @@ namespace Lib.SQL.Log
         }
 
         private void LogInputParameters(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null)
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             if (_logger.IsEnabled(LogLevel.Trace))
             {
@@ -54,11 +54,11 @@ namespace Lib.SQL.Log
             }
         }
 
-        public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public int Execute(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(Execute));
             
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
 
             var value = _logged.Execute(sql, enumeratedParameters);
@@ -66,11 +66,11 @@ namespace Lib.SQL.Log
             return value;
         }
 
-        public object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public IConvertible FetchValue(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchValue));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
 
             var value = _logged.FetchValue(sql, enumeratedParameters);
@@ -78,11 +78,11 @@ namespace Lib.SQL.Log
             return value;
         }
 
-        public IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public IReadOnlyDictionary<string, IConvertible> FetchLine(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchLine));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
 
             var line = _logged.FetchLine(sql, enumeratedParameters);
@@ -90,11 +90,11 @@ namespace Lib.SQL.Log
             return line;
         }
 
-        public IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public IReadOnlyList<IReadOnlyDictionary<string, IConvertible>> FetchLines(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchLines));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, object>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
             LogInputParameters(sql, enumeratedParameters);
 
             var lines = _logged.FetchLines(sql, enumeratedParameters);

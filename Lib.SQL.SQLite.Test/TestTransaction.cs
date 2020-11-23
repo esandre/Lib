@@ -42,7 +42,7 @@ namespace Lib.SQL.SQLite.Test
 
             adapter.ExecuteInTransaction(scope =>
             {
-                adapter.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, object>{{"@value", value}});
+                adapter.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, IConvertible>{{"@value", value}});
                 return commit ? TransactionResult.Commit : TransactionResult.Rollback;
             });
         }

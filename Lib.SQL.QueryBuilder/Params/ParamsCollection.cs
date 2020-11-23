@@ -5,7 +5,7 @@ namespace Lib.SQL.QueryBuilder.Params
 {
     public class ParamsCollection
     {
-        public IDictionary<string, object> Params { get; } = new Dictionary<string, object>();
+        public IDictionary<string, IConvertible> Params { get; } = new Dictionary<string, IConvertible>();
 
         public string GetIdentifier(IConvertible param)
         {

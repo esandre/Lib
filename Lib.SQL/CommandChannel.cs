@@ -54,19 +54,19 @@ namespace Lib.SQL
             }
         }
 
-        public async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => await OpenCloseReturnSomethingAsync(async () => await _connection.ExecuteAsync(sql, parameters));
+        public async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) 
+            => await OpenCloseReturnSomethingAsync(async () => await _connection.ExecuteAsync(sql, parameters.Box()));
 
-        public async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => await OpenCloseReturnSomethingAsync(async () => await _connection.FetchValueAsync(sql, parameters));
+        public async Task<IConvertible> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) 
+            => await OpenCloseReturnSomethingAsync(async () => (await _connection.FetchValueAsync(sql, parameters.Box())).AsConvertible());
 
-        public async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null) =>
-            await OpenCloseReturnSomethingAsync(async () => await _connection.FetchLineAsync(sql, parameters));
+        public async Task<IReadOnlyDictionary<string, IConvertible>> FetchLineAsync(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) =>
+            await OpenCloseReturnSomethingAsync(async () => (await _connection.FetchLineAsync(sql, parameters.Box())).Unbox());
 
-        public async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null) =>
-            await OpenCloseReturnSomethingAsync(async () => await _connection.FetchLinesAsync(sql, parameters));
+        public async Task<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>> FetchLinesAsync(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) =>
+            await OpenCloseReturnSomethingAsync(async () => (await _connection.FetchLinesAsync(sql, parameters.Box())).Unbox());
 
         private async Task<T> OpenCloseReturnSomethingAsync<T>(Func<Task<T>> what)
         {
@@ -163,23 +163,23 @@ namespace Lib.SQL
         }
 
         public IConvertible LastInsertedId => OpenCloseReturnSomething(() => _connection.LastInsertedId);
-        public int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) =>
+        public int Execute(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) =>
             OpenCloseReturnSomething(() =>
             {
-                var output = _connection.Execute(sql, parameters);
+                var output = _connection.Execute(sql, parameters.Box());
                 return output;
             });
 
-        public object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => OpenCloseReturnSomething(() => _connection.FetchValue(sql, parameters));
+        public IConvertible FetchValue(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) 
+            => OpenCloseReturnSomething(() => _connection.FetchValue(sql, parameters.Box())).AsConvertible();
 
-        public IReadOnlyDictionary<string, object> FetchLine(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null) =>
-            OpenCloseReturnSomething(() => _connection.FetchLine(sql, parameters));
+        public IReadOnlyDictionary<string, IConvertible> FetchLine(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) =>
+            OpenCloseReturnSomething(() => _connection.FetchLine(sql, parameters.Box())).Unbox();
 
-        public IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null) =>
-            OpenCloseReturnSomething(() => _connection.FetchLines(sql, parameters));
+        public IReadOnlyList<IReadOnlyDictionary<string, IConvertible>> FetchLines(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) =>
+            OpenCloseReturnSomething(() => _connection.FetchLines(sql, parameters.Box())).Unbox();
 
         public void Dispose() => _connection.Dispose();
     }

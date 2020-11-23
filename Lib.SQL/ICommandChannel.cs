@@ -8,30 +8,30 @@ namespace Lib.SQL
     {
         IConvertible LastInsertedId { get; }
 
-        int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
+        int Execute(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
 
-        object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
+        IConvertible FetchValue(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
 
-        IReadOnlyDictionary<string, object> FetchLine(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null);
+        IReadOnlyDictionary<string, IConvertible> FetchLine(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
 
-        IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null);
+        IReadOnlyList<IReadOnlyDictionary<string, IConvertible>> FetchLines(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
     }
 
     public interface IAsyncCommandChannel : IAsyncTransactionControl
     {
         Task<IConvertible> LastInsertedIdAsync();
 
-        Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
+        Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
 
-        Task<object> FetchValueAsync(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null);
+        Task<IConvertible> FetchValueAsync(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
 
-        Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null);
+        Task<IReadOnlyDictionary<string, IConvertible>> FetchLineAsync(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
 
-        Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql,
-            IEnumerable<KeyValuePair<string, object>> parameters = null);
+        Task<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>> FetchLinesAsync(string sql,
+            IEnumerable<KeyValuePair<string, IConvertible>> parameters = null);
     }
 }
