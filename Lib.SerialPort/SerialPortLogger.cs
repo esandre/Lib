@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Lib.SerialPort
 {
     public class SerialPortLogger : ISerialPort
     {
         private readonly ISerialPort _logged;
-        private readonly IProgress<string> _log;
+        private readonly ILogger<SerialPortLogger> _log;
         private readonly IByteFormatter _byteFormatter;
 
-        public SerialPortLogger(ISerialPort logged, IProgress<string> log, IByteFormatter byteFormatter)
+        public SerialPortLogger(ISerialPort logged, ILogger<SerialPortLogger> log, IByteFormatter byteFormatter)
         {
             _logged = logged;
             _log = log;
@@ -18,13 +18,13 @@ namespace Lib.SerialPort
         public void Open()
         {
             _logged.Open();
-            _log.Report("Port is now open");
+            _log.LogDebug("Port is now open");
         }
 
         public void Close()
         {
             _logged.Close();
-            _log.Report("Port is now closed");
+            _log.LogDebug("Port is now closed");
         }
 
         public bool IsOpen => _logged.IsOpen;
@@ -38,26 +38,26 @@ namespace Lib.SerialPort
         public int ReadByte()
         {
             var b = _logged.ReadByte();
-            _log.Report("Received : " + _byteFormatter.FormatReceivedSingleByte(b));
+            _log.LogInformation("Received : " + _byteFormatter.FormatReceivedSingleByte(b));
             return b;
         }
 
         public void DiscardOutBuffer()
         {
             _logged.DiscardOutBuffer();
-            _log.Report("Out buffer discarded");
+            _log.LogTrace("Out buffer discarded");
         }
 
         public void DiscardInBuffer()
         {
             _logged.DiscardInBuffer();
-            _log.Report("In buffer discarded");
+            _log.LogTrace("In buffer discarded");
         }
 
         public void Write(byte[] request, int i, in int requestLength)
         {
             _logged.Write(request, i, in requestLength);
-            _log.Report("Written : " + _byteFormatter.FormatSentByteArray(request));
+            _log.LogInformation("Written : " + _byteFormatter.FormatSentByteArray(request));
         }
     }
 }

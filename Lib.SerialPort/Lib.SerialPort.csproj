@@ -5,9 +5,11 @@
     <Authors>Enzo Sandré</Authors>
     <Company>Atelier Logiciel Sandré</Company>
     <Description>Serial port management</Description>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     <PackageReference Include="System.IO.Ports" Version="4.7.0" />
   </ItemGroup>
 
