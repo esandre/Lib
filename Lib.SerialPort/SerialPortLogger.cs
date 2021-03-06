@@ -18,13 +18,13 @@ namespace Lib.SerialPort
         public void Open()
         {
             _logged.Open();
-            _log.LogDebug("Port is now open");
+            _log.LogTrace("Port is now open");
         }
 
         public void Close()
         {
             _logged.Close();
-            _log.LogDebug("Port is now closed");
+            _log.LogTrace("Port is now closed");
         }
 
         public bool IsOpen => _logged.IsOpen;
@@ -38,7 +38,10 @@ namespace Lib.SerialPort
         public int ReadByte()
         {
             var b = _logged.ReadByte();
-            _log.LogInformation("Received : " + _byteFormatter.FormatReceivedSingleByte(b));
+
+            if(_log.IsEnabled(LogLevel.Trace))
+                _log.LogTrace("Received : {received}", _byteFormatter.FormatReceivedSingleByte(b));
+
             return b;
         }
 
@@ -57,7 +60,9 @@ namespace Lib.SerialPort
         public void Write(byte[] request, int i, in int requestLength)
         {
             _logged.Write(request, i, in requestLength);
-            _log.LogInformation("Written : " + _byteFormatter.FormatSentByteArray(request));
+
+            if(_log.IsEnabled(LogLevel.Trace))
+                _log.LogTrace("Written : {written}", _byteFormatter.FormatSentByteArray(request));
         }
     }
 }
