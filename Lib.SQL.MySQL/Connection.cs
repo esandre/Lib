@@ -29,7 +29,7 @@ namespace Lib.SQL.MySQL
         public override async Task<IAsyncSession> BeginTransactionAsync() => await AsyncSavepoint.ConstructAsync(this);
 
         public override async Task OpenAsync() => await _dbCon.OpenAsync();
-        public override async Task CloseAsync() => await _dbCon.OpenAsync();
+        public override async Task CloseAsync() => await _dbCon.CloseAsync();
         public override async ValueTask DisposeAsync() => await _dbCon.DisposeAsync();
         public override void Dispose() => _dbCon.Dispose();
 
