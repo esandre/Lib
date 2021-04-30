@@ -15,7 +15,17 @@
         public void DiscardOutBuffer() => _port.DiscardOutBuffer();
         public void DiscardInBuffer() => _port.DiscardInBuffer();
         public void Write(byte[] request, int i, in int requestLength) => _port.Write(request, i, requestLength);
-        public void Close() => _port.Close();
+        public void Close()
+        {
+            try
+            {
+                _port.Close();
+            }
+            catch
+            {
+            }
+        }
+
         public void Dispose() => _port.Dispose();
         public bool IsOpen => _port.IsOpen;
     }

@@ -21,9 +21,10 @@ namespace Lib.SerialPort
         public async Task<IEnumerable<byte>> TransceiveAsync(byte[] request, CancellationToken cancellationToken)
         {
             var wasOpenBefore = _inner.IsOpen;
-
             if(!wasOpenBefore) _inner.Open();
+
             var result = await _inner.TransceiveAsync(request, cancellationToken);
+
             if(PortMustBeClosed(wasOpenBefore)) _inner.Close();
 
             return result;

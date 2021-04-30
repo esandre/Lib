@@ -64,5 +64,7 @@ namespace Lib.SerialPort
             if(_log.IsEnabled(LogLevel.Trace))
                 _log.LogTrace("Written : {written}", _byteFormatter.FormatSentByteArray(request));
         }
+
+        public override string ToString() => _logged.ToString();
     }
 }
