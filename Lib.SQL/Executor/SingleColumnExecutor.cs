@@ -15,14 +15,17 @@ namespace Lib.SQL.Executor
 
         private static IReadOnlyList<IConvertible> ParseResultLines(IEnumerable<IReadOnlyDictionary<string, IConvertible>> lines)
         {
+            if (lines is null) return new IConvertible[0];
+
             var linesAsArray = lines.ToArray();
             var columnName = linesAsArray.FirstOrDefault()?.First().Key;
+
             return columnName is null 
                 ? new IConvertible[0] 
                 : linesAsArray.Select(line => line[columnName]).ToArray();
         }
 
-        public async Task<IReadOnlyList<IConvertible>> ExecuteOnAdapterAsync(IAsyncCommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters)
+        public async Task<IReadOnlyList<IConvertible>> ExecuteOnAdapterAsync(IAsyncCommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
         {
             var lines = await adapter.FetchLinesAsync(sql, parameters);
             return ParseResultLines(lines);

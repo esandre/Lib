@@ -11,7 +11,7 @@ namespace Lib.SQL.Executor
             => adapter.FetchLines(sql, parameters);
 
         public async Task<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>> ExecuteOnAdapterAsync(
-            IAsyncCommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters)
+            IAsyncCommandChannel adapter, string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null)
             => await adapter.FetchLinesAsync(sql, parameters);
     }
 }

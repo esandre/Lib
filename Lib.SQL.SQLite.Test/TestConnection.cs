@@ -87,6 +87,34 @@ namespace Lib.SQL.SQLite.Test
             Assert.AreEqual(2, lines.Count);
         }
 
+
+        [TestMethod]
+        public void TestExceptionsNotSwallowed()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            var syncAdapter = _memoryCommandChannelFactory.Create(new CreationParameters<MemorySqliteConnectionStringBuilder>(connString, "CREATE TABLE a (b TEXT)", true));
+
+            Assert.ThrowsException<SqliteException>(() => syncAdapter.Execute("BADREQUEST"));
+            Assert.ThrowsException<SqliteException>(() => syncAdapter.FetchLines("BADREQUEST"));
+            Assert.ThrowsException<SqliteException>(() => syncAdapter.FetchLine("BADREQUEST"));
+            Assert.ThrowsException<SqliteException>(() => syncAdapter.FetchValue("BADREQUEST"));
+        }
+
+        [TestMethod]
+        public async Task TestExceptionsNotSwallowedAsync()
+        {
+            var connString = new MemorySqliteConnectionStringBuilder();
+
+            _memoryCommandChannelFactory.Create(new CreationParameters<MemorySqliteConnectionStringBuilder>(connString, "CREATE TABLE a (b TEXT)", true));
+            var asyncAdapter = _memoryCommandChannelFactory.OpenAsync(connString);
+
+            await Assert.ThrowsExceptionAsync<SqliteException>(async () => await asyncAdapter.ExecuteAsync("BADREQUEST"));
+            await Assert.ThrowsExceptionAsync<SqliteException>(async () => await asyncAdapter.FetchLinesAsync("BADREQUEST"));
+            await Assert.ThrowsExceptionAsync<SqliteException>(async () => await asyncAdapter.FetchLineAsync("BADREQUEST"));
+            await Assert.ThrowsExceptionAsync<SqliteException>(async () => await asyncAdapter.FetchValueAsync("BADREQUEST"));
+        }
+
         [TestMethod]
         public async Task TestPersistenceOfMemoryConnectionsSyncAndAsync()
         {

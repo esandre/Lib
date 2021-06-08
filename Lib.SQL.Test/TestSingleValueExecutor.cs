@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Lib.SQL.Executor;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -53,6 +54,36 @@ namespace Lib.SQL.Test
 
             var executor = new SingleValueExecutor();
             Assert.AreEqual(DateTime.MinValue, executor.ExecuteOnAdapter(commandChannel, "date"));
+        }
+
+        [TestMethod]
+        public void TestExceptionsNotSwallowed()
+        {
+            var executor = new SingleValueExecutor();
+
+            var commandChannel = new Mock<ICommandChannel>();
+            commandChannel
+                .Setup(m => m.FetchValue(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()))
+                .Throws<VerySpecificException>();
+
+            Assert.ThrowsException<VerySpecificException>(() => executor.ExecuteOnAdapter(commandChannel.Object, ""));
+        }
+
+        [TestMethod]
+        public async Task TestExceptionsNotSwallowedAsync()
+        {
+            var executor = new SingleValueExecutor();
+
+            var commandChannel = new Mock<IAsyncCommandChannel>();
+            commandChannel
+                .Setup(m => m.FetchValueAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()))
+                .Throws<VerySpecificException>();
+
+            await Assert.ThrowsExceptionAsync<VerySpecificException>(async () => await executor.ExecuteOnAdapterAsync(commandChannel.Object, ""));
+        }
+
+        private class VerySpecificException : Exception
+        {
         }
     }
 }
