@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lib.ACL.Rule;
+using Lib.Patterns;
 
 namespace Lib.ACL
 {
@@ -14,13 +15,13 @@ namespace Lib.ACL
             _allRules = rules.OrderBy(rule => rule.Priority);
         }
 
-        public bool IsAuthorizedNow(ISubject subject, IObject target) 
+        public (bool, Maybe<IRule>) IsAuthorizedNow(ISubject subject, IObject target) 
             => IsAuthorizedAt(DateTime.Now, subject, target);
-
-        private bool IsAuthorizedAt(DateTime when, ISubject subject, IObject @object)
+        
+        private (bool, Maybe<IRule>) IsAuthorizedAt(DateTime when, ISubject subject, IObject @object)
         {
             var applicableRule = _allRules.FirstOrDefault(rule => rule.IsApplicableFor(subject, @object, when));
-            return applicableRule?.Authorize ?? false;
+            return (applicableRule?.Authorize ?? false, applicableRule is null ? new Maybe<IRule>() : new Maybe<IRule>(applicableRule));
         }
     }
 }

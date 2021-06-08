@@ -4,9 +4,9 @@ namespace Lib.ACL.Rule
 {
     public class Rule : IRule
     {
-        private ITimeSlot TimeSlot { get; }
-        private IMatcher<ISubject> Subject { get; }
-        private IMatcher<IObject> Objet { get; }
+        protected ITimeSlot TimeSlot { get; }
+        protected IMatcher<ISubject> Subject { get; }
+        protected IMatcher<IObject> Objet { get; }
         public bool Authorize { get; }
 
         public bool IsApplicableFor(ISubject subject, IObject @object, DateTime at)
