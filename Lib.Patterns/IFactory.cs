@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace Lib.Patterns
 {
@@ -21,7 +22,7 @@ namespace Lib.Patterns
         /// <summary>
         /// Factories Output from Input
         /// </summary>
-        Task<TOutput> FactoryAsync(TInput input);
+        Task<TOutput> FactoryAsync(TInput input, CancellationToken token);
     }
 
     /// <summary>
