@@ -15,13 +15,15 @@ namespace Lib.ACL
             _allRules = rules.OrderBy(rule => rule.Priority);
         }
 
-        public (bool, Maybe<IRule>) IsAuthorizedNow(ISubject subject, IObject target) 
+        public (bool? Issue, Maybe<IRule> Raison) IsAuthorizedNow(ISubject subject, IObject target) 
             => IsAuthorizedAt(DateTime.Now, subject, target);
         
-        private (bool, Maybe<IRule>) IsAuthorizedAt(DateTime when, ISubject subject, IObject @object)
+        private (bool? Issue, Maybe<IRule> Raison) IsAuthorizedAt(DateTime when, ISubject subject, IObject @object)
         {
             var applicableRule = _allRules.FirstOrDefault(rule => rule.IsApplicableFor(subject, @object, when));
-            return (applicableRule?.Authorize ?? false, applicableRule is null ? new Maybe<IRule>() : new Maybe<IRule>(applicableRule));
+            if (applicableRule is null) return (null, new Maybe<IRule>());
+
+            return (applicableRule.Authorize, new Maybe<IRule>(applicableRule));
         }
     }
 }
