@@ -76,6 +76,12 @@ namespace Lib.Patterns
             return HasItem ? await ifPresent(Item) : await ifAbsent();
         }
 
+        public async Task SelectAsync(Func<T, Task> ifPresent, Action ifAbsent)
+        {
+            if (HasItem) await ifPresent(Item);
+            else ifAbsent();
+        }
+
         public Maybe<TReturn> Transform<TReturn>(Func<T, TReturn> transformation) 
             => HasItem ? new Maybe<TReturn>(transformation(Item)) : new Maybe<TReturn>();
 
