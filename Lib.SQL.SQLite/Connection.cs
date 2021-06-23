@@ -12,6 +12,8 @@ namespace Lib.SQL.SQLite
     {
         private readonly SqliteConnection _sqLiteConnection;
         private readonly SqliteCommand _lastInsertedCommand;
+        private long _lastInsertedId;
+
         public AsyncConnection(SqliteConnection connection)
         {
             _sqLiteConnection = connection;
@@ -21,7 +23,7 @@ namespace Lib.SQL.SQLite
         public override async Task<IAsyncSession> BeginTransactionAsync()
             => await AsyncSavepoint.ConstructAsync(this);
 
-        public override async Task<long> LastInsertedIdAsync() => Convert.ToInt64(await _lastInsertedCommand.ExecuteScalarAsync());
+        public override Task<long> LastInsertedIdAsync() => Task.FromResult(_lastInsertedId);
         public override async Task OpenAsync() => await _sqLiteConnection.OpenAsync();
         public override async Task CloseAsync() => await _sqLiteConnection.CloseAsync();
 
@@ -89,7 +91,9 @@ namespace Lib.SQL.SQLite
                             parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value))
                                 .ToArray());
 
-                    return await whatToDo(command);
+                    var result = await whatToDo(command);
+                    _lastInsertedId = (long) await _lastInsertedCommand.ExecuteScalarAsync();
+                    return result;
                 });
         }
     }
@@ -98,6 +102,7 @@ namespace Lib.SQL.SQLite
     {
         private readonly SqliteCommand _lastInsertedCommand;
         private readonly SqliteConnection _sqLiteConnection;
+        private long _lastInsertedId;
 
         public Connection(SqliteConnection connection)
         {
@@ -105,12 +110,19 @@ namespace Lib.SQL.SQLite
             _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
         }
 
-        public override void Open() => _sqLiteConnection.Open();
-        public override void Close() => _sqLiteConnection.Close();
+        public override void Open()
+        {
+            _sqLiteConnection.Open();
+        }
+
+        public override void Close()
+        {
+            _sqLiteConnection.Close();
+        }
 
         public override ISession BeginTransaction() => new Savepoint(this);
 
-        public override long LastInsertedId => Convert.ToInt64(_lastInsertedCommand.ExecuteScalar());
+        public override long LastInsertedId => _lastInsertedId;
 
         private TReturn ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, TReturn> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
@@ -123,7 +135,9 @@ namespace Lib.SQL.SQLite
                             parameters.Select(parameter => new SqliteParameter(parameter.Key, parameter.Value))
                                 .ToArray());
 
-                    return whatToDo(command);
+                    var result = whatToDo(command);
+                    _lastInsertedId = (long) _lastInsertedCommand.ExecuteScalar();
+                    return result;
                 });
         }
 

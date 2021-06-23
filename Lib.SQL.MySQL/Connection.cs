@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lib.SQL.Adapter;
@@ -11,6 +9,7 @@ namespace Lib.SQL.MySQL
     internal class AsyncConnection : AsyncConnectionAbstract
     {
         private readonly MySqlConnection _dbCon;
+        private long _lastInsertedId;
 
         public AsyncConnection(MySqlConnectionStringBuilder sqlConnectionString)
         {
@@ -32,19 +31,23 @@ namespace Lib.SQL.MySQL
         public override async Task CloseAsync() => await _dbCon.CloseAsync();
         public override async ValueTask DisposeAsync() => await _dbCon.DisposeAsync();
         public override void Dispose() => _dbCon.Dispose();
-
-        public override async Task<long> LastInsertedIdAsync() => Convert.ToInt64(await FetchValueAsync("SELECT LAST_INSERT_ID();"));
+        
+        public override Task<long> LastInsertedIdAsync() => Task.FromResult(_lastInsertedId);
 
         public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             await using var command = CreateCommand(sql, parameters);
-            return await command.ExecuteNonQueryAsync();
+            var result = await command.ExecuteNonQueryAsync();
+            _lastInsertedId = command.LastInsertedId;
+            return result;
         }
 
         public override async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             await using var command = CreateCommand(sql, parameters);
-            return await command.ExecuteScalarAsync();
+            var result = await command.ExecuteScalarAsync();
+            _lastInsertedId = command.LastInsertedId;
+            return result;
         }
 
         public override async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
@@ -62,6 +65,9 @@ namespace Lib.SQL.MySQL
                     .ToDictionary(reader.GetName, reader.GetValue);
                 output.Add(line);
             }
+
+            _lastInsertedId = command.LastInsertedId;
+
             return output;
         }
     }
@@ -69,13 +75,14 @@ namespace Lib.SQL.MySQL
     internal class Connection : ConnectionAbstract
     {
         private readonly MySqlConnection _dbCon;
+        private long _lastInsertedId;
 
         public Connection(MySqlConnectionStringBuilder sqlConnectionString)
         {
             _dbCon = new MySqlConnection(sqlConnectionString.ConnectionString);
         }
 
-        private IDbCommand CreateCommand(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        private MySqlCommand CreateCommand(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             var command = new MySqlCommand(sql, _dbCon);
             if (parameters != null)
@@ -101,18 +108,22 @@ namespace Lib.SQL.MySQL
             _dbCon.Close();
         }
 
-        public override long LastInsertedId => Convert.ToInt64(FetchValue("SELECT LAST_INSERT_ID();"));
+        public override long LastInsertedId => _lastInsertedId;
 
         public override int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             using var command = CreateCommand(sql, parameters);
-            return command.ExecuteNonQuery();
+            var result = command.ExecuteNonQuery();
+            _lastInsertedId = command.LastInsertedId;
+            return result;
         }
 
         public override object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             using var command = CreateCommand(sql, parameters);
-            return command.ExecuteScalar();
+            var result = command.ExecuteScalar();
+            _lastInsertedId = command.LastInsertedId;
+            return result;
         }
 
         public override IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
@@ -130,6 +141,9 @@ namespace Lib.SQL.MySQL
                     .ToDictionary(reader.GetName, reader.GetValue);
                 output.Add(line);
             }
+
+            _lastInsertedId = command.LastInsertedId;
+
             return output;
         }
     }

@@ -1,4 +1,5 @@
-﻿using Lib.SQL.QueryBuilder.Operator;
+﻿using System.Threading.Tasks;
+using Lib.SQL.QueryBuilder.Operator;
 using Lib.SQL.QueryBuilder.Sequences;
 using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,7 +14,7 @@ namespace Lib.SQL.SQLite.Test
             .Create(
                 new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA TEXT, colB TEXT)", true)
                 );
-
+        
         private readonly Table _table;
 
         public TestDbal()
@@ -82,13 +83,36 @@ namespace Lib.SQL.SQLite.Test
         [TestMethod]
         public void TestLastInsertedId()
         {
-            var notInserted = _adapter.LastInsertedId;
+            var adapter = new MemorySqliteCommandChannelFactory()
+                .Create(
+                    new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA INT AUTO_INCREMENT, colB TEXT)", true)
+                );
+
+            var notInserted = adapter.LastInsertedId;
             Assert.AreEqual((long) 0, notInserted);
 
-            var id = _table.Insert().Values("a", "b").ExecuteOnAndReturnRowId(_adapter);
+            var id = _table.Insert().Values(null, "b").ExecuteOnAndReturnRowId(adapter);
 
-            var lastInserted = _adapter.LastInsertedId;
+            var lastInserted = adapter.LastInsertedId;
             Assert.AreEqual(id, lastInserted);
+        }
+
+        [TestMethod]
+        public async Task TestLastInsertedIdAsync()
+        {
+            var adapter = await new MemorySqliteCommandChannelFactory()
+                .CreateAsync(
+                    new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA INT AUTO_INCREMENT, colB TEXT)", true)
+                );
+
+            var notInserted = await adapter.LastInsertedIdAsync();
+            Assert.AreEqual((long)0, notInserted);
+
+            var id = await  _table.Insert().Values(null, "b").ExecuteOnAndReturnRowIdAsync(adapter);
+            var lastInserted = await adapter.LastInsertedIdAsync();
+
+            Assert.AreEqual(id, lastInserted);
+            Assert.AreNotEqual(id, notInserted);
         }
     }
 }

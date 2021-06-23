@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Lib.SQL.QueryBuilder.Operator;
 using Lib.SQL.QueryBuilder.Sequences;
 using Lib.SQL.Tables;
@@ -86,13 +87,32 @@ namespace Lib.SQL.MySQL.Test
         [TestMethod]
         public void TestLastInsertedId()
         {
-            var notInserted = _adapter.LastInsertedId;
+            var adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, 
+                "CREATE TABLE example(colA INT PRIMARY KEY AUTO_INCREMENT, colB TEXT)", true));
+
+            var notInserted = adapter.LastInsertedId;
             Assert.AreEqual((long) 0, notInserted);
 
-            var id = _table.Insert().Values("a", "b").ExecuteOnAndReturnRowId(_adapter);
+            var id = _table.Insert().Values(null, "b").ExecuteOnAndReturnRowId(adapter);
 
-            var lastInserted = _adapter.LastInsertedId;
+            var lastInserted = adapter.LastInsertedId;
             Assert.AreEqual(id, lastInserted);
+        }
+
+        [TestMethod]
+        public async Task TestLastInsertedIdAsync()
+        {
+            var adapter = await new MySQLCommandChannelFactory().CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials,
+                "CREATE TABLE example(colA INT PRIMARY KEY AUTO_INCREMENT, colB TEXT)", true));
+
+            var notInserted = await adapter.LastInsertedIdAsync();
+            Assert.AreEqual((long)0, notInserted);
+
+            var id = await _table.Insert().Values(null, "b").ExecuteOnAndReturnRowIdAsync(adapter);
+
+            var lastInserted = await adapter.LastInsertedIdAsync();
+            Assert.AreEqual(id, lastInserted);
+            Assert.AreNotEqual(id, notInserted);
         }
     }
 }
