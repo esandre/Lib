@@ -1,3 +1,4 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NFluent;
@@ -48,7 +49,21 @@ namespace Lib.Encapsulation.Test
             Check.That(y.Equals(x)).IsTrue();
         }
 
-        private class ChildClass : EncapsulatedValueAbstract<object>
+        [TestMethod]
+        public void Instances_Are_Mock_Comparable()
+        {
+            var x = new ChildClass("x");
+            var y = new ChildClass("x");
+
+            var mock = new Mock<IEquatable<ChildClass>>();
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+            mock.Object.Equals(x);
+
+            mock.Verify(m => m.Equals(y), Times.Once);
+        }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public class ChildClass : EncapsulatedValueAbstract<object>
         {
             public ChildClass(object input) : base(input)
             {
