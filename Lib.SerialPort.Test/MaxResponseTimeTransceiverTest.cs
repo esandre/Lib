@@ -15,7 +15,7 @@ namespace Lib.SerialPort.Test
         private static readonly byte[] NotEmptyMessage = { 0x01 };
 
         [TestMethod]
-        public async Task Renvoie_Un_Datagramme_Vide_Si_Le_Temps_Est_Ecoulé()
+        public async Task Renvoie_Un_Datagramme_Vide_Si_Le_Temps_Est_EcoulÃ©()
         {
             var maxTime = TimeSpan.FromMilliseconds(100);
             var inner = Mock.Of<ISerialPortTransceiver>(m => 
