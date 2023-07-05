@@ -18,7 +18,11 @@ namespace Lib.SQL.MySQL.Test
         [TestInitialize]
         public void Init()
         {
-            _adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE example(colA TEXT, colB TEXT)", true));
+            var parameters = new CreationParameters<MySqlConnectionStringBuilder>(Credentials,
+                "CREATE TABLE example(colA TEXT, colB TEXT)", true);
+
+            _adapter = new MySQLCommandChannelFactory()
+                .Create(parameters);
         }
 
         public TestDbal()

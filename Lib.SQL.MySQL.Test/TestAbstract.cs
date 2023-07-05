@@ -26,6 +26,7 @@ namespace Lib.SQL.MySQL.Test
             var mysqlUser = Environment.GetEnvironmentVariable(TestUserKey) 
                             ?? throw new ConfigurationErrorsException(TestUserKey + " is not set in ENV vars");
 
+
             var mysqlPassword = Environment.GetEnvironmentVariable(TestPasswordKey) ?? string.Empty;
 
             var mysqlDatabase = Environment.GetEnvironmentVariable(TestDatabaseKey) ?? Guid.NewGuid().ToString("N");
@@ -47,7 +48,13 @@ namespace Lib.SQL.MySQL.Test
         [TestCleanup]
         public void CleanDb()
         {
-            new MySQLCommandChannelFactory().Delete(Credentials);
+            try
+            {
+                new MySQLCommandChannelFactory().Delete(Credentials);
+            } catch
+            {
+                // ignored
+            }
         }
 
         protected MySqlConnectionStringBuilder Credentials { get; private set; }
