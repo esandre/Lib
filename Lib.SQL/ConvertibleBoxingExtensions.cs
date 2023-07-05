@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Lib.SQL
 {
@@ -15,8 +16,8 @@ namespace Lib.SQL
         public static IReadOnlyList<IReadOnlyDictionary<TKey, IConvertible>> Unbox<TKey>(this IEnumerable<IEnumerable<KeyValuePair<TKey, object>>> input)
             => input?.Select(dict => dict.Unbox()).ToList();
 
-        public static IConvertible AsConvertible(this object obj) => obj as IConvertible ??
-                                                                     throw new ArrayTypeMismatchException(
-                                                                         $"Not IConvertible returned by Db : {obj} of type {obj.GetType()}");
+        [CanBeNull] public static IConvertible AsConvertible(this object obj) => obj is null || obj is DBNull ? null 
+            : obj as IConvertible ?? 
+              throw new ArrayTypeMismatchException($"Not IConvertible returned by Db : {obj} of type {obj.GetType()}");
     }
 }
