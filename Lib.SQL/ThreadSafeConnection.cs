@@ -8,7 +8,7 @@ namespace Lib.SQL
     public class AsyncThreadSafeConnection : IAsyncConnection
     {
         private int _openings;
-        private readonly object _lock = new object();
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
         private readonly IAsyncConnection _asyncConnectionImplementation;
 
         public AsyncThreadSafeConnection(IAsyncConnection asyncConnectionImplementation)
@@ -18,7 +18,7 @@ namespace Lib.SQL
 
         public async Task OpenAsync()
         {
-            Monitor.Enter(_lock);
+            await _semaphore.WaitAsync();
 
             try
             {
@@ -27,13 +27,13 @@ namespace Lib.SQL
             }
             finally
             {
-                Monitor.Exit(_lock);
+                _semaphore.Release();
             }
         }
 
         public async Task CloseAsync()
         {
-            Monitor.Enter(_lock);
+            await _semaphore.WaitAsync();
 
             try
             {
@@ -42,23 +42,37 @@ namespace Lib.SQL
             }
             finally
             {
-                Monitor.Exit(_lock);
+                _semaphore.Release();
             }
         }
 
-        public Task<IAsyncSession> BeginTransactionAsync() => _asyncConnectionImplementation.BeginTransactionAsync();
-        public Task CommitAsync() => _asyncConnectionImplementation.CommitAsync();
-        public Task RollbackAsync() => _asyncConnectionImplementation.RollbackAsync();
-        public ValueTask DisposeAsync() => _asyncConnectionImplementation.DisposeAsync();
-        public Task<long> LastInsertedIdAsync() => _asyncConnectionImplementation.LastInsertedIdAsync();
-        public Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => _asyncConnectionImplementation.ExecuteAsync(sql, parameters);
-        public Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => _asyncConnectionImplementation.FetchValueAsync(sql, parameters);
-        public Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => _asyncConnectionImplementation.FetchLineAsync(sql, parameters);
-        public Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
-            => _asyncConnectionImplementation.FetchLinesAsync(sql, parameters);
+        public async Task<IAsyncSession> BeginTransactionAsync() 
+            => await _asyncConnectionImplementation.BeginTransactionAsync();
+
+        public async Task CommitAsync() 
+            => await _asyncConnectionImplementation.CommitAsync();
+
+        public async Task RollbackAsync() 
+            => await _asyncConnectionImplementation.RollbackAsync();
+
+        public async ValueTask DisposeAsync() 
+            => await _asyncConnectionImplementation.DisposeAsync();
+
+        public async Task<long> LastInsertedIdAsync() 
+            => await _asyncConnectionImplementation.LastInsertedIdAsync();
+
+        public async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+            => await _asyncConnectionImplementation.ExecuteAsync(sql, parameters);
+
+        public async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+            => await _asyncConnectionImplementation.FetchValueAsync(sql, parameters);
+
+        public async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+            => await _asyncConnectionImplementation.FetchLineAsync(sql, parameters);
+
+        public async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
+            => await _asyncConnectionImplementation.FetchLinesAsync(sql, parameters);
+
         public void Dispose() => _asyncConnectionImplementation?.Dispose();
     }
 
