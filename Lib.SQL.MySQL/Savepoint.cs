@@ -10,18 +10,18 @@ namespace Lib.SQL.MySQL
         private readonly int _id;
 
         public static async Task<AsyncSavepoint> ConstructAsync(IAsyncConnection parent)
-            => await ConstructAsync(parent, 0);
+            => await ConstructAsync(parent, 0).ConfigureAwait(false);
 
         private static async Task<AsyncSavepoint> ConstructAsync(IAsyncConnection parent, int id)
         {
-            if(id == 0) await parent.ExecuteAsync("START TRANSACTION");
-            await parent.ExecuteAsync("SAVEPOINT `" + id + "`");
+            if(id == 0) await parent.ExecuteAsync("START TRANSACTION").ConfigureAwait(false);
+            await parent.ExecuteAsync("SAVEPOINT `" + id + "`").ConfigureAwait(false);
 
             return new AsyncSavepoint(parent, id);
         }
 
         private static async Task<AsyncSavepoint> ConstructAsync(AsyncSavepoint parent)
-            => await ConstructAsync(parent._connection, parent._id + 1);
+            => await ConstructAsync(parent._connection, parent._id + 1).ConfigureAwait(false);
 
         private AsyncSavepoint(IAsyncConnection parent, int id)
         {
@@ -31,17 +31,19 @@ namespace Lib.SQL.MySQL
 
         public override async Task CommitAsync()
         {
-            if (!IsRoot) await _connection.ExecuteAsync("RELEASE SAVEPOINT `" + _id + "`");
-            else await _connection.ExecuteAsync("COMMIT");
+            if (!IsRoot) await _connection.ExecuteAsync("RELEASE SAVEPOINT `" + _id + "`").ConfigureAwait(false);
+            else await _connection.ExecuteAsync("COMMIT").ConfigureAwait(false);
         }
 
         public override async Task RollbackAsync()
         {
-            if (!IsRoot) await _connection.ExecuteAsync("ROLLBACK TO `" + _id + "`");
-            else await _connection.ExecuteAsync("ROLLBACK");
+            if (!IsRoot) await _connection.ExecuteAsync("ROLLBACK TO `" + _id + "`").ConfigureAwait(false);
+            else await _connection.ExecuteAsync("ROLLBACK").ConfigureAwait(false);
         }
 
-        public override async Task<IAsyncSession> BeginTransactionAsync() => await ConstructAsync(this);
+        public override async Task<IAsyncSession> BeginTransactionAsync() 
+            => await ConstructAsync(this)
+            .ConfigureAwait(false);
     }
 
     internal class Savepoint : TransactionAbstract

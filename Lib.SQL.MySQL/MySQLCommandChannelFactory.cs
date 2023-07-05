@@ -19,10 +19,10 @@ namespace Lib.SQL.MySQL
             await using var conn = RootConnection(connectionString);
             await using var command = conn.CreateCommand();
 
-            await conn.OpenAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
             command.CommandText =
                 $"CREATE DATABASE IF NOT EXISTS `{connectionString.Database}`; USE `{connectionString.Database}`; ";
-            await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
         private static void CreateDb(MySqlConnectionStringBuilder connectionString)
@@ -69,18 +69,19 @@ namespace Lib.SQL.MySQL
 
         public async Task<IAsyncCommandChannel> CreateAsync(CreationParameters<MySqlConnectionStringBuilder> creationParameters)
         {
-            if (await ExistsAsync(creationParameters.ConnectionString) && !creationParameters.EraseIfExists)
+            if (await ExistsAsync(creationParameters.ConnectionString).ConfigureAwait(false) 
+                && !creationParameters.EraseIfExists)
                 return OpenAsync(creationParameters.ConnectionString); 
 
-            await DeleteAsync(creationParameters.ConnectionString);
-            await CreateDbAsync(creationParameters.ConnectionString);
+            await DeleteAsync(creationParameters.ConnectionString).ConfigureAwait(false);
+            await CreateDbAsync(creationParameters.ConnectionString).ConfigureAwait(false);
 
             var adapter = OpenAsync(creationParameters.ConnectionString);
 
             foreach (var script in creationParameters.AdditionalScripts.Prepend(creationParameters.Script))
             {
                 if (!string.IsNullOrEmpty(script)) 
-                    await adapter.ExecuteAsync(script);
+                    await adapter.ExecuteAsync(script).ConfigureAwait(false);
             }
 
             return adapter;
@@ -104,8 +105,8 @@ namespace Lib.SQL.MySQL
             command.CommandText =
                 $"DROP DATABASE IF EXISTS `{connectionString.Database}`";
 
-            await conn.OpenAsync();
-            await command.ExecuteNonQueryAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
+            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
         public bool Exists(MySqlConnectionStringBuilder connectionString)
@@ -128,8 +129,8 @@ namespace Lib.SQL.MySQL
             command.CommandText =
                 $"SHOW DATABASES LIKE '{connectionString.Database}'";
 
-            await conn.OpenAsync();
-            return await command.ExecuteScalarAsync() != null;
+            await conn.OpenAsync().ConfigureAwait(false);
+            return (await command.ExecuteScalarAsync().ConfigureAwait(false)) != null;
         }
     }
 }
