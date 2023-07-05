@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Lib.SQL.Adapter;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace Lib.SQL.MySQL
 {

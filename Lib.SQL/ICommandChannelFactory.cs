@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace Lib.SQL
             ConnectionString = connectionString;
             Script = script;
             EraseIfExists = eraseIfExists;
-            AdditionalScripts = new string[0];
+            AdditionalScripts = Array.Empty<string>();
         }
     }
 
