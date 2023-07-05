@@ -102,8 +102,11 @@ namespace Lib.SQL.MySQL.Test
         [TestMethod]
         public async Task TestLastInsertedIdAsync()
         {
-            var adapter = await new MySQLCommandChannelFactory().CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials,
-                "CREATE TABLE example(colA INT PRIMARY KEY AUTO_INCREMENT, colB TEXT)", true));
+            var adapter = await new MySQLCommandChannelFactory()
+                .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(
+                    Credentials,
+                    "CREATE TABLE example(colA INT PRIMARY KEY AUTO_INCREMENT, colB TEXT)", 
+                    true));
 
             var notInserted = await adapter.LastInsertedIdAsync();
             Assert.AreEqual((long)0, notInserted);

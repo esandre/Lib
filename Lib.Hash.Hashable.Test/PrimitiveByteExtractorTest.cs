@@ -26,9 +26,9 @@ namespace Lib.Hash.Hashable.Test
         [TestMethod]
         public void SByte_ExtractedAs_Bytes()
         {
-            Check.That(ExtractBytes(sbyte.MinValue)).Equals(BitConverter.GetBytes(sbyte.MinValue));
-            Check.That(ExtractBytes(sbyte.MaxValue)).Equals(BitConverter.GetBytes(sbyte.MaxValue));
-            Check.That(ExtractBytes(sbyte.MinValue)).Not.Equals(BitConverter.GetBytes(sbyte.MaxValue));
+            Check.That(ExtractBytes(sbyte.MinValue)).Equals(BitConverter.GetBytes((short) sbyte.MinValue));
+            Check.That(ExtractBytes(sbyte.MaxValue)).Equals(BitConverter.GetBytes((short)sbyte.MaxValue));
+            Check.That(ExtractBytes(sbyte.MinValue)).Not.Equals(BitConverter.GetBytes((short) sbyte.MaxValue));
         }
 
         [TestMethod]
