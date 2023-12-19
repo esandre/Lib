@@ -57,7 +57,7 @@ namespace Lib.SQL.MySQL
         public override async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             await using var command = CreateCommand(sql, parameters);
-            await using var reader = command.ExecuteReader();
+            await using var reader = await command.ExecuteReaderAsync();
 
             var output = new List<Dictionary<string, object>>();
             while (reader.Read())
