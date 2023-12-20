@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Description>SQL querying tools</Description>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
     <Authors>Enzo Sandré</Authors>
     <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
