@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Lib.Console
 {
