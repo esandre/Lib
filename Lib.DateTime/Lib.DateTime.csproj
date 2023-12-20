@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Description>System.DateTime wrappers for years, months, days, etc...</Description>
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
     <Authors>Enzo Sandré</Authors>
     <Company>Atelier Logiciel Sandré</Company>
   </PropertyGroup>
