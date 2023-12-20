@@ -4,15 +4,6 @@ using System.Threading.Tasks;
 
 namespace Lib.SQL.Adapter
 {
-    public interface IConnection : ISession, IDisposable
-    {
-        long LastInsertedId { get; }
-        int Execute(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
-        object FetchValue(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
-        IReadOnlyDictionary<string, object> FetchLine(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
-        IReadOnlyList<IReadOnlyDictionary<string, object>> FetchLines(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);
-    }
-
     public interface IAsyncConnection : IAsyncSession, IAsyncDisposable, IDisposable
     {
         Task<long> LastInsertedIdAsync();

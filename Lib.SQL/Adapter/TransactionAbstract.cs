@@ -11,20 +11,4 @@ namespace Lib.SQL.Adapter
         public abstract Task CommitAsync();
         public abstract Task RollbackAsync();
     }
-
-    public abstract class TransactionAbstract : ISession
-    {
-        public abstract ISession BeginTransaction();
-
-        public abstract void Commit();
-        public abstract void Rollback();
-
-        public void Open()
-        {
-        }
-
-        public void Close()
-        {
-        }
-    }
 }

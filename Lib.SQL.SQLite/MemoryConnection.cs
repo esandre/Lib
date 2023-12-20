@@ -3,29 +3,6 @@ using Microsoft.Data.Sqlite;
 
 namespace Lib.SQL.SQLite
 {
-    internal class MemoryConnection : Connection
-    {
-        public MemoryConnection(SqliteConnection connection)
-         : base(connection)
-        {
-            base.Open();
-        }
-
-        public override void Open()
-        {
-        }
-
-        public override void Close()
-        {
-        }
-
-        public override void Dispose()
-        {
-            base.Close();
-            base.Dispose();
-        }
-    }
-
     internal class AsyncMemoryConnection : AsyncConnection
     {
         public AsyncMemoryConnection(SqliteConnection connection)

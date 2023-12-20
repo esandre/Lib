@@ -9,8 +9,8 @@ namespace Lib.SQL.MySQL
         private readonly IAsyncConnection _connection;
         private readonly int _id;
 
-        public static async Task<AsyncSavepoint> ConstructAsync(IAsyncConnection parent)
-            => await ConstructAsync(parent, 0).ConfigureAwait(false);
+        public static Task<AsyncSavepoint> ConstructAsync(IAsyncConnection parent)
+            => ConstructAsync(parent, 0);
 
         private static async Task<AsyncSavepoint> ConstructAsync(IAsyncConnection parent, int id)
         {
@@ -20,8 +20,8 @@ namespace Lib.SQL.MySQL
             return new AsyncSavepoint(parent, id);
         }
 
-        private static async Task<AsyncSavepoint> ConstructAsync(AsyncSavepoint parent)
-            => await ConstructAsync(parent._connection, parent._id + 1).ConfigureAwait(false);
+        private static Task<AsyncSavepoint> ConstructAsync(AsyncSavepoint parent)
+            => ConstructAsync(parent._connection, parent._id + 1);
 
         private AsyncSavepoint(IAsyncConnection parent, int id)
         {
@@ -44,44 +44,5 @@ namespace Lib.SQL.MySQL
         public override async Task<IAsyncSession> BeginTransactionAsync() 
             => await ConstructAsync(this)
             .ConfigureAwait(false);
-    }
-
-    internal class Savepoint : TransactionAbstract
-    {
-        private bool IsRoot => _id == 0;
-        private readonly IConnection _connection;
-        private readonly int _id;
-
-        private Savepoint(IConnection parent, int id)
-        {
-            _id = id;
-            _connection = parent;
-            if(IsRoot) _connection.Execute("START TRANSACTION");
-            _connection.Execute("SAVEPOINT `" + id + "`");
-        }
-
-        public Savepoint(IConnection parent) 
-            : this(parent, 0)
-        {
-        }
-
-        private Savepoint(Savepoint parent)
-            : this(parent._connection, parent._id + 1)
-        {
-        }
-
-        public override void Commit()
-        {
-            if (!IsRoot) _connection.Execute("RELEASE SAVEPOINT `" + _id + "`");
-            else _connection.Execute("COMMIT");
-        }
-
-        public override void Rollback()
-        {
-            if (!IsRoot) _connection.Execute("ROLLBACK TO `" + _id + "`");
-            else _connection.Execute("ROLLBACK");
-        }
-
-        public override ISession BeginTransaction() => new Savepoint(this);
     }
 }

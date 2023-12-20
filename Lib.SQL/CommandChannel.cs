@@ -16,9 +16,9 @@ namespace Lib.SQL
             Peek = connection;
         }
 
-        public async Task<IConvertible> LastInsertedIdAsync() => await OpenCloseReturnSomethingAsync(async () => await _connection.LastInsertedIdAsync());
-        private async Task CommitPeekAsync() => await Peek.CommitAsync();
-        private async Task RollbackPeekAsync() => await Peek.RollbackAsync();
+        public async Task<IConvertible> LastInsertedIdAsync() => await OpenCloseReturnSomethingAsync(() => _connection.LastInsertedIdAsync());
+        private Task CommitPeekAsync() => Peek.CommitAsync();
+        private Task RollbackPeekAsync() => Peek.RollbackAsync();
 
         public async Task ExecuteInTransactionAsync(Func<IAsyncCommandChannel, Task<TransactionResult>> whatToDo)
         {
@@ -54,19 +54,19 @@ namespace Lib.SQL
             }
         }
 
-        public async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) 
-            => await OpenCloseReturnSomethingAsync(async () => await _connection.ExecuteAsync(sql, parameters.Box()));
+        public Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) 
+            => OpenCloseReturnSomethingAsync(() => _connection.ExecuteAsync(sql, parameters.Box()));
 
-        public async Task<IConvertible> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) 
-            => await OpenCloseReturnSomethingAsync(async () => (await _connection.FetchValueAsync(sql, parameters.Box())).AsConvertible());
+        public Task<IConvertible> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) 
+            => OpenCloseReturnSomethingAsync(async () => (await _connection.FetchValueAsync(sql, parameters.Box())).AsConvertible());
 
-        public async Task<IReadOnlyDictionary<string, IConvertible>> FetchLineAsync(string sql,
+        public Task<IReadOnlyDictionary<string, IConvertible>> FetchLineAsync(string sql,
             IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) =>
-            await OpenCloseReturnSomethingAsync(async () => (await _connection.FetchLineAsync(sql, parameters.Box())).Unbox());
+            OpenCloseReturnSomethingAsync(async () => (await _connection.FetchLineAsync(sql, parameters.Box())).Unbox());
 
-        public async Task<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>> FetchLinesAsync(string sql,
+        public Task<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>> FetchLinesAsync(string sql,
             IEnumerable<KeyValuePair<string, IConvertible>> parameters = null) =>
-            await OpenCloseReturnSomethingAsync(async () => (await _connection.FetchLinesAsync(sql, parameters.Box())).Unbox());
+            OpenCloseReturnSomethingAsync(async () => (await _connection.FetchLinesAsync(sql, parameters.Box())).Unbox());
 
         private async Task<T> OpenCloseReturnSomethingAsync<T>(Func<Task<T>> what)
         {
@@ -81,10 +81,10 @@ namespace Lib.SQL
             }
         }
 
-        private async Task OpenAsync() => await Peek.OpenAsync();
-        private async Task CloseAsync() => await Peek.CloseAsync();
+        private Task OpenAsync() => Peek.OpenAsync();
+        private Task CloseAsync() => Peek.CloseAsync();
 
-        public async ValueTask DisposeAsync() => await _connection.DisposeAsync();
+        public ValueTask DisposeAsync() => _connection.DisposeAsync();
         public void Dispose() => _connection.Dispose();
     }
 }

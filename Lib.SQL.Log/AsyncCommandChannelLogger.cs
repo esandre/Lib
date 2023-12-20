@@ -17,7 +17,7 @@ namespace Lib.SQL.Log
             _logger = logger;
         }
 
-        public async Task ExecuteInTransactionAsync(Func<IAsyncCommandChannel, Task<TransactionResult>> whatToDo)
+        public Task ExecuteInTransactionAsync(Func<IAsyncCommandChannel, Task<TransactionResult>> whatToDo)
         {
             async Task<TransactionResult> OverridenWhatToDo(IAsyncCommandChannel channel)
             {
@@ -29,7 +29,7 @@ namespace Lib.SQL.Log
                 return innerResult;
             }
 
-            await _logged.ExecuteInTransactionAsync(OverridenWhatToDo);
+            return _logged.ExecuteInTransactionAsync(OverridenWhatToDo);
         }
 
         public async Task<IConvertible> LastInsertedIdAsync()
@@ -56,7 +56,7 @@ namespace Lib.SQL.Log
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(ExecuteAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? Array.Empty<KeyValuePair<string, IConvertible>>();
             LogInputParameters(sql, enumeratedParameters);
             var lines = await _logged.ExecuteAsync(sql, enumeratedParameters);
             return lines;
@@ -66,7 +66,7 @@ namespace Lib.SQL.Log
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchValueAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? Array.Empty<KeyValuePair<string, IConvertible>>();
             LogInputParameters(sql, enumeratedParameters);
             var value = await _logged.FetchValueAsync(sql, enumeratedParameters);
 
@@ -77,7 +77,7 @@ namespace Lib.SQL.Log
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchLineAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? Array.Empty<KeyValuePair<string, IConvertible>>();
             LogInputParameters(sql, enumeratedParameters);
             var line = await _logged.FetchLineAsync(sql, enumeratedParameters);
 
@@ -88,7 +88,7 @@ namespace Lib.SQL.Log
         {
             using var scope = _logger.BeginScope("Query {Guid} of type {Type}", Guid.NewGuid(), nameof(FetchLinesAsync));
 
-            var enumeratedParameters = parameters?.ToArray() ?? new KeyValuePair<string, IConvertible>[0];
+            var enumeratedParameters = parameters?.ToArray() ?? Array.Empty<KeyValuePair<string, IConvertible>>();
             LogInputParameters(sql, enumeratedParameters);
             var lines = await _logged.FetchLinesAsync(sql, enumeratedParameters);
 
