@@ -6,7 +6,7 @@ using MySqlConnector;
 
 namespace Lib.SQL.MySQL
 {
-    internal class AsyncConnection : AsyncConnectionAbstract
+    internal class AsyncConnection : IAsyncConnection
     {
         private readonly MySqlConnection _dbCon;
         private long _lastInsertedId;
@@ -25,17 +25,20 @@ namespace Lib.SQL.MySQL
             return command;
         }
 
-        public override async Task<IAsyncSession> BeginTransactionAsync() 
+        public async Task<IAsyncSession> BeginTransactionAsync() 
             => await AsyncSavepoint.ConstructAsync(this).ConfigureAwait(false);
 
-        public override Task OpenAsync() => _dbCon.OpenAsync();
-        public override Task CloseAsync() => _dbCon.CloseAsync();
-        public override ValueTask DisposeAsync() => _dbCon.DisposeAsync();
-        public override void Dispose() => _dbCon.Dispose();
-        
-        public override Task<long> LastInsertedIdAsync() => Task.FromResult(_lastInsertedId);
+        public Task CommitAsync() => Task.CompletedTask;
+        public Task RollbackAsync() => Task.CompletedTask;
 
-        public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public Task OpenAsync() => _dbCon.OpenAsync();
+        public Task CloseAsync() => _dbCon.CloseAsync();
+        public ValueTask DisposeAsync() => _dbCon.DisposeAsync();
+        public void Dispose() => _dbCon.Dispose();
+        
+        public Task<long> LastInsertedIdAsync() => Task.FromResult(_lastInsertedId);
+
+        public async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             await using var command = CreateCommand(sql, parameters);
             var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
@@ -43,7 +46,7 @@ namespace Lib.SQL.MySQL
             return result;
         }
 
-        public override async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             await using var command = CreateCommand(sql, parameters);
             var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
@@ -51,10 +54,10 @@ namespace Lib.SQL.MySQL
             return result;
         }
 
-        public override async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
             => (await FetchLinesAsync(sql, parameters).ConfigureAwait(false)).First();
 
-        public override async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             await using var command = CreateCommand(sql, parameters);
             await using var reader = await command.ExecuteReaderAsync();

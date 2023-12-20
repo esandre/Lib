@@ -72,7 +72,5 @@ namespace Lib.SQL
 
         public Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null) 
             => _asyncConnectionImplementation.FetchLinesAsync(sql, parameters);
-
-        public void Dispose() => _asyncConnectionImplementation?.Dispose();
     }
 }

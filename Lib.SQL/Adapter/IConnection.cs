@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Lib.SQL.Adapter
 {
-    public interface IAsyncConnection : IAsyncSession, IAsyncDisposable, IDisposable
+    public interface IAsyncConnection : IAsyncSession, IAsyncDisposable
     {
         Task<long> LastInsertedIdAsync();
         Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null);

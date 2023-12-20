@@ -72,11 +72,6 @@ namespace Lib.SQL.MySQL
             return _connection.DisposeAsync();
         }
 
-        public void Dispose()
-        {
-            _connection.Dispose();
-        }
-
         public async Task<long> LastInsertedIdAsync()
         {
             await _semaphore.WaitAsync();

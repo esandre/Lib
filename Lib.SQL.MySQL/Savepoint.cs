@@ -3,7 +3,7 @@ using Lib.SQL.Adapter;
 
 namespace Lib.SQL.MySQL
 {
-    internal class AsyncSavepoint : AsyncTransactionAbstract
+    internal class AsyncSavepoint : IAsyncSession
     {
         private bool IsRoot => _id == 0;
         private readonly IAsyncConnection _connection;
@@ -29,19 +29,23 @@ namespace Lib.SQL.MySQL
             _connection = parent;
         }
 
-        public override async Task CommitAsync()
+        public async Task CommitAsync()
         {
             if (!IsRoot) await _connection.ExecuteAsync("RELEASE SAVEPOINT `" + _id + "`").ConfigureAwait(false);
             else await _connection.ExecuteAsync("COMMIT").ConfigureAwait(false);
         }
 
-        public override async Task RollbackAsync()
+        public async Task RollbackAsync()
         {
             if (!IsRoot) await _connection.ExecuteAsync("ROLLBACK TO `" + _id + "`").ConfigureAwait(false);
             else await _connection.ExecuteAsync("ROLLBACK").ConfigureAwait(false);
         }
 
-        public override async Task<IAsyncSession> BeginTransactionAsync() 
+        public Task OpenAsync() => Task.CompletedTask;
+
+        public Task CloseAsync() => Task.CompletedTask;
+
+        public async Task<IAsyncSession> BeginTransactionAsync() 
             => await ConstructAsync(this)
             .ConfigureAwait(false);
     }

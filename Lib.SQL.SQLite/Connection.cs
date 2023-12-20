@@ -8,7 +8,7 @@ using Microsoft.Data.Sqlite;
 
 namespace Lib.SQL.SQLite
 {
-    internal class AsyncConnection : AsyncConnectionAbstract
+    internal class AsyncConnection : IAsyncConnection
     {
         private readonly SqliteConnection _sqLiteConnection;
         private readonly SqliteCommand _lastInsertedCommand;
@@ -20,14 +20,18 @@ namespace Lib.SQL.SQLite
             _lastInsertedCommand = new SqliteCommand("SELECT last_insert_rowid();", _sqLiteConnection);
         }
 
-        public override async Task<IAsyncSession> BeginTransactionAsync()
+        public async Task<IAsyncSession> BeginTransactionAsync()
             => await AsyncSavepoint.ConstructAsync(this);
 
-        public override Task<long> LastInsertedIdAsync() => Task.FromResult(_lastInsertedId);
-        public override async Task OpenAsync() => await _sqLiteConnection.OpenAsync();
-        public override async Task CloseAsync() => await _sqLiteConnection.CloseAsync();
+        public Task CommitAsync() => Task.CompletedTask;
 
-        public override async ValueTask DisposeAsync()
+        public Task RollbackAsync() => Task.CompletedTask;
+
+        public Task<long> LastInsertedIdAsync() => Task.FromResult(_lastInsertedId);
+        public virtual Task OpenAsync() => _sqLiteConnection.OpenAsync();
+        public virtual Task CloseAsync() => _sqLiteConnection.CloseAsync();
+
+        public virtual async ValueTask DisposeAsync()
         {
             try
             {
@@ -41,7 +45,7 @@ namespace Lib.SQL.SQLite
             }
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             try
             {
@@ -55,17 +59,17 @@ namespace Lib.SQL.SQLite
             }
         }
         
-        public override async Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-            => await ExecuteSomethingInCommand(async command => await command.ExecuteNonQueryAsync(), sql, parameters);
+        public Task<int> ExecuteAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => ExecuteSomethingInCommand(command => command.ExecuteNonQueryAsync(), sql, parameters);
 
-        public override async Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
-            => await ExecuteSomethingInCommand(async command => await command.ExecuteScalarAsync(), sql, parameters);
+        public Task<object> FetchValueAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+            => ExecuteSomethingInCommand(command => command.ExecuteScalarAsync(), sql, parameters);
 
-        public override async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql,
+        public async Task<IReadOnlyDictionary<string, object>> FetchLineAsync(string sql,
             IEnumerable<KeyValuePair<string, object>> parameters = null)
             => (await FetchLinesAsync(sql, parameters)).FirstOrDefault();
 
-        public override async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        public async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> FetchLinesAsync(string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
             => await ExecuteSomethingInCommand(async command =>
             {
                 await using var reader = await command.ExecuteReaderAsync();
@@ -80,9 +84,9 @@ namespace Lib.SQL.SQLite
                 return output;
             }, sql, parameters);
 
-        private async Task<TReturn> ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, Task<TReturn>> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
+        private Task<TReturn> ExecuteSomethingInCommand<TReturn>(Func<SqliteCommand, Task<TReturn>> whatToDo, string sql, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
-            return await AsyncRectifyDispose<SqliteCommand>.UseDisposableResource(
+            return AsyncRectifyDispose<SqliteCommand>.UseDisposableResource(
                 new SqliteCommand(sql, _sqLiteConnection),
                 async command =>
                 {
