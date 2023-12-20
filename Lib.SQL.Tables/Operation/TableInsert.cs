@@ -20,14 +20,6 @@ namespace Lib.SQL.Tables.Operation
             return this;
         }
 
-        public override int ExecuteOn(ICommandChannel on)
-        {
-            var affectedLines = base.ExecuteOn(on);
-            if (affectedLines != _values)
-                throw new Exception($"Tentative d'insertion de {_values} lignes, seulement {affectedLines} insérée(s)");
-            return affectedLines;
-        }
-
         public override async Task<int> ExecuteOnAsync(IAsyncCommandChannel on)
         {
             var affectedLines = await base.ExecuteOnAsync(on);

@@ -12,29 +12,16 @@ namespace Lib.SQL.Test
     public class TestSingleLineExecutor
     {
         [TestMethod]
-        public void TestSingleLine()
+        public async Task TestSingleLine()
         {
-            var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchLine(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
-                new Dictionary<string, IConvertible> {{"a", "b"}, {"c", "d"}}
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m =>
+                m.FetchLineAsync(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
+                Task.FromResult<IReadOnlyDictionary<string, IConvertible>>(new Dictionary<string, IConvertible> {{"a", "b"}, {"c", "d"}})
             );
 
-            var result = new SingleLineExecutor().ExecuteOnAdapter(commandChannel, "");
+            var result = await new SingleLineExecutor().ExecuteOnAdapterAsync(commandChannel, "");
             Assert.AreEqual("b", result["a"].ToString());
             Assert.AreEqual("d", result["c"].ToString());
-        }
-
-        [TestMethod]
-        public void TestExceptionsNotSwallowed()
-        {
-            var executor = new SingleLineExecutor();
-
-            var commandChannel = new Mock<ICommandChannel>();
-            commandChannel
-                .Setup(m => m.FetchLine(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()))
-                .Throws<VerySpecificException>();
-
-            Assert.ThrowsException<VerySpecificException>(() => executor.ExecuteOnAdapter(commandChannel.Object, ""));
         }
 
         [TestMethod]
@@ -50,8 +37,6 @@ namespace Lib.SQL.Test
             await Assert.ThrowsExceptionAsync<VerySpecificException>(async () => await executor.ExecuteOnAdapterAsync(commandChannel.Object, ""));
         }
 
-        private class VerySpecificException : Exception
-        {
-        }
+        private class VerySpecificException : Exception;
     }
 }

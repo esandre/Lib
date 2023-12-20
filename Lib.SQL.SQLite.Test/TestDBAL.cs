@@ -10,25 +10,27 @@ namespace Lib.SQL.SQLite.Test
     [TestClass]
     public class TestDbal
     {
-        private readonly ICommandChannel _adapter = new MemorySqliteCommandChannelFactory()
-            .Create(
-                new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA TEXT, colB TEXT)", true)
-                );
+        private IAsyncCommandChannel _adapter;
         
-        private readonly Table _table;
+        private readonly Table _table = new("example", "colA", "colB");
 
-        public TestDbal()
+        [TestInitialize]
+        public async Task Initialize()
         {
-            _table = new Table("example", "colA", "colB");
+            _adapter = await new MemorySqliteCommandChannelFactory()
+                .CreateAsync(
+                    new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), 
+                        "CREATE TABLE example(colA TEXT, colB TEXT)", true)
+                );
         }
 
         [TestMethod]
-        public void TestInsert()
+        public async Task TestInsert()
         {
-            var count = _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
+            var count = await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
             Assert.AreEqual(2, count);
 
-            var selected = _table.SelectLines().OrderBy("colA", OrderDirection.Asc).ExecuteOn(_adapter);
+            var selected = await _table.SelectLines().OrderBy("colA", OrderDirection.Asc).ExecuteOnAsync(_adapter);
             Assert.AreEqual(2, selected.Count);
             Assert.AreEqual("a", selected[0]["colA"].ToString());
             Assert.AreEqual("b", selected[0]["colB"].ToString());
@@ -37,12 +39,12 @@ namespace Lib.SQL.SQLite.Test
         }
 
         [TestMethod]
-        public void TestUpdate()
+        public async Task TestUpdate()
         {
-            _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
-            _table.Update().Set("colA", "z").Where("colB", Is.EqualWith, "b").ExecuteOn(_adapter);
+            await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
+            await _table.Update().Set("colA", "z").Where("colB", Is.EqualWith, "b").ExecuteOnAsync(_adapter);
 
-            var selected = _table.SelectLines().OrderBy("colB", OrderDirection.Asc).ExecuteOn(_adapter);
+            var selected = await _table.SelectLines().OrderBy("colB", OrderDirection.Asc).ExecuteOnAsync(_adapter);
             Assert.AreEqual(2, selected.Count);
             Assert.AreEqual("z", selected[0]["colA"].ToString());
             Assert.AreEqual("b", selected[0]["colB"].ToString());
@@ -51,50 +53,33 @@ namespace Lib.SQL.SQLite.Test
         }
 
         [TestMethod]
-        public void TestDelete()
+        public async Task TestDelete()
         {
-            _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
-            _table.Delete().Where("colB", Is.EqualWith, "b").ExecuteOn(_adapter);
+            await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
+            await _table.Delete().Where("colB", Is.EqualWith, "b").ExecuteOnAsync(_adapter);
 
-            var selected = _table.SelectLines().ExecuteOn(_adapter);
+            var selected = await _table.SelectLines().ExecuteOnAsync(_adapter);
             Assert.AreEqual(1, selected.Count);
             Assert.AreEqual("c", selected[0]["colA"].ToString());
             Assert.AreEqual("d", selected[0]["colB"].ToString());
         }
 
         [TestMethod]
-        public void TestSelect()
+        public async Task TestSelect()
         {
-            var rowId = _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAndReturnRowId(_adapter);
-            Assert.AreEqual(rowId, _table.Select("last_insert_rowid()").ExecuteOn(_adapter));
+            var rowId = await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAndReturnRowIdAsync(_adapter);
+            Assert.AreEqual(rowId, await _table.Select("last_insert_rowid()").ExecuteOnAsync(_adapter));
         }
 
         [TestMethod]
-        public void TestExists()
+        public async Task TestExists()
         {
-            var selected = _table.Exists().Where("1", Is.DifferentWith, "1").ExecuteOn(_adapter);
+            var selected = await _table.Exists().Where("1", Is.DifferentWith, "1").ExecuteOnAsync(_adapter);
             Assert.AreEqual(false, selected);
 
-            _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
-            selected = _table.Exists().Where("colB", Is.EqualWith, "b").ExecuteOn(_adapter);
+            await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
+            selected = await _table.Exists().Where("colB", Is.EqualWith, "b").ExecuteOnAsync(_adapter);
             Assert.AreEqual(true, selected);
-        }
-
-        [TestMethod]
-        public void TestLastInsertedId()
-        {
-            var adapter = new MemorySqliteCommandChannelFactory()
-                .Create(
-                    new CreationParameters<MemorySqliteConnectionStringBuilder>(new MemorySqliteConnectionStringBuilder(), "CREATE TABLE example(colA INT AUTO_INCREMENT, colB TEXT)", true)
-                );
-
-            var notInserted = adapter.LastInsertedId;
-            Assert.AreEqual((long) 0, notInserted);
-
-            var id = _table.Insert().Values(null, "b").ExecuteOnAndReturnRowId(adapter);
-
-            var lastInserted = adapter.LastInsertedId;
-            Assert.AreEqual(id, lastInserted);
         }
 
         [TestMethod]

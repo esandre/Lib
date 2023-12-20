@@ -13,31 +13,26 @@ namespace Lib.SQL.MySQL.Test;
 [TestClass]
 public class TestDbal : TestAbstract
 {
-    private ICommandChannel _adapter;
-    private readonly Table _table;
+    private IAsyncCommandChannel _adapter;
+    private readonly Table _table = new("example", "colA", "colB");
 
     [TestInitialize]
-    public void Init()
+    public async Task Init()
     {
         var parameters = new CreationParameters<MySqlConnectionStringBuilder>(Credentials,
             "CREATE TABLE example(colA TEXT, colB TEXT)", true);
 
-        _adapter = new MySQLCommandChannelFactory()
-            .Create(parameters);
-    }
-
-    public TestDbal()
-    {
-        _table = new Table("example", "colA", "colB");
+        _adapter = await new MySQLCommandChannelFactory()
+            .CreateAsync(parameters);
     }
 
     [TestMethod]
-    public void TestInsert()
+    public async Task TestInsert()
     {
-        var count = _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
+        var count = await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
         Assert.AreEqual(2, count);
 
-        var selected = _table.SelectLines().OrderBy("colA", OrderDirection.Asc).ExecuteOn(_adapter);
+        var selected = await _table.SelectLines().OrderBy("colA", OrderDirection.Asc).ExecuteOnAsync(_adapter);
         Assert.AreEqual(2, selected.Count);
         Assert.AreEqual("a", selected[0]["colA"].ToString());
         Assert.AreEqual("b", selected[0]["colB"].ToString());
@@ -46,12 +41,12 @@ public class TestDbal : TestAbstract
     }
 
     [TestMethod]
-    public void TestUpdate()
+    public async Task TestUpdate()
     {
-        _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
-        _table.Update().Set("colA", "z").Where("colB", Is.EqualWith, "b").ExecuteOn(_adapter);
+        await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
+        await _table.Update().Set("colA", "z").Where("colB", Is.EqualWith, "b").ExecuteOnAsync(_adapter);
 
-        var selected = _table.SelectLines().OrderBy("colB", OrderDirection.Asc).ExecuteOn(_adapter);
+        var selected = await _table.SelectLines().OrderBy("colB", OrderDirection.Asc).ExecuteOnAsync(_adapter);
         Assert.AreEqual(2, selected.Count);
         Assert.AreEqual("z", selected[0]["colA"].ToString());
         Assert.AreEqual("b", selected[0]["colB"].ToString());
@@ -60,48 +55,33 @@ public class TestDbal : TestAbstract
     }
 
     [TestMethod]
-    public void TestDelete()
+    public async Task TestDelete()
     {
-        _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
-        _table.Delete().Where("colB", Is.EqualWith, "b").ExecuteOn(_adapter);
+        await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
+        await _table.Delete().Where("colB", Is.EqualWith, "b").ExecuteOnAsync(_adapter);
 
-        var selected = _table.SelectLines().ExecuteOn(_adapter);
+        var selected = await _table.SelectLines().ExecuteOnAsync(_adapter);
         Assert.AreEqual(1, selected.Count);
         Assert.AreEqual("c", selected[0]["colA"].ToString());
         Assert.AreEqual("d", selected[0]["colB"].ToString());
     }
 
     [TestMethod]
-    public void TestSelect()
+    public async Task TestSelect()
     {
-        var rowId = _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAndReturnRowId(_adapter);
-        Assert.AreEqual(rowId, Convert.ToInt64(_table.Select("LAST_INSERT_ID()").ExecuteOn(_adapter)));
+        var rowId = await _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAndReturnRowIdAsync(_adapter);
+        Assert.AreEqual(rowId, Convert.ToInt64(await _table.Select("LAST_INSERT_ID()").ExecuteOnAsync(_adapter)));
     }
 
     [TestMethod]
-    public void TestExists()
+    public async Task TestExists()
     {
-        var selected = _table.Exists().Where("1", Is.DifferentWith, "1").ExecuteOn(_adapter);
+        var selected = await _table.Exists().Where("1", Is.DifferentWith, "1").ExecuteOnAsync(_adapter);
         Assert.AreEqual(false, selected);
 
-        _table.Insert().Values("a", "b").Values("c", "d").ExecuteOn(_adapter);
-        selected = _table.Exists().Where("colB", Is.EqualWith, "b").ExecuteOn(_adapter);
+        await  _table.Insert().Values("a", "b").Values("c", "d").ExecuteOnAsync(_adapter);
+        selected = await _table.Exists().Where("colB", Is.EqualWith, "b").ExecuteOnAsync(_adapter);
         Assert.AreEqual(true, selected);
-    }
-
-    [TestMethod]
-    public void TestLastInsertedId()
-    {
-        var adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, 
-            "CREATE TABLE example(colA INT PRIMARY KEY AUTO_INCREMENT, colB TEXT)", true));
-
-        var notInserted = adapter.LastInsertedId;
-        Assert.AreEqual((long) 0, notInserted);
-
-        var id = _table.Insert().Values(null, "b").ExecuteOnAndReturnRowId(adapter);
-
-        var lastInserted = adapter.LastInsertedId;
-        Assert.AreEqual(id, lastInserted);
     }
 
     [TestMethod]

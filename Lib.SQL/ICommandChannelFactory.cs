@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Threading.Tasks;
 
 namespace Lib.SQL
@@ -19,15 +18,6 @@ namespace Lib.SQL
             EraseIfExists = eraseIfExists;
             AdditionalScripts = Array.Empty<string>();
         }
-    }
-
-    public interface ICommandChannelFactory<TConnectionString> 
-        where TConnectionString : DbConnectionStringBuilder
-    {
-        ICommandChannel Open(TConnectionString connectionString);
-        ICommandChannel Create(CreationParameters<TConnectionString> creationParameters);
-        void Delete(TConnectionString connectionString);
-        bool Exists(TConnectionString connectionString);
     }
 
     public interface IAsyncCommandChannelFactory<TConnectionString>

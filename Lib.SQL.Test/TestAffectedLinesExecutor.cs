@@ -11,25 +11,14 @@ namespace Lib.SQL.Test
     public class TestAffectedLinesExecutor
     {
         [TestMethod]
-        public void TestLastinsertedId()
+        public async Task TestLastinsertedIdAsync()
         {
             var executor = new AffectedLinesExecutor();
 
-            var commandChannel = Mock.Of<ICommandChannel>(m => m.Execute(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()) == 1);
-            Assert.AreEqual(1, executor.ExecuteOnAdapter(commandChannel, ""));
-        }
-
-        [TestMethod]
-        public void TestExceptionsNotSwallowed()
-        {
-            var executor = new AffectedLinesExecutor();
-
-            var commandChannel = new Mock<ICommandChannel>();
-            commandChannel
-                .Setup(m => m.Execute(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()))
-                .Throws<VerySpecificException>();
-            
-            Assert.ThrowsException<VerySpecificException>(() => executor.ExecuteOnAdapter(commandChannel.Object, ""));
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m => m.ExecuteAsync(
+                It.IsAny<string>(), 
+                It.IsAny<IDictionary<string, IConvertible>>()) == Task.FromResult(1));
+            Assert.AreEqual(1, await executor.ExecuteOnAdapterAsync(commandChannel, ""));
         }
 
         [TestMethod]
@@ -45,8 +34,6 @@ namespace Lib.SQL.Test
             await Assert.ThrowsExceptionAsync<VerySpecificException>(async () => await executor.ExecuteOnAdapterAsync(commandChannel.Object, ""));
         }
 
-        private class VerySpecificException : Exception
-        {
-        }
+        private class VerySpecificException : Exception;
     }
 }

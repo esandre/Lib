@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySqlConnector;
 
@@ -10,54 +12,65 @@ namespace Lib.SQL.MySQL.Test;
 public sealed class TestConnection : TestAbstract
 {
     [TestMethod]
-    public void TestCreationSuccessFromPlainSql()
+    public async Task TestCreationSuccessFromPlainSql()
     {
-        new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCreationSuccess, true));
+        await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCreationSuccess, true));
     }
 
     [TestMethod]
     [ExpectedException(typeof(Exception), AllowDerivedTypes = true)]
-    public void TestCreationFailFromFromPlainSql()
+    public async Task TestCreationFailFromFromPlainSql()
     {
-        new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCreationFail, true));
+        await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCreationFail, true));
     }
 
     [TestMethod]
-    public void TestOpeningSuccess()
+    public async Task TestOpeningSuccess()
     {
-        new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "", true));
+        await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "", true));
     }
 
     [TestMethod]
-    public void TestSuccessiveConnections()
+    public async Task TestSuccessiveConnections()
     {
-        var adapter =new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
-        adapter.Execute("INSERT INTO a VALUES ('c')");
-        adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
-        Assert.AreEqual(0, adapter.FetchLines("SELECT * FROM a").Count);
+        var adapter = await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
+        
+        await adapter.ExecuteAsync("INSERT INTO a VALUES ('c')");
+        
+        adapter = await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
+        
+        Assert.AreEqual(0, (await adapter.FetchLinesAsync("SELECT * FROM a")).Count);
     }
 
     [TestMethod]
-    public void TestMultithreading()
+    public async Task TestMultithreading()
     {
-        var mainAdapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
+        var mainAdapter = await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, "CREATE TABLE a (b TEXT)", true));
+
+        var bag = new ConcurrentBag<Task>();
 
         var t1 = new Thread(() =>
         {
-            var adapter =  new MySQLCommandChannelFactory().Open(Credentials);
-            foreach (var _ in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
+            var adapter =  new MySQLCommandChannelFactory().OpenAsync(Credentials);
+            foreach (var _ in Enumerable.Repeat(0, 50)) bag.Add(adapter.ExecuteAsync("INSERT INTO a VALUES ('c')"));
         });
 
         var t2 = new Thread(() =>
         {
-            var adapter = new MySQLCommandChannelFactory().Open(Credentials);
-            foreach (var _ in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
+            var adapter = new MySQLCommandChannelFactory().OpenAsync(Credentials);
+            foreach (var _ in Enumerable.Repeat(0, 50)) bag.Add(adapter.ExecuteAsync("INSERT INTO a VALUES ('c')"));
         });
 
         var t3 = new Thread(() =>
         {
-            var adapter = new MySQLCommandChannelFactory().Open(Credentials);
-            foreach (var _ in Enumerable.Repeat(0, 50)) adapter.Execute("INSERT INTO a VALUES ('c')");
+            var adapter = new MySQLCommandChannelFactory().OpenAsync(Credentials);
+            foreach (var _ in Enumerable.Repeat(0, 50)) bag.Add(adapter.ExecuteAsync("INSERT INTO a VALUES ('c')"));
         });
 
         t1.Start();
@@ -68,6 +81,9 @@ public sealed class TestConnection : TestAbstract
         t2.Join();
         t3.Join();
 
-        Assert.AreEqual(150, mainAdapter.FetchLines("SELECT * FROM a").Count);
+        var tasks = bag.ToArray();
+        await Task.WhenAll(tasks);
+
+        Assert.AreEqual(150, (await mainAdapter.FetchLinesAsync("SELECT * FROM a")).Count);
     }
 }

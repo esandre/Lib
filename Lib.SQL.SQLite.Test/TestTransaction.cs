@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,126 +11,128 @@ namespace Lib.SQL.SQLite.Test
     public sealed class TestTransaction
     {
         [TestMethod]
-        public void TestCommit()
+        public async Task TestCommit()
         {
             const string dbPath = "TestCommit.s3db";
             const string value = "committed";
 
-            InsertValueInNewDb(value, dbPath, true);
+            await InsertValueInNewDbAsync(value, dbPath, true);
 
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
-            var adapter = new SqliteCommandChannelFactory().Open(connString);
-            Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
+            var adapter = new SqliteCommandChannelFactory().OpenAsync(connString);
+            Assert.AreEqual("committed", await adapter.FetchValueAsync("SELECT reference FROM test LIMIT 1"));
         }
 
         [TestMethod]
-        public void TestRollback()
+        public async Task TestRollback()
         {
             const string dbPath = "TestRollback.s3db";
             const string value = "committed";
 
-            InsertValueInNewDb(value, dbPath, false);
+            await InsertValueInNewDbAsync(value, dbPath, false);
 
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbPath) };
-            var adapter =  new SqliteCommandChannelFactory().Open(connString);
-            Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
+            var adapter = new SqliteCommandChannelFactory().OpenAsync(connString);
+            Assert.AreEqual((long) 0, await adapter.FetchValueAsync("SELECT COUNT(*) FROM test"));
         }
 
-        private static void InsertValueInNewDb(string value, string dbName, bool commit)
+        private static async Task InsertValueInNewDbAsync(string value, string dbName, bool commit)
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), dbName) };
-            var adapter =  new SqliteCommandChannelFactory().Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
+            var adapter = await new SqliteCommandChannelFactory()
+                .CreateAsync(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
 
-            adapter.ExecuteInTransaction(scope =>
+            await adapter.ExecuteInTransactionAsync(async _ =>
             {
-                adapter.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, IConvertible>{{"@value", value}});
+                await adapter.ExecuteAsync("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, IConvertible>{{"@value", value}});
                 return commit ? TransactionResult.Commit : TransactionResult.Rollback;
             });
         }
 
-        private static int GetCount(ICommandChannel adapter)
+        private static async Task<int> GetCountAsync(IAsyncCommandChannel adapter)
         {
-            return Convert.ToInt32(adapter.FetchValue("SELECT COUNT(*) FROM test"));
+            return Convert.ToInt32(await adapter.FetchValueAsync("SELECT COUNT(*) FROM test"));
         }
 
-        private static void InsertDoSomethingAndCommit(ICommandChannel adapter, string what, Action something)
+        private static async Task InsertDoSomethingAndCommit(IAsyncCommandChannel adapter, string what, Func<Task> something)
         {
             var beforeCommit = 0;
-            adapter.ExecuteInTransaction(scope =>
+            await adapter.ExecuteInTransactionAsync(async scope =>
             {
-                var initial = GetCount(scope);
-                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
-                Assert.AreEqual(initial + 1, GetCount(scope));
+                var initial = await GetCountAsync(scope);
+                await scope.ExecuteAsync("INSERT INTO test (reference) VALUES ('" + what + "')");
+                Assert.AreEqual(initial + 1, await GetCountAsync(scope));
 
-                something.Invoke();
+                await something.Invoke();
 
-                beforeCommit = GetCount(scope);
+                beforeCommit = await GetCountAsync(scope);
                 return TransactionResult.Commit;
             });
-            Assert.AreEqual(beforeCommit, GetCount(adapter));
+
+            Assert.AreEqual(beforeCommit, await GetCountAsync(adapter));
         }
 
-        private static void InsertDoSomethingAndRollback(ICommandChannel adapter, string what, Action something)
+        private static async Task InsertDoSomethingAndRollback(IAsyncCommandChannel adapter, string what, Func<Task> something)
         {
-            var initial = GetCount(adapter);
-            adapter.ExecuteInTransaction(scope =>
+            var initial = await GetCountAsync(adapter);
+            await adapter.ExecuteInTransactionAsync(async scope =>
             {
-                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
-                Assert.AreEqual(initial + 1, GetCount(scope));
-                something.Invoke();
+                await scope.ExecuteAsync("INSERT INTO test (reference) VALUES ('" + what + "')");
+                Assert.AreEqual(initial + 1, await GetCountAsync(scope));
+                await something.Invoke();
                 return TransactionResult.Rollback;
             });
-            Assert.AreEqual(initial, GetCount(adapter));
+            Assert.AreEqual(initial, await GetCountAsync(adapter));
         }
 
-        private static void DoSomethingInsertAndCommit(ICommandChannel adapter, string what, Action something)
+        private static async Task DoSomethingInsertAndCommit(IAsyncCommandChannel adapter, string what, Func<Task> something)
         {
-            var initial = GetCount(adapter);
+            var initial = await GetCountAsync(adapter);
 
-            adapter.ExecuteInTransaction(scope =>
+            await adapter.ExecuteInTransactionAsync(async scope =>
             {
-                something.Invoke();
-                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
-                return  TransactionResult.Commit;
+                await something.Invoke();
+                await scope.ExecuteAsync("INSERT INTO test (reference) VALUES ('" + what + "')");
+                return TransactionResult.Commit;
             });
 
-            Assert.AreEqual(initial + 1, GetCount(adapter));
+            Assert.AreEqual(initial + 1, await GetCountAsync(adapter));
         }
 
-        private static void DoSomethingInsertAndRollback(ICommandChannel adapter, string what, Action something)
+        private static async Task DoSomethingInsertAndRollback(IAsyncCommandChannel adapter, string what, Func<Task> something)
         {
-            var initial = GetCount(adapter);
+            var initial = await GetCountAsync(adapter);
 
-            adapter.ExecuteInTransaction(scope =>
+            await adapter.ExecuteInTransactionAsync(async scope =>
             {
-                
-                something.Invoke();
+                await something.Invoke();
 
-                var afterInvoke = GetCount(scope);
-                scope.Execute("INSERT INTO test (reference) VALUES ('" + what + "')");
-                Assert.AreEqual(afterInvoke + 1, GetCount(scope));
+                var afterInvoke = await GetCountAsync(scope);
+                await scope.ExecuteAsync("INSERT INTO test (reference) VALUES ('" + what + "')");
+                Assert.AreEqual(afterInvoke + 1, await GetCountAsync(scope));
 
                 return TransactionResult.Rollback;
             });
 
-            Assert.AreEqual(initial, GetCount(adapter));
+            Assert.AreEqual(initial, await GetCountAsync(adapter));
         }
 
         [TestMethod]
-        public void TestNestedTransactions()
+        public async Task TestNestedTransactions()
         {
             var connString = new SqliteConnectionStringBuilder { DataSource = Path.Combine(Path.GetTempPath(), "TestNestedTransactions.s3db") };
-            var adapter =  new SqliteCommandChannelFactory().Create(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
+            var adapter = await new SqliteCommandChannelFactory()
+                .CreateAsync(new CreationParameters<SqliteConnectionStringBuilder>(connString, Resources.TestCommitRollback, true));
 
-            DoSomethingInsertAndCommit(adapter, "B",
+            await DoSomethingInsertAndCommit(adapter, "B",
                 () => DoSomethingInsertAndRollback(adapter, "C",
                     () => InsertDoSomethingAndCommit(adapter, "D",
-                        () => InsertDoSomethingAndRollback(adapter, "E", () => { })
+                        () => InsertDoSomethingAndRollback(adapter, "E", () => Task.CompletedTask)
                     )
                 )
             );
 
-            Assert.AreEqual(1, GetCount(adapter));
+            Assert.AreEqual(1, await GetCountAsync(adapter));
         }
     }
 }

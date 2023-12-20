@@ -12,35 +12,22 @@ namespace Lib.SQL.Test
     public class TestMultipleLinesExecutor
     {
         [TestMethod]
-        public void TestMultipleLines()
+        public async Task TestMultipleLinesAsync()
         {
-            var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchLines(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
-                new[]
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m =>
+                m.FetchLinesAsync(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
+                Task.FromResult<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>>(new []
                 {
                     new Dictionary<string, IConvertible> {{"a", "b"}, {"c", "d"}},
                     new Dictionary<string, IConvertible> {{"a", "f"}, {"c", "h"}},
-                }
+                })
             );
 
-            var result = new MultipleLinesExecutor().ExecuteOnAdapter(commandChannel, "");
+            var result = await new MultipleLinesExecutor().ExecuteOnAdapterAsync(commandChannel, "");
             Assert.AreEqual("b", result[0]["a"].ToString());
             Assert.AreEqual("d", result[0]["c"].ToString());
             Assert.AreEqual("f", result[1]["a"].ToString());
             Assert.AreEqual("h", result[1]["c"].ToString());
-        }
-
-        [TestMethod]
-        public void TestExceptionsNotSwallowed()
-        {
-            var executor = new MultipleLinesExecutor();
-
-            var commandChannel = new Mock<ICommandChannel>();
-            commandChannel
-                .Setup(m => m.FetchLines(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()))
-                .Throws<VerySpecificException>();
-
-            Assert.ThrowsException<VerySpecificException>(() => executor.ExecuteOnAdapter(commandChannel.Object, ""));
         }
 
         [TestMethod]
@@ -56,8 +43,6 @@ namespace Lib.SQL.Test
             await Assert.ThrowsExceptionAsync<VerySpecificException>(async () => await executor.ExecuteOnAdapterAsync(commandChannel.Object, ""));
         }
 
-        private class VerySpecificException : Exception
-        {
-        }
+        private class VerySpecificException : Exception;
     }
 }

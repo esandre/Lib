@@ -11,34 +11,21 @@ namespace Lib.SQL.Test
     public class TestSingleColumnExecutor
     {
         [TestMethod]
-        public void TestSingleColumn()
+        public async Task TestSingleColumn()
         {
-            var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchLines(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
-                new[]
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m =>
+                m.FetchLinesAsync(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) ==
+                Task.FromResult<IReadOnlyList<IReadOnlyDictionary<string, IConvertible>>>(new[]
                 {
                     new Dictionary<string, IConvertible> {{"_", "b"}},
                     new Dictionary<string, IConvertible> {{"_", "f"}},
-                }
+                })
             );
 
-            var result = new SingleColumnExecutor().ExecuteOnAdapter(commandChannel, "");
+            var result = await new SingleColumnExecutor().ExecuteOnAdapterAsync(commandChannel, "");
 
             Assert.AreEqual("b", result[0]);
             Assert.AreEqual("f", result[1]);
-        }
-
-        [TestMethod]
-        public void TestExceptionsNotSwallowed()
-        {
-            var executor = new SingleColumnExecutor();
-
-            var commandChannel = new Mock<ICommandChannel>();
-            commandChannel
-                .Setup(m => m.FetchLines(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()))
-                .Throws<VerySpecificException>();
-
-            Assert.ThrowsException<VerySpecificException>(() => executor.ExecuteOnAdapter(commandChannel.Object, ""));
         }
 
         [TestMethod]
@@ -54,8 +41,6 @@ namespace Lib.SQL.Test
             await Assert.ThrowsExceptionAsync<VerySpecificException>(async () => await executor.ExecuteOnAdapterAsync(commandChannel.Object, ""));
         }
 
-        private class VerySpecificException : Exception
-        {
-        }
+        private class VerySpecificException : Exception;
     }
 }

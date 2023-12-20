@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Lib.SQL.Tables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySqlConnector;
@@ -10,115 +11,118 @@ namespace Lib.SQL.MySQL.Test;
 public sealed class TestTransaction : TestAbstract
 {
     [TestMethod]
-    public void TestCommit()
+    public async Task TestCommit()
     {
-        InsertValueInNewDb(true);
+        await InsertValueInNewDbAsync(true);
 
-        var adapter = new MySQLCommandChannelFactory().Open(Credentials);
-        Assert.AreEqual("committed", adapter.FetchValue("SELECT reference FROM test LIMIT 1"));
+        var adapter = new MySQLCommandChannelFactory()
+            .OpenAsync(Credentials);
+        Assert.AreEqual("committed", await adapter.FetchValueAsync("SELECT reference FROM test LIMIT 1"));
     }
 
     [TestMethod]
-    public void TestRollback()
+    public async Task TestRollback()
     {
-        InsertValueInNewDb(false);
+        await InsertValueInNewDbAsync(false);
 
-        var adapter = new MySQLCommandChannelFactory().Open(Credentials);
-        Assert.AreEqual((long) 0, adapter.FetchValue("SELECT COUNT(*) FROM test"));
+        var adapter = new MySQLCommandChannelFactory().OpenAsync(Credentials);
+        Assert.AreEqual((long) 0, await adapter.FetchValueAsync("SELECT COUNT(*) FROM test"));
     }
 
-    private void InsertValueInNewDb(bool commit)
+    private async Task InsertValueInNewDbAsync(bool commit)
     {
-        var adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCommitRollback, true));
+        var adapter = await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCommitRollback, true));
 
-        adapter.ExecuteInTransaction(scope =>
+        await adapter.ExecuteInTransactionAsync(async scope =>
         {
-            scope.Execute("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, IConvertible>{{"@value", "committed" } });
+            await scope.ExecuteAsync("INSERT INTO test (reference) VALUES (@value)", new Dictionary<string, IConvertible>{{"@value", "committed" } });
             return commit ? TransactionResult.Commit : TransactionResult.Rollback;
         });
     }
 
-    private static int GetCount(Table table, ICommandChannel adapter)
+    private static async Task<int> GetCountAsync(ITable table, IAsyncCommandChannel adapter)
     {
-        return Convert.ToInt32(table.Select("COUNT(*)").ExecuteOn(adapter));
+        return Convert.ToInt32(await table.Select("COUNT(*)").ExecuteOnAsync(adapter));
     }
 
-    private static void InsertDoSomethingAndCommit(ICommandChannel commandChannel, Table table, string what, Action something)
+    private static async Task InsertDoSomethingAndCommitAsync(IAsyncCommandChannel commandChannel, ITable table, string what, Func<Task> something)
     {
         var beforeCommit = 0;
-        commandChannel.ExecuteInTransaction(scope =>
+        await commandChannel.ExecuteInTransactionAsync(async scope =>
         {
-            var initial = GetCount(table, scope);
-            table.Insert().Values(what).ExecuteOn(scope);
-            Assert.AreEqual(initial + 1, GetCount(table, scope));
+            var initial = await GetCountAsync(table, scope);
+            await table.Insert().Values(what).ExecuteOnAsync(scope);
+            Assert.AreEqual(initial + 1, await GetCountAsync(table, scope));
 
-            something.Invoke();
+            await something.Invoke();
 
-            beforeCommit = GetCount(table, scope);
+            beforeCommit = await GetCountAsync(table, scope);
             return TransactionResult.Commit;
         });
-        Assert.AreEqual(beforeCommit, GetCount(table, commandChannel));
+        Assert.AreEqual(beforeCommit, await GetCountAsync(table, commandChannel));
     }
 
-    private static void InsertDoSomethingAndRollback(ICommandChannel commandChannel, Table table, string what, Action something)
+    private static async Task InsertDoSomethingAndRollbackAsync(IAsyncCommandChannel commandChannel, ITable table, string what, Func<Task> something)
     {
-        var initial = GetCount(table, commandChannel);
-        commandChannel.ExecuteInTransaction(scope =>
+        var initial = await GetCountAsync(table, commandChannel);
+        await commandChannel.ExecuteInTransactionAsync( async scope =>
         {
-            table.Insert().Values(what).ExecuteOn(scope);
-            Assert.AreEqual(initial + 1, GetCount(table, scope));
-            something.Invoke();
+            await table.Insert().Values(what).ExecuteOnAsync(scope);
+            Assert.AreEqual(initial + 1, await GetCountAsync(table, scope));
+            await something.Invoke();
             return TransactionResult.Rollback;
         });
-        Assert.AreEqual(initial, GetCount(table, commandChannel));
+        Assert.AreEqual(initial, await GetCountAsync(table, commandChannel));
     }
 
-    private static void DoSomethingInsertAndCommit(ICommandChannel commandChannel, Table table, string what, Action something)
+    private static async Task DoSomethingInsertAndCommitAsync(IAsyncCommandChannel commandChannel, Table table, string what, Func<Task> something)
     {
-        var initial = GetCount(table, commandChannel);
+        var initial = await GetCountAsync(table, commandChannel);
 
-        commandChannel.ExecuteInTransaction(scope =>
+        await commandChannel.ExecuteInTransactionAsync(async scope =>
         {
-            something.Invoke();
-            table.Insert().Values(what).ExecuteOn(scope);
-            return  TransactionResult.Commit;
+            await something.Invoke();
+            await table.Insert().Values(what).ExecuteOnAsync(scope);
+            return TransactionResult.Commit;
         });
 
-        Assert.AreEqual(initial + 1, GetCount(table, commandChannel));
+        Assert.AreEqual(initial + 1, await GetCountAsync(table, commandChannel));
     }
 
-    private static void DoSomethingInsertAndRollback(ICommandChannel commandChannel, Table table, string what, Action something)
+    private static async Task DoSomethingInsertAndRollbackAsync(IAsyncCommandChannel commandChannel, Table table, string what, Func<Task> something)
     {
-        var initial = GetCount(table, commandChannel);
+        var initial = await GetCountAsync(table, commandChannel);
 
-        commandChannel.ExecuteInTransaction(scope =>
+        await commandChannel.ExecuteInTransactionAsync(async scope =>
         {
-            something.Invoke();
+            await something.Invoke();
 
-            var afterInvoke = GetCount(table, scope);
-            table.Insert().Values(what).ExecuteOn(scope);
-            Assert.AreEqual(afterInvoke + 1, GetCount(table, scope));
+            var afterInvoke = await GetCountAsync(table, scope);
+            await table.Insert().Values(what).ExecuteOnAsync(scope);
+            Assert.AreEqual(afterInvoke + 1, await GetCountAsync(table, scope));
 
             return TransactionResult.Rollback;
         });
 
-        Assert.AreEqual(initial, GetCount(table, commandChannel));
+        Assert.AreEqual(initial, await GetCountAsync(table, commandChannel));
     }
 
     [TestMethod]
-    public void TestNestedTransactions()
+    public async Task TestNestedTransactions()
     {
-        var adapter = new MySQLCommandChannelFactory().Create(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCommitRollback, true));
+        var adapter = await new MySQLCommandChannelFactory()
+            .CreateAsync(new CreationParameters<MySqlConnectionStringBuilder>(Credentials, Resources.TestCommitRollback, true));
         var table = new Table("test", "reference");
 
-        DoSomethingInsertAndCommit(adapter, table, "B",
-            () => DoSomethingInsertAndRollback(adapter, table, "C",
-                () => InsertDoSomethingAndCommit(adapter, table, "D",
-                    () => InsertDoSomethingAndRollback(adapter, table, "E", () => { })
+        await DoSomethingInsertAndCommitAsync(adapter, table, "B",
+            () => DoSomethingInsertAndRollbackAsync(adapter, table, "C",
+                () => InsertDoSomethingAndCommitAsync(adapter, table, "D",
+                    () => InsertDoSomethingAndRollbackAsync(adapter, table, "E", () => Task.CompletedTask)
                 )
             )
         );
 
-        Assert.AreEqual(1, GetCount(table, adapter));
+        Assert.AreEqual(1, await GetCountAsync(table, adapter));
     }
 }

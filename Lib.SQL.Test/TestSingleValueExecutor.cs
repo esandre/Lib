@@ -5,7 +5,6 @@ using Lib.SQL.Executor;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 // ReSharper disable PossibleUnintendedReferenceComparison
-#pragma warning disable 252,253
 
 namespace Lib.SQL.Test
 {
@@ -13,60 +12,51 @@ namespace Lib.SQL.Test
     public class TestSingleValueExecutor
     {
         [TestMethod]
-        public void TestString()
+        public async Task TestString()
         {
-            var commandChannel = Mock.Of<ICommandChannel>(m =>
-                    m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == "str"
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m =>
+                    m.FetchValueAsync(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) 
+                    == Task.FromResult<IConvertible>("str")
             );
 
             var executor = new SingleValueExecutor();
-            Assert.AreEqual("str", executor.ExecuteOnAdapter(commandChannel, "string"));
+            Assert.AreEqual("str", await executor.ExecuteOnAdapterAsync(commandChannel, "string"));
         }
 
         [TestMethod]
-        public void TestInt()
+        public async Task TestInt()
         {
-            var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == (IConvertible) 1
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m =>
+                m.FetchValueAsync(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) 
+                == Task.FromResult<IConvertible>(1)
             );
 
             var executor = new SingleValueExecutor();
-            Assert.AreEqual(1, executor.ExecuteOnAdapter(commandChannel, "int"));
+            Assert.AreEqual(1, await executor.ExecuteOnAdapterAsync(commandChannel, "int"));
         }
 
         [TestMethod]
-        public void TestDouble()
+        public async Task TestDouble()
         {
-            var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == (IConvertible) 8.0
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m =>
+                m.FetchValueAsync(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) 
+                == Task.FromResult<IConvertible>(8.0)
             );
 
             var executor = new SingleValueExecutor();
-            Assert.AreEqual(8.0, executor.ExecuteOnAdapter(commandChannel, "double"));
+            Assert.AreEqual(8.0, await executor.ExecuteOnAdapterAsync(commandChannel, "double"));
         }
 
         [TestMethod]
-        public void TestDateTime()
+        public async Task TestDateTime()
         {
-            var commandChannel = Mock.Of<ICommandChannel>(m =>
-                m.FetchValue(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) == (IConvertible) DateTime.MinValue
+            var commandChannel = Mock.Of<IAsyncCommandChannel>(m =>
+                m.FetchValueAsync(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, IConvertible>>>()) 
+                == Task.FromResult((IConvertible) DateTime.MinValue)
             );
 
             var executor = new SingleValueExecutor();
-            Assert.AreEqual(DateTime.MinValue, executor.ExecuteOnAdapter(commandChannel, "date"));
-        }
-
-        [TestMethod]
-        public void TestExceptionsNotSwallowed()
-        {
-            var executor = new SingleValueExecutor();
-
-            var commandChannel = new Mock<ICommandChannel>();
-            commandChannel
-                .Setup(m => m.FetchValue(It.IsAny<string>(), It.IsAny<IDictionary<string, IConvertible>>()))
-                .Throws<VerySpecificException>();
-
-            Assert.ThrowsException<VerySpecificException>(() => executor.ExecuteOnAdapter(commandChannel.Object, ""));
+            Assert.AreEqual(DateTime.MinValue, await executor.ExecuteOnAdapterAsync(commandChannel, "date"));
         }
 
         [TestMethod]
@@ -82,8 +72,6 @@ namespace Lib.SQL.Test
             await Assert.ThrowsExceptionAsync<VerySpecificException>(async () => await executor.ExecuteOnAdapterAsync(commandChannel.Object, ""));
         }
 
-        private class VerySpecificException : Exception
-        {
-        }
+        private class VerySpecificException : Exception;
     }
 }

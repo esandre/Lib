@@ -21,9 +21,6 @@ namespace Lib.SQL.Tables.Operation
             _description = table.Name; 
         }
 
-        public virtual TResultType ExecuteOn(ICommandChannel on) 
-            => _executor.ExecuteOnAdapter(on, Statement.Sql, Statement.Parameters);
-
         public virtual async Task<TResultType> ExecuteOnAsync(IAsyncCommandChannel on) 
             => await _executor.ExecuteOnAdapterAsync(on, Statement.Sql, Statement.Parameters);
 
