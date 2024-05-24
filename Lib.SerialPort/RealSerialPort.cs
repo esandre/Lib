@@ -28,5 +28,10 @@
 
         public void Dispose() => _port.Dispose();
         public bool IsOpen => _port.IsOpen;
+
+        public override string ToString()
+        {
+            return _port.PortName;
+        }
     }
 }

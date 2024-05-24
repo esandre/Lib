@@ -5,7 +5,7 @@
     <Authors>Enzo Sandré</Authors>
     <Company>Atelier Logiciel Sandré</Company>
     <Description>Serial port management</Description>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
